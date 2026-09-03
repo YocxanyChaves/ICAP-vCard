@@ -3,6 +3,7 @@ import Propuesta1 from './proposals/propuesta-1/Propuesta1';
 import Propuesta2 from './proposals/propuesta-2/Propuesta2';
 import Propuesta3 from './proposals/propuesta-3/Propuesta3';
 import ProposalSwitcher from './components/ProposalSwitcher';
+import DeviceFrame from './components/DeviceFrame';
 import { defaultContact } from './components/VCardDownload';
 import './styles/global.css';
 
@@ -29,17 +30,22 @@ function App() {
       {/* View Container */}
       {viewMode === 'mobile' ? (
         <div className="py-8 sm:py-12 px-4 flex flex-col items-center w-full min-h-screen justify-center">
-          {/* Phone Shell Frame */}
-          <div className="relative w-full max-w-[390px] bg-slate-900 rounded-[48px] p-3 shadow-2xl border-4 border-slate-700/60 ring-1 ring-white/20">
+          {/* Phone Shell Frame — 390px de pantalla real + 12px de marco a cada lado */}
+          <div
+            className="relative bg-slate-900 rounded-[48px] p-3 shadow-2xl border-4 border-slate-700/60 ring-1 ring-white/20 flex flex-col"
+            style={{ width: 414, height: 'min(844px, 90vh)' }}
+          >
             {/* Dynamic Island / Speaker notch */}
             <div className="absolute top-6 left-1/2 -translate-x-1/2 w-28 h-5 bg-black rounded-full z-50 flex items-center justify-center">
               <div className="w-2.5 h-2.5 rounded-full bg-slate-900 border border-slate-700 mr-2" />
               <div className="w-2 h-2 rounded-full bg-blue-950" />
             </div>
 
-            {/* Screen Content */}
-            <div className="w-full bg-white rounded-[38px] overflow-hidden overflow-y-auto max-h-[820px] shadow-inner relative">
-              {renderActiveProposal()}
+            {/* Screen Content: iframe real de 390px, no un div comprimido */}
+            <div className="bg-white rounded-[38px] overflow-hidden shadow-inner relative flex-1 min-h-0">
+              <DeviceFrame width={390} height="100%">
+                {renderActiveProposal()}
+              </DeviceFrame>
             </div>
           </div>
         </div>
