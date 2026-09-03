@@ -96,7 +96,7 @@ export default function VCardDownload({
     <button
       onClick={handleDownload}
       className={`flex items-center justify-center gap-2 h-12 rounded-xl font-heading font-bold text-sm tracking-wide transition-all duration-200 shadow-md active:scale-[0.98] ${
-        className || 'w-full bg-[#E8791E] hover:bg-[#D06815] text-white'
+        className || 'w-full bg-[#0077C8] hover:bg-[#005A96] text-white'
       }`}
     >
       {children || (

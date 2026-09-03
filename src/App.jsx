@@ -26,7 +26,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#07192C] text-slate-800 flex flex-col items-center">
+    <div className="min-h-screen bg-[#001F3D] text-slate-800 flex flex-col items-center">
       {/* View Container */}
       {viewMode === 'mobile' ? (
         <div className="py-8 sm:py-12 px-4 flex flex-col items-center w-full min-h-screen justify-center">

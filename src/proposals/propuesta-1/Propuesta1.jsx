@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Hero from './Hero';
 import MissionVision from './MissionVision';
 import ValuesWheel from './ValuesWheel';
@@ -8,26 +8,80 @@ import RegionalMap from './RegionalMap';
 import AlliesMarquee from './AlliesMarquee';
 import ContactSection from './ContactSection';
 import BottomSheet from '../../components/BottomSheet';
-import { Globe2, Award, History, Building2, ExternalLink } from 'lucide-react';
+import {
+  Globe2,
+  Award,
+  History,
+  Building2,
+  ExternalLink,
+  Home,
+  Compass,
+  Sparkles,
+  LayoutGrid,
+  MapPinned,
+  Phone
+} from 'lucide-react';
 import { defaultContact } from '../../components/VCardDownload';
+
+const PAGES = [
+  { id: 'inicio', label: 'Inicio', icon: Home },
+  { id: 'mision', label: 'Misión', icon: Compass },
+  { id: 'valores', label: 'Valores', icon: Sparkles },
+  { id: 'areas', label: 'Áreas', icon: LayoutGrid },
+  { id: 'presencia', label: 'Presencia', icon: MapPinned },
+  { id: 'contacto', label: 'Contacto', icon: Phone }
+];
 
 export default function Propuesta1({ contact = defaultContact }) {
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
+  const [activePage, setActivePage] = useState('inicio');
+  const mainRef = useRef(null);
 
-  const scrollToContact = () => {
-    const el = document.getElementById('propuesta1-contact');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+  const goToPage = (id) => {
+    setActivePage(id);
+  };
+
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0, behavior: 'instant' in document.documentElement.style ? 'instant' : 'auto' });
+    }
+  }, [activePage]);
+
+  const renderPage = () => {
+    switch (activePage) {
+      case 'inicio':
+        return (
+          <>
+            <Hero
+              onOpenAbout={() => setAboutModalOpen(true)}
+              onScrollToContact={() => goToPage('contacto')}
+            />
+            <StatsSection />
+            <AlliesMarquee />
+          </>
+        );
+      case 'mision':
+        return <MissionVision />;
+      case 'valores':
+        return <ValuesWheel />;
+      case 'areas':
+        return <SpecializationAreas />;
+      case 'presencia':
+        return <RegionalMap />;
+      case 'contacto':
+        return <ContactSection id="propuesta1-contact" contact={contact} />;
+      default:
+        return null;
     }
   };
 
   return (
-    <div className="w-full bg-slate-50 text-slate-800 font-sans relative pb-28">
+    <div className="w-full h-screen bg-slate-50 text-slate-800 font-sans relative flex flex-col overflow-hidden">
       {/* Sticky Utility Navbar */}
-      <header className="sticky top-0 z-40 bg-[#0B2A4A]/95 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 py-3 flex items-center justify-between shadow-sm">
+      <header className="shrink-0 z-40 bg-[#003366]/95 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full border border-[#E8791E] flex items-center justify-center bg-[#0B2A4A] shrink-0">
-            <div className="w-2 h-2 rounded-full bg-[#E8791E]" />
+          <div className="w-6 h-6 rounded-full border border-[#0077C8] flex items-center justify-center bg-[#003366] shrink-0">
+            <div className="w-2 h-2 rounded-full bg-[#0077C8]" />
           </div>
           <span className="font-heading font-extrabold text-white text-sm sm:text-base tracking-wider">
             ICAP
@@ -45,28 +99,52 @@ export default function Propuesta1({ contact = defaultContact }) {
             Sobre ICAP
           </button>
           <button
-            onClick={scrollToContact}
-            className="h-8 px-3.5 sm:px-4 rounded-xl bg-[#E8791E] hover:bg-[#D06815] text-white font-heading font-bold text-xs tracking-wider uppercase shadow transition-all active:scale-95 shrink-0"
+            onClick={() => goToPage('contacto')}
+            className="h-8 px-3.5 sm:px-4 rounded-xl bg-[#0077C8] hover:bg-[#005A96] text-white font-heading font-bold text-xs tracking-wider uppercase shadow transition-all active:scale-95 shrink-0"
           >
             Contactanos
           </button>
         </div>
       </header>
 
-      {/* Main Sections */}
-      <main>
-        <Hero
-          onOpenAbout={() => setAboutModalOpen(true)}
-          onScrollToContact={scrollToContact}
-        />
-        <MissionVision />
-        <ValuesWheel />
-        <StatsSection />
-        <SpecializationAreas />
-        <RegionalMap />
-        <AlliesMarquee />
-        <ContactSection id="propuesta1-contact" contact={contact} />
+      {/* Active Page */}
+      <main ref={mainRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+        <div key={activePage} className="animate-page-in">
+          {renderPage()}
+        </div>
       </main>
+
+      {/* Bottom App Navigation */}
+      <nav className="shrink-0 z-30 bg-white border-t border-slate-200 shadow-[0_-4px_16px_rgba(0,51,102,0.08)] px-1 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] flex items-stretch justify-between">
+        {PAGES.map((page) => {
+          const Icon = page.icon;
+          const active = activePage === page.id;
+          return (
+            <button
+              key={page.id}
+              onClick={() => goToPage(page.id)}
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl transition-colors relative"
+            >
+              {active && (
+                <span className="absolute -top-1.5 w-8 h-1 rounded-full bg-[#0077C8]" />
+              )}
+              <Icon
+                className={`w-[19px] h-[19px] transition-all ${
+                  active ? 'text-[#0077C8] scale-110' : 'text-slate-400'
+                }`}
+                strokeWidth={active ? 2.4 : 2}
+              />
+              <span
+                className={`text-[9px] font-heading tracking-wide transition-colors ${
+                  active ? 'text-[#003366] font-bold' : 'text-slate-400 font-semibold'
+                }`}
+              >
+                {page.label}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
 
       {/* About ICAP Bottom Sheet for Mobile & Modal for Desktop */}
       <BottomSheet
@@ -75,7 +153,7 @@ export default function Propuesta1({ contact = defaultContact }) {
         title="Acerca del ICAP"
         subtitle="Organismo Internacional del SICA"
         icon={
-          <div className="w-8 h-8 rounded-lg bg-[#0B2A4A] text-[#E8791E] flex items-center justify-center font-heading font-extrabold text-xs">
+          <div className="w-8 h-8 rounded-lg bg-[#003366] text-[#0077C8] flex items-center justify-center font-heading font-extrabold text-xs">
             SICA
           </div>
         }
@@ -100,7 +178,7 @@ export default function Propuesta1({ contact = defaultContact }) {
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3">
-              <Award className="w-5 h-5 text-[#E8791E] shrink-0 mt-0.5" />
+              <Award className="w-5 h-5 text-[#0077C8] shrink-0 mt-0.5" />
               <div>
                 <h4 className="font-heading font-bold text-xs uppercase text-slate-800 mb-0.5">
                   Acreditación de Posgrados
@@ -124,7 +202,7 @@ export default function Propuesta1({ contact = defaultContact }) {
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3">
-              <Building2 className="w-5 h-5 text-[#E8791E] shrink-0 mt-0.5" />
+              <Building2 className="w-5 h-5 text-[#0077C8] shrink-0 mt-0.5" />
               <div>
                 <h4 className="font-heading font-bold text-xs uppercase text-slate-800 mb-0.5">
                   Sede Central en Costa Rica
@@ -145,14 +223,14 @@ export default function Propuesta1({ contact = defaultContact }) {
               href="https://icap.ac.cr"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0077C8] hover:text-[#E8791E] transition-colors uppercase font-heading"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0077C8] hover:text-[#0077C8] transition-colors uppercase font-heading"
             >
               <span>Visitar portal web oficial ICAP</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
             <button
               onClick={() => setAboutModalOpen(false)}
-              className="w-full sm:w-auto py-2.5 px-6 rounded-2xl bg-[#0B2A4A] hover:bg-[#092647] text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors shadow"
+              className="w-full sm:w-auto py-2.5 px-6 rounded-2xl bg-[#003366] hover:bg-[#001F3D] text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors shadow"
             >
               Cerrar
             </button>

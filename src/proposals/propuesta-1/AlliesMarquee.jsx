@@ -14,9 +14,9 @@ export default function AlliesMarquee() {
   ];
 
   return (
-    <section className="py-12 bg-[#0A0F16] text-white overflow-hidden border-y border-white/5">
+    <section className="py-12 bg-[#001F3D] text-white overflow-hidden border-y border-white/5">
       <div className="max-w-4xl mx-auto px-6 mb-8 text-center">
-        <span className="text-xs font-bold tracking-widest uppercase text-[#E8791E] block mb-1 font-mono-code">
+        <span className="text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
           Red Institucional
         </span>
         <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-white tracking-tight">
@@ -27,16 +27,16 @@ export default function AlliesMarquee() {
       {/* Infinite scrolling track */}
       <div className="relative w-full overflow-hidden flex items-center py-2">
         {/* Gradient fades at borders */}
-        <div className="absolute left-0 inset-y-0 w-16 bg-gradient-to-r from-[#0A0F16] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 inset-y-0 w-16 bg-gradient-to-l from-[#0A0F16] to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 inset-y-0 w-16 bg-gradient-to-r from-[#001F3D] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 inset-y-0 w-16 bg-gradient-to-l from-[#001F3D] to-transparent z-10 pointer-events-none" />
 
         <div className="animate-marquee flex items-center gap-4">
           {[...allies, ...allies].map((item, idx) => (
             <div
               key={idx}
-              className="flex items-center gap-3 px-6 py-3.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-[#E8791E]/50 hover:bg-white/[0.08] transition-all min-w-[200px] sm:min-w-[240px] shrink-0 group cursor-default"
+              className="flex items-center gap-3 px-6 py-3.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-[#0077C8]/50 hover:bg-white/[0.08] transition-all min-w-[200px] sm:min-w-[240px] shrink-0 group cursor-default"
             >
-              <div className="w-9 h-9 rounded-xl bg-[#0B2A4A] border border-white/15 flex items-center justify-center font-heading font-extrabold text-xs text-[#E8791E] group-hover:scale-105 transition-transform shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-[#003366] border border-white/15 flex items-center justify-center font-heading font-extrabold text-xs text-[#0077C8] group-hover:scale-105 transition-transform shrink-0">
                 {item.name.split(' ')[0]}
               </div>
               <div className="flex flex-col">

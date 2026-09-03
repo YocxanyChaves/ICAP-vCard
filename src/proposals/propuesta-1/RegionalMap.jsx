@@ -272,7 +272,7 @@ export default function RegionalMap() {
   // Institutional dark palette matching the website theme
   const getCountryFill = (id) => {
     if (selectedCountry === id) {
-      return '#E8791E'; // Bright active ICAP orange
+      return '#0077C8'; // Celeste ICAP activo
     }
     // Harmonious, elegant dark shades for unselected countries
     const shades = {
@@ -293,15 +293,15 @@ export default function RegionalMap() {
   };
 
   return (
-    <section className="px-4 sm:px-6 py-12 sm:py-20 bg-[#092647] text-white relative overflow-hidden">
+    <section className="px-4 sm:px-6 py-12 sm:py-20 bg-[#001F3D] text-white relative overflow-hidden">
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#0077C8]/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-[#E8791E]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-[#0077C8]/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-5xl mx-auto relative z-10">
         {/* Section Header */}
         <div className="mb-6 sm:mb-8 text-center sm:text-left">
-          <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#E8791E] block mb-1 font-mono-code">
+          <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
             Alcance y Territorio
           </span>
           <h2 className="font-heading font-extrabold text-2xl sm:text-4xl text-white tracking-tight">
@@ -315,7 +315,7 @@ export default function RegionalMap() {
         {/* Map & Desktop Detail Card Container */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-stretch">
           {/* Institutional Dark Geographic Map Canvas */}
-          <div className="lg:col-span-7 bg-[#07192C]/90 backdrop-blur-md border border-white/15 rounded-3xl p-4 sm:p-7 flex flex-col justify-between shadow-2xl relative overflow-hidden min-h-[380px] sm:min-h-[460px]">
+          <div className="lg:col-span-7 bg-[#001F3D]/90 backdrop-blur-md border border-white/15 rounded-3xl p-4 sm:p-7 flex flex-col justify-between shadow-2xl relative overflow-hidden min-h-[380px] sm:min-h-[460px]">
             {/* Ocean & Ambient Text Markers */}
             <div className="absolute top-4 right-6 text-right select-none pointer-events-none z-0">
               <h3 className="font-heading font-extrabold text-lg sm:text-xl text-white/90 tracking-wide">
@@ -341,7 +341,7 @@ export default function RegionalMap() {
                 <defs>
                   {/* Glowing effect for selected country */}
                   <filter id="active-glow-orange" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#E8791E" floodOpacity="0.9" />
+                    <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#0077C8" floodOpacity="0.9" />
                   </filter>
                   <filter id="country-depth" x="-10%" y="-10%" width="120%" height="120%">
                     <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000000" floodOpacity="0.4" />
@@ -369,7 +369,7 @@ export default function RegionalMap() {
                     className="hover:fill-[#1E578F] transition-all"
                   />
                   {/* Capital Dot */}
-                  <circle cx="175" cy="225" r="4.5" fill="#0B2A4A" stroke="#FFFFFF" strokeWidth="1.5" />
+                  <circle cx="175" cy="225" r="4.5" fill="#003366" stroke="#FFFFFF" strokeWidth="1.5" />
                   <text x="175" y="175" fill={getTextColor('GT')} fontSize="13" fontWeight="800" fontFamily="Raleway, sans-serif" textAnchor="middle">
                     GUATEMALA
                   </text>
@@ -396,7 +396,7 @@ export default function RegionalMap() {
                     className="hover:fill-[#1E578F] transition-all"
                   />
                   {/* Capital Dot */}
-                  <circle cx="270" cy="115" r="4" fill="#0B2A4A" stroke="#FFFFFF" strokeWidth="1.5" />
+                  <circle cx="270" cy="115" r="4" fill="#003366" stroke="#FFFFFF" strokeWidth="1.5" />
                   <text x="295" y="118" fill={getTextColor('BZ')} fontSize="11" fontWeight="800" fontFamily="Raleway, sans-serif">
                     BELIZE
                   </text>
@@ -423,7 +423,7 @@ export default function RegionalMap() {
                     className="hover:fill-[#1E578F] transition-all"
                   />
                   {/* Capital Dot */}
-                  <circle cx="255" cy="295" r="4" fill="#0B2A4A" stroke="#FFFFFF" strokeWidth="1.5" />
+                  <circle cx="255" cy="295" r="4" fill="#003366" stroke="#FFFFFF" strokeWidth="1.5" />
                   <text x="275" y="302" fill={selectedCountry === 'SV' ? '#FFFFFF' : '#9FC6E8'} fontSize="9.5" fontWeight="700">
                     San Salvador
                   </text>
@@ -457,7 +457,7 @@ export default function RegionalMap() {
                   <ellipse cx="445" cy="145" rx="10" ry="3" fill={getCountryFill('HN')} stroke="rgba(255,255,255,0.3)" />
 
                   {/* Capital Dot */}
-                  <circle cx="335" cy="255" r="4.5" fill="#0B2A4A" stroke="#FFFFFF" strokeWidth="1.5" />
+                  <circle cx="335" cy="255" r="4.5" fill="#003366" stroke="#FFFFFF" strokeWidth="1.5" />
                   <text x="390" y="215" fill={getTextColor('HN')} fontSize="13" fontWeight="800" fontFamily="Raleway, sans-serif" textAnchor="middle">
                     HONDURAS
                   </text>
@@ -485,11 +485,11 @@ export default function RegionalMap() {
                     className="hover:fill-[#1E578F] transition-all"
                   />
                   {/* Lakes (White Inset) */}
-                  <path d="M 390,345 C 410,340 420,360 405,360 Z" fill="#07192C" opacity="0.9" stroke="rgba(255,255,255,0.2)" />
-                  <path d="M 420,365 C 465,355 485,405 455,420 C 430,415 415,390 420,365 Z" fill="#07192C" opacity="0.95" stroke="rgba(255,255,255,0.2)" />
+                  <path d="M 390,345 C 410,340 420,360 405,360 Z" fill="#001F3D" opacity="0.9" stroke="rgba(255,255,255,0.2)" />
+                  <path d="M 420,365 C 465,355 485,405 455,420 C 430,415 415,390 420,365 Z" fill="#001F3D" opacity="0.95" stroke="rgba(255,255,255,0.2)" />
 
                   {/* Capital Dot */}
-                  <circle cx="410" cy="340" r="4.5" fill="#0B2A4A" stroke="#FFFFFF" strokeWidth="1.5" />
+                  <circle cx="410" cy="340" r="4.5" fill="#003366" stroke="#FFFFFF" strokeWidth="1.5" />
                   <text x="425" y="344" fill={selectedCountry === 'NI' ? '#FFFFFF' : '#9FC6E8'} fontSize="10" fontWeight="700">
                     Managua
                   </text>
@@ -519,8 +519,8 @@ export default function RegionalMap() {
                     className="hover:fill-[#1E578F] transition-all"
                   />
                   {/* Sede Central Pulsing Pin */}
-                  <circle cx="475" cy="460" r="5.5" fill="#0B2A4A" stroke="#FFFFFF" strokeWidth="2" />
-                  <circle cx="475" cy="460" r="10" stroke="#E8791E" strokeWidth="2" fill="none" className="animate-ping" />
+                  <circle cx="475" cy="460" r="5.5" fill="#003366" stroke="#FFFFFF" strokeWidth="2" />
+                  <circle cx="475" cy="460" r="10" stroke="#0077C8" strokeWidth="2" fill="none" className="animate-ping" />
 
                   <text x="490" y="460" fill={selectedCountry === 'CR' ? '#FFFFFF' : '#9FC6E8'} fontSize="10.5" fontWeight="800">
                     San José
@@ -528,7 +528,7 @@ export default function RegionalMap() {
                   <text x="445" y="535" fill={getTextColor('CR')} fontSize="13" fontWeight="800" fontFamily="Raleway, sans-serif" textAnchor="middle">
                     COSTA RICA
                   </text>
-                  <text x="445" y="550" fill="#E8791E" fontSize="9.5" fontWeight="800" textAnchor="middle" fontMono="true">
+                  <text x="445" y="550" fill="#0077C8" fontSize="9.5" fontWeight="800" textAnchor="middle" fontMono="true">
                     ★ SEDE CENTRAL
                   </text>
                 </g>
@@ -554,7 +554,7 @@ export default function RegionalMap() {
                     className="hover:fill-[#1E578F] transition-all"
                   />
                   {/* Capital Dot */}
-                  <circle cx="705" cy="485" r="4.5" fill="#0B2A4A" stroke="#FFFFFF" strokeWidth="1.5" />
+                  <circle cx="705" cy="485" r="4.5" fill="#003366" stroke="#FFFFFF" strokeWidth="1.5" />
                   <text x="718" y="480" fill={selectedCountry === 'PA' ? '#FFFFFF' : '#9FC6E8'} fontSize="10" fontWeight="700">
                     Panama
                   </text>
@@ -568,7 +568,7 @@ export default function RegionalMap() {
             {/* Instruction Footer */}
             <div className="flex items-center justify-between pt-2 border-t border-white/10 text-[11px] text-[#9FC6E8] z-10">
               <span className="flex items-center gap-1.5 font-medium">
-                <Navigation className="w-3.5 h-3.5 text-[#E8791E]" />
+                <Navigation className="w-3.5 h-3.5 text-[#0077C8]" />
                 Toca cualquier país en el mapa para seleccionarlo
               </span>
               <span className="font-mono-code text-[10px] text-[#9FC6E8]/70 hidden sm:inline">
@@ -578,7 +578,7 @@ export default function RegionalMap() {
           </div>
 
           {/* Country Detail Card (Desktop Sidebar) */}
-          <div className="lg:col-span-5 hidden lg:flex flex-col justify-between bg-[#0B2A4A] border border-white/15 rounded-3xl p-6 sm:p-7 shadow-xl">
+          <div className="lg:col-span-5 hidden lg:flex flex-col justify-between bg-[#003366] border border-white/15 rounded-3xl p-6 sm:p-7 shadow-xl">
             <div>
               {/* Country Header */}
               <div className="flex items-center gap-3.5 mb-4">
@@ -587,15 +587,15 @@ export default function RegionalMap() {
                   <h3 className="font-heading font-extrabold text-2xl text-white">
                     {current.name}
                   </h3>
-                  <span className="text-xs text-[#E8791E] font-semibold font-mono-code block">
+                  <span className="text-xs text-[#0077C8] font-semibold font-mono-code block">
                     {current.city}
                   </span>
                 </div>
               </div>
 
               {/* Status Badge */}
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#E8791E]/20 border border-[#E8791E]/50 text-[#F2B78A] text-xs font-bold mb-4 font-mono-code">
-                <Building2 className="w-3.5 h-3.5 text-[#E8791E]" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#0077C8]/20 border border-[#0077C8]/50 text-[#F2B78A] text-xs font-bold mb-4 font-mono-code">
+                <Building2 className="w-3.5 h-3.5 text-[#0077C8]" />
                 <span>{current.status}</span>
               </div>
 
@@ -610,7 +610,7 @@ export default function RegionalMap() {
                   Enfoque Institucional
                 </span>
                 <div className="flex items-center gap-2 text-xs font-semibold text-white">
-                  <CheckCircle2 className="w-4 h-4 text-[#E8791E] shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-[#0077C8] shrink-0" />
                   <span>{current.highlight}</span>
                 </div>
               </div>
@@ -643,8 +643,8 @@ export default function RegionalMap() {
                   onClick={() => handleSelectCountry(c.id)}
                   className={`flex items-center gap-2.5 p-2.5 rounded-2xl border transition-all duration-200 text-left group active:scale-[0.98] cursor-pointer ${
                     isSelected
-                      ? 'bg-[#E8791E] border-white text-white shadow-lg scale-[1.02] ring-2 ring-[#E8791E]/50'
-                      : 'bg-[#0B2A4A] border-white/10 text-slate-200 hover:bg-white/10 hover:border-white/25 hover:text-white'
+                      ? 'bg-[#0077C8] border-white text-white shadow-lg scale-[1.02] ring-2 ring-[#0077C8]/50'
+                      : 'bg-[#003366] border-white/10 text-slate-200 hover:bg-white/10 hover:border-white/25 hover:text-white'
                   }`}
                 >
                   <FlagIcon countryCode={c.id} className="w-6 h-4 shrink-0 shadow-xs" />
@@ -676,7 +676,7 @@ export default function RegionalMap() {
         icon={<FlagIcon countryCode={current.id} className="w-8 h-6" />}
       >
         <div className="space-y-4 text-slate-700">
-          <div className="flex items-center gap-2 text-xs font-mono-code text-[#E8791E] font-bold">
+          <div className="flex items-center gap-2 text-xs font-mono-code text-[#0077C8] font-bold">
             <MapPin className="w-4 h-4" />
             <span>{current.city}</span>
           </div>
@@ -689,15 +689,15 @@ export default function RegionalMap() {
             <span className="text-[10px] font-mono-code uppercase font-bold tracking-wider text-slate-400 block">
               Enfoque Institucional
             </span>
-            <div className="flex items-start gap-2 text-xs font-semibold text-[#0B2A4A]">
-              <CheckCircle2 className="w-4 h-4 text-[#E8791E] shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 text-xs font-semibold text-[#003366]">
+              <CheckCircle2 className="w-4 h-4 text-[#0077C8] shrink-0 mt-0.5" />
               <span>{current.highlight}</span>
             </div>
           </div>
 
           <button
             onClick={() => setShowDetailSheet(false)}
-            className="mt-4 w-full py-3.5 rounded-2xl bg-[#0B2A4A] hover:bg-[#092647] text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors shadow-md cursor-pointer"
+            className="mt-4 w-full py-3.5 rounded-2xl bg-[#003366] hover:bg-[#001F3D] text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors shadow-md cursor-pointer"
           >
             Cerrar
           </button>

@@ -15,7 +15,7 @@ export default function ProposalSwitcher({
       title: 'Propuesta 1',
       subtitle: 'Brochure Institucional + vCard',
       badge: 'Completo',
-      color: 'border-[#E8791E] text-[#E8791E]'
+      color: 'border-[#0077C8] text-[#0077C8]'
     },
     {
       id: 2,
@@ -35,11 +35,11 @@ export default function ProposalSwitcher({
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-2xl transition-all duration-300">
-      <div className="bg-[#0B2A4A]/90 backdrop-blur-md border border-white/20 shadow-2xl rounded-2xl p-3 text-white">
+      <div className="bg-[#003366]/90 backdrop-blur-md border border-white/20 shadow-2xl rounded-2xl p-3 text-white">
         {/* Header bar */}
         <div className="flex items-center justify-between gap-3 pb-2 border-b border-white/10">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-[#E8791E] flex items-center justify-center font-heading font-extrabold text-[10px] text-white">
+            <div className="w-6 h-6 rounded-full bg-[#0077C8] flex items-center justify-center font-heading font-extrabold text-[10px] text-white">
               ICAP
             </div>
             <span className="font-heading font-bold text-xs tracking-wider uppercase text-slate-200">
@@ -58,7 +58,7 @@ export default function ProposalSwitcher({
                 title="Vista Móvil (390px)"
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
                   viewMode === 'mobile'
-                    ? 'bg-[#E8791E] text-white font-semibold shadow'
+                    ? 'bg-[#0077C8] text-white font-semibold shadow'
                     : 'text-slate-300 hover:text-white'
                 }`}
               >
@@ -122,7 +122,7 @@ export default function ProposalSwitcher({
                   </span>
 
                   {active && (
-                    <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-[#E8791E] font-bold">
+                    <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-[#0077C8] font-bold">
                       <Sparkles className="w-3 h-3" />
                       <span>Activa</span>
                     </div>

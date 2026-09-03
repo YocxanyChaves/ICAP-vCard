@@ -25,7 +25,7 @@ export default function SpecializationAreas() {
       tag: 'Dirección en salud y seguridad social',
       longDesc: 'Programas y consultorías especializadas en gestión de servicios de salud, optimización de recursos hospitalarios y sostenibilidad de los sistemas de seguridad social en la región.',
       icon: HeartPulse,
-      color: 'bg-[#FBE6D2] text-[#E8791E]',
+      color: 'bg-[#EAF3FB] text-[#0077C8]',
       points: [
         'Gestión estratégica de servicios hospitalarios y redes de salud.',
         'Sostenibilidad financiera en seguridad social.',
@@ -51,7 +51,7 @@ export default function SpecializationAreas() {
       tag: 'Transición energética y gestión ambiental',
       longDesc: 'Acompañamiento a ministerios e instituciones en transición energética justa, mitigación del cambio climático y gestión sostenible de los recursos naturales.',
       icon: Leaf,
-      color: 'bg-[#FBE6D2] text-[#E8791E]',
+      color: 'bg-[#EAF3FB] text-[#0077C8]',
       points: [
         'Políticas de descarbonización y energías renovables.',
         'Gobernanza hídrica y gestión de cuencas compartidas.',
@@ -77,7 +77,7 @@ export default function SpecializationAreas() {
       tag: 'Posgrados, maestrías y desarrollo del talento humano',
       longDesc: 'Oferta académica de posgrado (maestrías y doctorados) y programas de formación a la medida para cuadros directivos y técnicos del sector público.',
       icon: GraduationCap,
-      color: 'bg-[#FBE6D2] text-[#E8791E]',
+      color: 'bg-[#EAF3FB] text-[#0077C8]',
       points: [
         'Maestrías y doctorados especializados en administración pública.',
         'Cursos y diplomados ejecutivos virtuales y presenciales.',
@@ -90,10 +90,10 @@ export default function SpecializationAreas() {
     <section className="px-4 sm:px-6 py-10 sm:py-16 bg-slate-50 relative">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6 sm:mb-8 text-center sm:text-left">
-          <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#E8791E] block mb-1 font-mono-code">
+          <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
             Expertise y Oferta
           </span>
-          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#0B2A4A] tracking-tight">
+          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] tracking-tight">
             Áreas de Especialización
           </h2>
           <p className="text-xs text-slate-500 mt-1 sm:hidden">
@@ -116,7 +116,7 @@ export default function SpecializationAreas() {
                     <Icon className="w-5 h-5" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-heading font-bold text-sm sm:text-base text-[#0B2A4A] group-hover:text-[#0077C8] transition-colors truncate">
+                    <h3 className="font-heading font-bold text-sm sm:text-base text-[#003366] group-hover:text-[#0077C8] transition-colors truncate">
                       {area.title}
                     </h3>
                     <p className="text-[11px] text-slate-500 truncate mt-0.5">
@@ -125,7 +125,7 @@ export default function SpecializationAreas() {
                   </div>
                 </div>
 
-                <div className="w-7 h-7 rounded-full bg-slate-50 group-hover:bg-[#E8791E] text-slate-400 group-hover:text-white flex items-center justify-center transition-colors shrink-0">
+                <div className="w-7 h-7 rounded-full bg-slate-50 group-hover:bg-[#0077C8] text-slate-400 group-hover:text-white flex items-center justify-center transition-colors shrink-0">
                   <ArrowRight className="w-3.5 h-3.5" />
                 </div>
               </div>
@@ -164,7 +164,7 @@ export default function SpecializationAreas() {
               </span>
               {selectedArea.points.map((pt, idx) => (
                 <div key={idx} className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-50 text-xs text-slate-700 leading-relaxed">
-                  <CheckCircle2 className="w-4 h-4 text-[#E8791E] shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#0077C8] shrink-0 mt-0.5" />
                   <span>{pt}</span>
                 </div>
               ))}
@@ -172,7 +172,7 @@ export default function SpecializationAreas() {
 
             <button
               onClick={() => setSelectedArea(null)}
-              className="mt-6 w-full py-3.5 rounded-2xl bg-[#0B2A4A] hover:bg-[#092647] text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors shadow-md cursor-pointer"
+              className="mt-6 w-full py-3.5 rounded-2xl bg-[#003366] hover:bg-[#001F3D] text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors shadow-md cursor-pointer"
             >
               Cerrar Detalle
             </button>

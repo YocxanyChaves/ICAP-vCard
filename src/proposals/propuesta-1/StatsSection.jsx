@@ -7,7 +7,7 @@ export default function StatsSection() {
       value: '124',
       label: 'Proyectos',
       sublabel: 'ejecutados',
-      color: 'text-[#E8791E]',
+      color: 'text-[#003366]',
       icon: Briefcase
     },
     {
@@ -21,7 +21,7 @@ export default function StatsSection() {
       value: '18',
       label: 'Países',
       sublabel: 'atendidos',
-      color: 'text-[#0B2A4A]',
+      color: 'text-[#003366]',
       icon: Globe2
     }
   ];
@@ -29,13 +29,13 @@ export default function StatsSection() {
   return (
     <section className="px-4 sm:px-6 py-10 sm:py-16 bg-white border-y border-slate-100">
       <div className="max-w-4xl mx-auto text-center">
-        <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#E8791E] block mb-1 font-mono-code">
+        <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
           Trayectoria e Impacto
         </span>
-        <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#0B2A4A] tracking-tight mb-2">
+        <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] tracking-tight mb-2">
           ICAP en Cifras
         </h2>
-        <div className="inline-block px-2.5 py-0.5 rounded-md bg-[#FBE6D2] text-[#B8802E] text-[9px] sm:text-[10px] font-mono-code font-bold tracking-wider uppercase mb-8">
+        <div className="inline-block px-2.5 py-0.5 rounded-md bg-[#EAF3FB] text-[#003366] text-[9px] sm:text-[10px] font-mono-code font-bold tracking-wider uppercase mb-8">
           Cifras de ejemplo &middot; a confirmar
         </div>
 
