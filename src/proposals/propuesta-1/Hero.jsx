@@ -7,14 +7,39 @@ export default function Hero({ onOpenAbout, onScrollToContact }) {
     <section className="relative min-h-[560px] sm:min-h-[640px] bg-gradient-to-br from-[#003366] via-[#0B5A96] to-[#0077C8] text-white px-4 sm:px-6 py-12 sm:py-20 flex flex-col items-center justify-center text-center overflow-hidden">
       {/* Background radial glow & curves */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,255,255,0.18),rgba(0,119,200,0)_65%)] pointer-events-none" />
-      <svg
-        className="absolute inset-0 w-full h-full opacity-10 pointer-events-none"
-        viewBox="0 0 800 600"
-        preserveAspectRatio="none"
-      >
-        <path d="M0 120 C 200 90, 600 150, 800 110" stroke="#FFFFFF" strokeWidth="1.5" fill="none" />
-        <path d="M0 480 C 250 520, 550 450, 800 500" stroke="#FFFFFF" strokeWidth="1.5" fill="none" />
-      </svg>
+
+      {/* Ondas de fondo animadas: cada svg mide el doble del ancho real y
+          contiene el mismo trazo repetido a los 800 unidades de viewBox
+          (misma forma, controles desplazados +800 en x), así que al
+          trasladar -50% termina exactamente donde empezó y el loop no
+          se nota. Van a velocidades y direcciones distintas para que el
+          movimiento se sienta orgánico y no como un GIF repetido. */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-10" aria-hidden="true">
+        <svg
+          className="absolute top-0 left-0 w-[200%] h-full animate-wave-drift"
+          viewBox="0 0 1600 600"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M0 120 C 200 90, 600 150, 800 110 C 1000 90, 1400 150, 1600 110"
+            stroke="#FFFFFF"
+            strokeWidth="1.5"
+            fill="none"
+          />
+        </svg>
+        <svg
+          className="absolute top-0 left-0 w-[200%] h-full animate-wave-drift-reverse"
+          viewBox="0 0 1600 600"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M0 480 C 250 520, 550 450, 800 500 C 1050 520, 1350 450, 1600 500"
+            stroke="#FFFFFF"
+            strokeWidth="1.5"
+            fill="none"
+          />
+        </svg>
+      </div>
 
       <div className="relative z-10 flex flex-col items-center max-w-xl mx-auto w-full">
         {/* Kicker badge */}

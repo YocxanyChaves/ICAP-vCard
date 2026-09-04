@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Hero from './Hero';
 import MissionVision from './MissionVision';
 import ValuesWheel from './ValuesWheel';
 import StatsSection from './StatsSection';
 import SpecializationAreas from './SpecializationAreas';
+import AuthoritiesSection from './AuthoritiesSection';
 import RegionalMap from './RegionalMap';
 import AlliesMarquee from './AlliesMarquee';
 import ContactSection from './ContactSection';
@@ -19,7 +20,10 @@ import {
   Sparkles,
   LayoutGrid,
   MapPinned,
-  Phone
+  Phone,
+  Smartphone,
+  Monitor,
+  Users
 } from 'lucide-react';
 import { defaultContact } from '../../components/VCardDownload';
 
@@ -27,12 +31,17 @@ const PAGES = [
   { id: 'inicio', label: 'Inicio', icon: Home },
   { id: 'mision', label: 'Misión', icon: Compass },
   { id: 'valores', label: 'Valores', icon: Sparkles },
+  { id: 'autoridades', label: 'Autoridades', icon: Users },
   { id: 'areas', label: 'Áreas', icon: LayoutGrid },
   { id: 'presencia', label: 'Presencia', icon: MapPinned },
   { id: 'contacto', label: 'Contacto', icon: Phone }
 ];
 
-export default function Propuesta1({ contact = defaultContact }) {
+export default function Propuesta1({
+  contact = defaultContact,
+  viewMode = 'full',
+  onSetViewMode = () => {}
+}) {
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [activePage, setActivePage] = useState('inicio');
   const mainRef = useRef(null);
@@ -46,6 +55,52 @@ export default function Propuesta1({ contact = defaultContact }) {
       mainRef.current.scrollTo({ top: 0, behavior: 'instant' in document.documentElement.style ? 'instant' : 'auto' });
     }
   }, [activePage]);
+
+  // --- Esfera animada del menú inferior --------------------------------
+  // Un solo "blob" que se mide contra el botón activo y se traslada con
+  // una curva de rebote (spring) hacia esa posición, en vez de redibujar
+  // un indicador distinto por botón. Así el movimiento entre secciones
+  // (p. ej. Autoridades -> Contacto) se ve como una esfera que fluye por
+  // el menú en lugar de saltar de golpe.
+  const navRef = useRef(null);
+  const itemRefs = useRef({});
+  const [orb, setOrb] = useState({ left: 0, top: 0, width: 0, height: 0 });
+  const [orbReady, setOrbReady] = useState(false);
+
+  const measureOrb = () => {
+    const nav = navRef.current;
+    const btn = itemRefs.current[activePage];
+    if (!nav || !btn) return;
+    const navRect = nav.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
+    setOrb({
+      left: btnRect.left - navRect.left,
+      top: btnRect.top - navRect.top,
+      width: btnRect.width,
+      height: btnRect.height
+    });
+  };
+
+  useLayoutEffect(() => {
+    measureOrb();
+    if (!orbReady) {
+      // Coloca la esfera de una vez en su sitio antes de activar la
+      // transición, para que no "viaje" desde la esquina en el montaje.
+      const id = requestAnimationFrame(() => setOrbReady(true));
+      return () => cancelAnimationFrame(id);
+    }
+    return undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activePage]);
+
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav || typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(() => measureOrb());
+    ro.observe(nav);
+    return () => ro.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const renderPage = () => {
     switch (activePage) {
@@ -64,6 +119,8 @@ export default function Propuesta1({ contact = defaultContact }) {
         return <MissionVision />;
       case 'valores':
         return <ValuesWheel />;
+      case 'autoridades':
+        return <AuthoritiesSection />;
       case 'areas':
         return <SpecializationAreas />;
       case 'presencia':
@@ -92,6 +149,34 @@ export default function Propuesta1({ contact = defaultContact }) {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Viewport preview toggle: real / mobile-frame (390px vía iframe) */}
+          <div className="flex items-center bg-black/30 p-0.5 rounded-lg border border-white/10 shrink-0">
+            <button
+              onClick={() => onSetViewMode('full')}
+              title="Vista Completa"
+              aria-pressed={viewMode === 'full'}
+              className={`flex items-center justify-center w-7 h-7 rounded-md transition-all ${
+                viewMode === 'full'
+                  ? 'bg-[#0077C8] text-white shadow'
+                  : 'text-[#9FC6E8] hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <Monitor className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => onSetViewMode('mobile')}
+              title="Vista Móvil (390px)"
+              aria-pressed={viewMode === 'mobile'}
+              className={`flex items-center justify-center w-7 h-7 rounded-md transition-all ${
+                viewMode === 'mobile'
+                  ? 'bg-[#0077C8] text-white shadow'
+                  : 'text-[#9FC6E8] hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
           <button
             onClick={() => setAboutModalOpen(true)}
             className="text-xs font-heading font-semibold text-[#EAF3FB] hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-white/10 transition-colors"
@@ -115,28 +200,62 @@ export default function Propuesta1({ contact = defaultContact }) {
       </main>
 
       {/* Bottom App Navigation */}
-      <nav className="shrink-0 z-30 bg-white border-t border-slate-200 shadow-[0_-4px_16px_rgba(0,51,102,0.08)] px-1 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] flex items-stretch justify-between">
+      <nav
+        ref={navRef}
+        className="shrink-0 z-30 bg-white border-t border-slate-200 shadow-[0_-4px_16px_rgba(0,51,102,0.08)] px-1 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] flex items-stretch justify-between relative"
+      >
+        {/* Esfera animada del menú: un wrapper de posición (transición de
+            traslado) que envuelve el halo pulsante y la esfera principal,
+            para que ambos viajen juntos hacia el botón activo. */}
+        <div
+          aria-hidden="true"
+          className="absolute pointer-events-none z-0"
+          style={{
+            left: 0,
+            top: 0,
+            width: orb.width,
+            height: orb.height,
+            transform: `translate(${orb.left}px, ${orb.top}px)`,
+            transition: orbReady
+              ? 'transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.4s ease, height 0.4s ease'
+              : 'none'
+          }}
+        >
+          {/* Halo suave, le da profundidad y un ligero pulso */}
+          <div
+            className="absolute inset-0 rounded-full blur-md animate-pulse-slow"
+            style={{ background: 'radial-gradient(circle, #0077C8 0%, rgba(0,119,200,0) 72%)' }}
+          />
+          {/* Esfera principal */}
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{
+              background: 'radial-gradient(circle at 35% 28%, #4FB2F2 0%, #0077C8 55%, #003366 100%)',
+              boxShadow: '0 8px 18px -3px rgba(0,51,102,0.5), inset 0 1px 3px rgba(255,255,255,0.4)'
+            }}
+          />
+        </div>
         {PAGES.map((page) => {
           const Icon = page.icon;
           const active = activePage === page.id;
           return (
             <button
               key={page.id}
+              ref={(el) => {
+                itemRefs.current[page.id] = el;
+              }}
               onClick={() => goToPage(page.id)}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl transition-colors relative"
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl transition-colors relative z-10"
             >
-              {active && (
-                <span className="absolute -top-1.5 w-8 h-1 rounded-full bg-[#0077C8]" />
-              )}
               <Icon
-                className={`w-[19px] h-[19px] transition-all ${
-                  active ? 'text-[#0077C8] scale-110' : 'text-slate-400'
+                className={`w-[19px] h-[19px] transition-all duration-300 ${
+                  active ? 'text-white scale-110' : 'text-slate-400'
                 }`}
                 strokeWidth={active ? 2.4 : 2}
               />
               <span
-                className={`text-[9px] font-heading tracking-wide transition-colors ${
-                  active ? 'text-[#003366] font-bold' : 'text-slate-400 font-semibold'
+                className={`text-[9px] font-heading tracking-wide transition-colors duration-300 ${
+                  active ? 'text-white font-bold' : 'text-slate-400 font-semibold'
                 }`}
               >
                 {page.label}
