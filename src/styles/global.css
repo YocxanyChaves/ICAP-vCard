@@ -57,10 +57,20 @@ h1, h2, h3, h4, h5, h6 {
   100% { transform: translateX(-50%); }
 }
 
+/* Tira infinita de aliados: el truco de "duplicar el arreglo y trasladar
+   -50%" sólo da un loop sin costuras si el ancho de cada mitad es
+   EXACTAMENTE igual. Con `gap` en el contenedor flex eso no se cumple:
+   16 tarjetas tienen 15 gaps en total (no 16), así que la mitad del
+   ancho total queda medio gap corrida del ancho real de una mitad — de
+   ahí el salto/reinicio brusco en cada vuelta. Por eso el espaciado va
+   como margen en cada tarjeta (ver AlliesMarquee.jsx) en vez de `gap`
+   en el contenedor: así cada tarjeta aporta el mismo ancho (tarjeta +
+   margen) y las dos mitades quedan matemáticamente idénticas, sin
+   costura visible. */
 .animate-marquee {
   display: flex;
   width: max-content;
-  animation: marquee 25s linear infinite;
+  animation: marquee 34s linear infinite;
 }
 
 .animate-marquee:hover {
@@ -91,13 +101,45 @@ h1, h2, h3, h4, h5, h6 {
   animation: fadeIn 0.2s ease-out forwards;
 }
 
+/* Este keyframe SÓLO anima opacity a propósito — nada de transform.
+   Ese era justo el bug de "Áreas" (modal/BottomSheet cortado): esta
+   animación envuelve CADA página completa, y cualquier transform que
+   toque (aunque sea un translateX(0) que no mueve nada, o incluso
+   `transform: none` como valor final del keyframe — Chrome igual
+   reporta una matriz identidad ya calculada, no la palabra "none")
+   deja ese contenedor con un transform "activo" para siempre gracias a
+   `forwards`. Eso convierte a esta página en el "viewport" de
+   cualquier `position: fixed` de adentro (como el BottomSheet/modal)
+   en vez de la ventana real — si la página es más cortita que la
+   pantalla (como "Áreas"), el modal queda encogido/cortado a esa
+   altura en vez de cubrir toda la pantalla. Por eso esta entrada de
+   página sólo usa opacity: así el contenedor nunca tiene transform,
+   ni por un instante, y ningún fixed de adentro se rompe. */
 @keyframes pageIn {
-  from { opacity: 0; transform: translateX(16px); }
-  to { opacity: 1; transform: translateX(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .animate-page-in {
   animation: pageIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Entrada de la ficha del valor activo (Valores Institucionales): cada
+   vez que cambia el valor seleccionado el key={current.id} hace que
+   React remonte esta tarjeta, así que la animación se repite sola en
+   cada cambio, sin lógica extra. Una animación propia (no la genérica
+   .animate-page-in, que ya se usa para el cambio de sección completa)
+   para que el cambio de ficha se sienta como su propio gesto: alzado +
+   fundido + un empujoncito de escala, con movimiento suficiente para
+   notarse a simple vista aunque la esfera también esté animando. */
+@keyframes valueCardIn {
+  0% { opacity: 0; transform: translateY(22px) scale(0.93); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-value-card-in {
+  animation: valueCardIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes orbitSpin {
@@ -137,22 +179,147 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Ondas de fondo del Hero: drift horizontal infinito y sin costuras.
    El svg mide 200% de ancho con el mismo trazo repetido cada 800
-   unidades de viewBox, así que trasladar -50% (= un "tile" completo)
-   deja el dibujo idéntico al punto de partida y el loop no se nota. */
+   unidades de viewBox (mismo Y de entrada y salida en cada tramo), así
+   que trasladar -50% (= un "tile" completo) deja el dibujo idéntico al
+   punto de partida y el loop no se nota.
+
+   Las dos ondas principales comparten exactamente la misma clase de
+   drift/bob/rayo (mismo sentido, misma duración, sin animation-delay
+   propio) para avanzar siempre juntas — no es parallax caótico, es una
+   sola cadencia repetida en dos alturas, a propósito, para que el
+   movimiento se sienta controlado y pausado en vez de errático. La
+   onda central (muy tenue) dura exactamente el doble, así vuelve a
+   alinearse con las otras dos cada dos ciclos en lugar de derivar sin
+   patrón. */
 @keyframes waveDrift {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
 
-@keyframes waveDriftReverse {
-  from { transform: translateX(-50%); }
-  to { transform: translateX(0); }
+.animate-wave-drift-fast {
+  animation: waveDrift 4.5s linear infinite;
 }
 
 .animate-wave-drift {
-  animation: waveDrift 22s linear infinite;
+  animation: waveDrift 9s linear infinite;
 }
 
-.animate-wave-drift-reverse {
-  animation: waveDriftReverse 30s linear infinite;
+/* Respiro vertical de cada capa de onda: vive en un wrapper aparte del
+   svg que hace el drift horizontal, así ninguna de las dos animaciones
+   pisa el transform de la otra. Las dos ondas principales usan la
+   misma clase (sin delay) para respirar en unísono. */
+@keyframes waveBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(9px); }
+}
+
+.animate-wave-bob-fast {
+  animation: waveBob 3.2s ease-in-out infinite;
+}
+
+.animate-wave-bob-slow {
+  animation: waveBob 6.5s ease-in-out infinite;
+  animation-delay: -4s;
+}
+
+/* Puntos flotantes de fondo del Hero: suben desde abajo y se desvanecen. */
+@keyframes floatParticle {
+  0% { transform: translateY(0); opacity: 0; }
+  12% { opacity: 0.55; }
+  85% { opacity: 0.35; }
+  100% { transform: translateY(-170px); opacity: 0; }
+}
+
+.animate-float-particle {
+  animation-name: floatParticle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  filter: blur(0.5px);
+}
+
+/* Deriva muy lenta del resplandor radial de fondo, para que el fondo
+   del Hero se sienta vivo sin llamar la atención. */
+@keyframes glowDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(2.5%, -3%) scale(1.06); }
+}
+
+.animate-glow-drift {
+  animation: glowDrift 14s ease-in-out infinite;
+}
+
+/* Entrada escalonada del contenido del Hero: cada bloque usa la misma
+   animación con un animation-delay distinto asignado inline. `both`
+   mantiene opacity:0 durante el delay para que no haya parpadeo. */
+@keyframes heroRise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-hero-rise {
+  animation: heroRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Pequeño rebote de "aterrizaje" cuando un contador de ICAP en Cifras
+   llega a su total: el animation-delay inline (= la duración del
+   conteo) hace que dispare justo cuando el número termina de subir. */
+@keyframes statPop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.14); }
+  60% { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+.animate-stat-pop {
+  animation: statPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Rayito de luz que da casi una vuelta alrededor del logo del ICAP
+   (Valores Institucionales) justo cuando un valor "aterriza" en el
+   centro. `mask` deja visible sólo un anillo delgado (no un círculo
+   sólido) para que no tape el logo; el conic-gradient adentro de ese
+   anillo es lo que se ve como un arco brillante recorriéndolo. */
+@keyframes lightRingSweep {
+  0% { opacity: 0; transform: rotate(-45deg) scale(0.94); }
+  14% { opacity: 1; }
+  72% { opacity: 0.85; }
+  100% { opacity: 0; transform: rotate(300deg) scale(1.05); }
+}
+
+.value-light-ring {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 250deg,
+    rgba(143, 211, 255, 0.15) 270deg,
+    #bfe6ff 300deg,
+    #ffffff 320deg,
+    #8fd3ff 336deg,
+    transparent 360deg
+  );
+  -webkit-mask-image: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  mask-image: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  animation: lightRingSweep 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* "Asomo" de las fichas de Misión/Visión al entrar a la sección: un
+   vistazo de que la ficha se puede voltear, SIN llegar a voltearla
+   (se queda a medio camino y regresa). Gira hacia el mismo lado que
+   el volteo real (rotateY positivo) para que anticipe el gesto
+   correcto, con un pasadito leve al volver (-3deg) como un rebote
+   chiquito de "acomodo". Una animación de CSS sobre `transform` pisa
+   por encima del `transform` inline que controla el volteo real
+   mientras dura (así no hay que tocar el estado de volteado), y como
+   termina exactamente en rotateY(0deg) — el mismo valor en reposo —
+   no hay salto visible cuando se quita la clase al terminar. */
+@keyframes flipHint {
+  0% { transform: rotateY(0deg); }
+  38% { transform: rotateY(20deg); }
+  58% { transform: rotateY(14deg); }
+  80% { transform: rotateY(-3deg); }
+  100% { transform: rotateY(0deg); }
+}
+
+.animate-flip-hint {
+  animation: flipHint 1.15s cubic-bezier(0.45, 0, 0.2, 1) both;
 }
