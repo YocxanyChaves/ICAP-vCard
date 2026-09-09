@@ -323,3 +323,41 @@ h1, h2, h3, h4, h5, h6 {
 .animate-flip-hint {
   animation: flipHint 1.15s cubic-bezier(0.45, 0, 0.2, 1) both;
 }
+
+/* Ficha "despegada" del fondo (Misión/Visión): la profundidad se logra
+   sólo con sombras en capas (una pegada/cerca/oscura + una amplia/
+   lejos/difusa) — el mismo truco de Material Design para que algo se
+   vea "flotando" sobre la página, sin ningún transform 3D real. Al
+   pasar el mouse se levanta un poco (translateY) y la sombra se
+   agranda, como si se despegara todavía más del fondo. */
+.mv-card-light {
+  box-shadow:
+    0 2px 4px -2px rgba(0, 51, 102, 0.1),
+    0 12px 24px -8px rgba(0, 51, 102, 0.16),
+    0 32px 56px -26px rgba(0, 51, 102, 0.22);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mv-card-light:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 4px 8px -2px rgba(0, 51, 102, 0.14),
+    0 18px 32px -10px rgba(0, 51, 102, 0.22),
+    0 44px 70px -28px rgba(0, 51, 102, 0.28);
+}
+
+.mv-card-dark {
+  box-shadow:
+    0 2px 4px -2px rgba(0, 8, 20, 0.35),
+    0 14px 28px -10px rgba(0, 8, 20, 0.4),
+    0 36px 60px -28px rgba(0, 8, 20, 0.5);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mv-card-dark:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 4px 8px -2px rgba(0, 8, 20, 0.4),
+    0 20px 36px -12px rgba(0, 8, 20, 0.48),
+    0 48px 76px -30px rgba(0, 8, 20, 0.6);
+}

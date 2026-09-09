@@ -13,8 +13,9 @@ import {
   Leaf,
   Sparkles
 } from 'lucide-react';
-import icapEscudoCeleste from '../../assets/icap-escudo-celeste.png';
+import icapEscudoNavy from '../../assets/icap-escudo-navy.png';
 import icapEscudoWhite from '../../assets/icap-escudo-white.png';
+import icapEscudoCeleste from '../../assets/icap-escudo-celeste.png';
 
 const MISION_PILARES = [
   'Desarrollo y formación de competencias directivas en el servicio público.',
@@ -48,10 +49,10 @@ const VISION_REVERSO = [
 ];
 
 /**
- * Sello institucional del ICAP como marca de agua — la "base" sobre la
- * que se apoya cada ficha, como el timbre de un documento oficial.
- * Grande, ladeado como un sello real, muy tenue para no interferir con
- * la lectura del contenido que va encima.
+ * Sello institucional del ICAP como marca de agua, muy tenue, apenas
+ * insinuada — en navy sobre el card claro (antes usaba el celeste, muy
+ * parecido al blanco de fondo, y casi no se notaba) y en blanco sobre
+ * el card oscuro.
  */
 function SealWatermark({ src, className = '' }) {
   return (
@@ -61,26 +62,6 @@ function SealWatermark({ src, className = '' }) {
       aria-hidden="true"
       draggable={false}
       className={`pointer-events-none select-none absolute ${className}`}
-    />
-  );
-}
-
-/**
- * Doblez de esquina (dog-ear) sutil arriba a la derecha — el detalle
- * que ayuda a leer cada ficha como una hoja de papel física, con su
- * propio reverso, en vez de una tarjeta plana.
- */
-function PageCorner({ tone = 'light' }) {
-  return (
-    <div
-      aria-hidden="true"
-      className="absolute top-0 right-0 w-7 h-7 sm:w-9 sm:h-9 pointer-events-none"
-      style={{
-        background:
-          tone === 'light'
-            ? 'linear-gradient(135deg, transparent 50%, rgba(0,51,102,0.08) 50%)'
-            : 'linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.12) 50%)'
-      }}
     />
   );
 }
@@ -106,71 +87,71 @@ function FlipButton({ onClick, icon: Icon, label, tone = 'light' }) {
   );
 }
 
-// Grosor de la ficha (mitad de la distancia entre frente y reverso) y
-// ángulo de inclinación estático que hace que TODA la composición se
-// vea como una tablilla vista un poco desde arriba, apoyada sobre su
-// base — en vez de una tarjeta plana de frente. Ver SlabBase.
-const CARD_DEPTH = 9;
-const TILT_DEG = 6;
-
-/**
- * La "laja de piedra / tabla" sobre la que descansa cada ficha: una
- * plancha sólida, del tono del respectivo card, que vive DETRÁS y un
- * poco más abajo — no gira con el volteo (es la base, no la página),
- * así que ancla visualmente a la ficha como un objeto apoyado sobre
- * una superficie en vez de flotando. `translateZ` negativo la hunde
- * en el espacio 3D compartido con la ficha (mismo `perspective` del
- * padre) y el canto de abajo, inclinado con su propia bisagra,
- * dibuja el grosor real de la base.
- */
-function SlabBase({ tone }) {
+/** Fila numerada (frente). */
+function NumberTile({ tone, index, children }) {
   const isDark = tone === 'dark';
-  const faceGradient = isDark
-    ? 'linear-gradient(160deg, #123255 0%, #071b30 55%, #020a15 100%)'
-    : 'linear-gradient(160deg, #e4ebf2 0%, #c2d0de 55%, #9fb1c6 100%)';
-  const edgeGradient = isDark ? 'linear-gradient(#04101f, #000000)' : 'linear-gradient(#8ea0b6, #62748a)';
-
   return (
     <div
-      aria-hidden="true"
-      className="absolute inset-x-1.5 top-2.5 bottom-[-16px] sm:bottom-[-20px] pointer-events-none"
-      style={{ transformStyle: 'preserve-3d', transform: `translateZ(-${CARD_DEPTH * 2}px)` }}
+      className={
+        isDark
+          ? 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-white/[0.06] border border-white/5 text-xs sm:text-sm leading-relaxed text-[#C9D9E8]'
+          : 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 text-xs sm:text-sm leading-relaxed text-slate-600'
+      }
     >
-      {/* Cara de la base: lo que se asoma detrás/debajo de la ficha */}
-      <div
-        className="absolute inset-0 rounded-[26px] sm:rounded-[30px] shadow-[0_24px_38px_-16px_rgba(0,10,25,0.5)]"
-        style={{ background: faceGradient }}
-      />
-      {/* Canto frontal de la base: el "grosor" de la laja, con bisagra
-          en su propio borde inferior — por eso no hace falta saber el
-          ancho real de la ficha para que quede bien. */}
-      <div
-        className="absolute left-0 right-0 bottom-0 rounded-b-[26px] sm:rounded-b-[30px]"
-        style={{
-          height: 18,
-          background: edgeGradient,
-          transformOrigin: '50% 100%',
-          transform: 'rotateX(-58deg)'
-        }}
-      />
+      <span
+        className={
+          isDark
+            ? 'w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full bg-white/15 text-[#4FB2F2] text-[9px] sm:text-[10px] font-bold font-mono-code flex items-center justify-center shrink-0 mt-0.5 border border-white/10'
+            : 'w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full bg-[#0077C8] text-white text-[9px] sm:text-[10px] font-bold font-mono-code flex items-center justify-center shrink-0 mt-0.5'
+        }
+      >
+        {String(index + 1).padStart(2, '0')}
+      </span>
+      <span>{children}</span>
+    </div>
+  );
+}
+
+/** Fila con ícono (reverso). */
+function IconTile({ tone, icon: Icon, children }) {
+  const isDark = tone === 'dark';
+  return (
+    <div
+      className={
+        isDark
+          ? 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-white/[0.06] border border-white/5 text-xs sm:text-sm leading-relaxed text-[#C9D9E8]'
+          : 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 text-xs sm:text-sm leading-relaxed text-slate-600'
+      }
+    >
+      <span
+        className={
+          isDark
+            ? 'w-8 h-8 rounded-xl bg-white/10 text-[#4FB2F2] flex items-center justify-center shrink-0 border border-white/10'
+            : 'w-8 h-8 rounded-xl bg-[#EAF3FB] text-[#0077C8] flex items-center justify-center shrink-0'
+        }
+      >
+        <Icon className="w-4 h-4" />
+      </span>
+      <span className="pt-1">{children}</span>
     </div>
   );
 }
 
 /**
- * Ficha volteable: el "flipper" interno gira en 3D (rotateY) sobre un
+ * Ficha volteable: el "flipper" gira en 3D (rotateY) sobre un
  * contenedor con `perspective`; frente y reverso son la MISMA celda de
  * grid (gridArea 1/1) para que ambas caras compartan alto sin tener
- * que calcularlo a mano — el alto real de la ficha es el de la cara
- * más alta de las dos. Cada cara tiene `backfaceVisibility: hidden`
+ * que calcularlo a mano. Cada cara tiene `backfaceVisibility: hidden`
  * para que sólo se vea la que está mirando hacia el usuario en cada
- * momento, como una hoja real, y un `translateZ` propio que las separa
- * un poco en el espacio (el grosor de la hoja).
+ * momento, como una hoja real.
  *
- * Todo vive dentro de un envoltorio con una inclinación ESTÁTICA
- * (`TILT_DEG`, nunca anima) — ese es el efecto "3D, como que está
- * sobre una laja de piedra": se ve la ficha un poco desde arriba, con
- * su base asomando detrás, en vez de una tarjeta mirando de frente.
+ * `h-full` en cada nivel (este wrapper, el flipper, y el `h-full` que
+ * ya traen los <article> de frente/reverso) es lo que hace que las
+ * DOS fichas (Misión/Visión) terminen del mismo alto: el grid del
+ * díptico (`items-stretch`, más abajo) ya estira ambas columnas a la
+ * altura de la más alta de las dos — este `h-full` es lo que deja que
+ * esa altura le llegue de verdad hasta la tarjeta visible, en vez de
+ * quedarse a medio camino en un div sin alto propio.
  *
  * `hint`: un vistazo breve (gira un poco y regresa, sin llegar a
  * voltearse) al entrar a la sección, para insinuar que la ficha es
@@ -182,37 +163,27 @@ function SlabBase({ tone }) {
  */
 function FlipCard({ flipped, hint, tone = 'light', front, back }) {
   return (
-    <div className="relative" style={{ perspective: '2000px' }}>
-      <div className="relative" style={{ transformStyle: 'preserve-3d', transform: `rotateX(${TILT_DEG}deg)` }}>
-        <SlabBase tone={tone} />
+    <div className="relative h-full" style={{ perspective: '1800px' }}>
+      <div
+        className={`relative w-full h-full grid ${hint ? 'animate-flip-hint' : ''}`}
+        style={{
+          transformStyle: 'preserve-3d',
+          transition: 'transform 0.85s cubic-bezier(0.4, 0.12, 0.16, 1)',
+          transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+        }}
+      >
+        <div style={{ gridArea: '1 / 1', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}>
+          {front}
+        </div>
         <div
-          className={`relative w-full grid ${hint ? 'animate-flip-hint' : ''}`}
           style={{
-            transformStyle: 'preserve-3d',
-            transition: 'transform 0.85s cubic-bezier(0.4, 0.12, 0.16, 1)',
-            transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+            gridArea: '1 / 1',
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)'
           }}
         >
-          <div
-            style={{
-              gridArea: '1 / 1',
-              backfaceVisibility: 'hidden',
-              WebkitBackfaceVisibility: 'hidden',
-              transform: `translateZ(${CARD_DEPTH}px)`
-            }}
-          >
-            {front}
-          </div>
-          <div
-            style={{
-              gridArea: '1 / 1',
-              backfaceVisibility: 'hidden',
-              WebkitBackfaceVisibility: 'hidden',
-              transform: `rotateY(180deg) translateZ(${CARD_DEPTH}px)`
-            }}
-          >
-            {back}
-          </div>
+          {back}
         </div>
       </div>
     </div>
@@ -313,7 +284,8 @@ export default function MissionVision() {
         </div>
 
         {/* Díptico Misión / Visión — apiladas en móvil, a la par desde tablet/escritorio,
-            unidas por un mismo eje central con el escudo del ICAP. */}
+            unidas por un mismo eje central con el escudo del ICAP. `items-stretch`
+            es lo que hace que ambas columnas midan el alto de la más alta de las dos. */}
         <div className="grid sm:grid-cols-[1fr_auto_1fr] items-stretch">
           {/* Misión */}
           <FlipCard
@@ -321,16 +293,14 @@ export default function MissionVision() {
             hint={misionHint}
             tone="light"
             front={
-              <article className="relative bg-white rounded-[28px] sm:rounded-r-none p-6 sm:p-9 shadow-[0_10px_34px_-14px_rgba(0,51,102,0.22)] border border-slate-100 overflow-hidden h-full">
-                <PageCorner tone="light" />
+              <article className="relative bg-white rounded-[28px] sm:rounded-r-none p-6 sm:p-9 border border-slate-100 overflow-hidden h-full flex flex-col mv-card-light">
                 <span
                   aria-hidden="true"
                   className="absolute top-0 left-6 right-6 sm:right-auto sm:left-9 sm:w-16 h-[3px] rounded-full bg-gradient-to-r from-[#0077C8] to-[#4FB2F2]"
                 />
-                {/* Sello ICAP como base de la ficha, ladeado como un timbre */}
                 <SealWatermark
-                  src={icapEscudoCeleste}
-                  className="w-56 sm:w-72 -right-12 -bottom-16 opacity-[0.07] rotate-[9deg]"
+                  src={icapEscudoNavy}
+                  className="w-56 sm:w-72 -right-12 -bottom-16 opacity-[0.08] rotate-[9deg]"
                 />
 
                 <div className="relative flex flex-col h-full">
@@ -356,17 +326,15 @@ export default function MissionVision() {
 
                   <div className="space-y-2 sm:space-y-2.5">
                     {MISION_PILARES.map((item, i) => (
-                      <div
-                        key={i}
-                        className="flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 text-xs sm:text-sm leading-relaxed text-slate-600"
-                      >
-                        <span className="w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full bg-[#0077C8] text-white text-[9px] sm:text-[10px] font-bold font-mono-code flex items-center justify-center shrink-0 mt-0.5">
-                          {String(i + 1).padStart(2, '0')}
-                        </span>
-                        <span>{item}</span>
-                      </div>
+                      <NumberTile key={i} tone="light" index={i}>
+                        {item}
+                      </NumberTile>
                     ))}
                   </div>
+
+                  {/* Empuja el botón hasta abajo cuando esta ficha queda
+                      más baja que su pareja (Visión) y el grid la estira. */}
+                  <div className="flex-1" />
 
                   <div className="mt-6 pt-1">
                     <FlipButton
@@ -380,10 +348,10 @@ export default function MissionVision() {
               </article>
             }
             back={
-              <article className="relative bg-white rounded-[28px] sm:rounded-r-none p-6 sm:p-9 shadow-[0_10px_34px_-14px_rgba(0,51,102,0.22)] border border-slate-100 overflow-hidden h-full flex flex-col">
+              <article className="relative bg-white rounded-[28px] sm:rounded-r-none p-6 sm:p-9 border border-slate-100 overflow-hidden h-full flex flex-col mv-card-light">
                 <SealWatermark
-                  src={icapEscudoCeleste}
-                  className="w-52 sm:w-64 -left-12 -top-14 opacity-[0.06] -rotate-[11deg]"
+                  src={icapEscudoNavy}
+                  className="w-52 sm:w-64 -left-12 -top-14 opacity-[0.07] -rotate-[11deg]"
                 />
 
                 <div className="relative flex flex-col h-full">
@@ -396,15 +364,9 @@ export default function MissionVision() {
 
                   <div className="space-y-2 sm:space-y-2.5 flex-1">
                     {MISION_REVERSO.map((item, i) => (
-                      <div
-                        key={i}
-                        className="flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 text-xs sm:text-sm leading-relaxed text-slate-600"
-                      >
-                        <span className="w-8 h-8 rounded-xl bg-[#EAF3FB] text-[#0077C8] flex items-center justify-center shrink-0">
-                          <item.icon className="w-4 h-4" />
-                        </span>
-                        <span className="pt-1">{item.text}</span>
-                      </div>
+                      <IconTile key={i} tone="light" icon={item.icon}>
+                        {item.text}
+                      </IconTile>
                     ))}
                   </div>
 
@@ -437,8 +399,7 @@ export default function MissionVision() {
             hint={visionHint}
             tone="dark"
             front={
-              <article className="relative bg-[#003366] text-white rounded-[28px] sm:rounded-l-none p-6 sm:p-9 shadow-[0_10px_34px_-14px_rgba(0,15,35,0.45)] border border-white/5 overflow-hidden h-full">
-                <PageCorner tone="dark" />
+              <article className="relative bg-[#003366] text-white rounded-[28px] sm:rounded-l-none p-6 sm:p-9 border border-white/5 overflow-hidden h-full flex flex-col mv-card-dark">
                 <span
                   aria-hidden="true"
                   className="absolute top-0 left-6 right-6 sm:left-auto sm:right-9 sm:w-16 h-[3px] rounded-full bg-gradient-to-r from-[#4FB2F2] to-[#0077C8]"
@@ -471,17 +432,13 @@ export default function MissionVision() {
 
                   <div className="space-y-2 sm:space-y-2.5">
                     {VISION_PILARES.map((item, i) => (
-                      <div
-                        key={i}
-                        className="flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-white/[0.06] border border-white/5 text-xs sm:text-sm leading-relaxed text-[#C9D9E8]"
-                      >
-                        <span className="w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full bg-white/15 text-[#4FB2F2] text-[9px] sm:text-[10px] font-bold font-mono-code flex items-center justify-center shrink-0 mt-0.5 border border-white/10">
-                          {String(i + 1).padStart(2, '0')}
-                        </span>
-                        <span>{item}</span>
-                      </div>
+                      <NumberTile key={i} tone="dark" index={i}>
+                        {item}
+                      </NumberTile>
                     ))}
                   </div>
+
+                  <div className="flex-1" />
 
                   <div className="mt-6 pt-1">
                     <FlipButton
@@ -495,7 +452,7 @@ export default function MissionVision() {
               </article>
             }
             back={
-              <article className="relative bg-[#003366] text-white rounded-[28px] sm:rounded-l-none p-6 sm:p-9 shadow-[0_10px_34px_-14px_rgba(0,15,35,0.45)] border border-white/5 overflow-hidden h-full flex flex-col">
+              <article className="relative bg-[#003366] text-white rounded-[28px] sm:rounded-l-none p-6 sm:p-9 border border-white/5 overflow-hidden h-full flex flex-col mv-card-dark">
                 <SealWatermark
                   src={icapEscudoWhite}
                   className="w-52 sm:w-64 -right-12 -top-14 opacity-[0.07] rotate-[11deg]"
@@ -511,15 +468,9 @@ export default function MissionVision() {
 
                   <div className="space-y-2 sm:space-y-2.5 flex-1">
                     {VISION_REVERSO.map((item, i) => (
-                      <div
-                        key={i}
-                        className="flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-white/[0.06] border border-white/5 text-xs sm:text-sm leading-relaxed text-[#C9D9E8]"
-                      >
-                        <span className="w-8 h-8 rounded-xl bg-white/10 text-[#4FB2F2] flex items-center justify-center shrink-0 border border-white/10">
-                          <item.icon className="w-4 h-4" />
-                        </span>
-                        <span className="pt-1">{item.text}</span>
-                      </div>
+                      <IconTile key={i} tone="dark" icon={item.icon}>
+                        {item.text}
+                      </IconTile>
                     ))}
                   </div>
 
