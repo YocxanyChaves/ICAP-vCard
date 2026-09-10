@@ -68,6 +68,7 @@ export default function VCardDownload({
   contact = defaultContact,
   className = '',
   variant = 'primary',
+  style,
   children
 }) {
   const handleDownload = (e) => {
@@ -79,6 +80,7 @@ export default function VCardDownload({
     return (
       <button
         onClick={handleDownload}
+        style={style}
         className={`flex items-center gap-3 h-14 rounded-full px-5 font-semibold text-sm transition-all duration-200 active:scale-[0.98] ${className}`}
       >
         {children || (
@@ -95,6 +97,7 @@ export default function VCardDownload({
   return (
     <button
       onClick={handleDownload}
+      style={style}
       className={`flex items-center justify-center gap-2 h-12 rounded-xl font-heading font-bold text-sm tracking-wide transition-all duration-200 shadow-md active:scale-[0.98] ${
         className || 'w-full bg-[#0077C8] hover:bg-[#005A96] text-white'
       }`}

@@ -361,3 +361,56 @@ h1, h2, h3, h4, h5, h6 {
     0 20px 36px -12px rgba(0, 8, 20, 0.48),
     0 48px 76px -30px rgba(0, 8, 20, 0.6);
 }
+
+/* Fichas celeste de Áreas de Especialización: la "ilusión 3D" viene
+   toda de acá, sin ningún transform real — un realce blanco bien
+   marcado arriba (inset), como si la luz pegara fuerte en el borde
+   superior de una superficie curva/pulida; un bisel angosto a los
+   lados (claro a la izquierda, oscuro a la derecha) que refuerza esa
+   curvatura; una sombra oscura amplia abajo (inset) que hunde la
+   parte baja de la tarjeta; y una sombra exterior grande, teñida del
+   mismo celeste, para que se note bien despegada de la página. El
+   hover sigue chill: sólo un levantado chiquito (3px) y la sombra se
+   agranda un poco más — nada de escalas, rotaciones ni saltos. */
+.area-card {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 1px 2px rgba(1, 20, 42, 0.12),
+    0 10px 18px -10px rgba(1, 20, 42, 0.3),
+    0 22px 34px -20px rgba(1, 20, 42, 0.34);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.area-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 2px 4px rgba(1, 20, 42, 0.14),
+    0 16px 24px -12px rgba(1, 20, 42, 0.34),
+    0 32px 46px -22px rgba(1, 20, 42, 0.4);
+}
+
+/* Entrada al hacer scroll: cada tarjeta llega deslizándose desde SU
+   lado de la pantalla (la de la columna izquierda entra desde la
+   izquierda, la de la derecha desde la derecha — en móvil, con una
+   sola columna, igual alternan y queda como un zigzag sutil). Es un
+   wrapper aparte alrededor de <article className="area-card">, no el
+   mismo elemento: así este translateX de entrada nunca compite por la
+   propiedad `transform` con el translateY(-4px) del hover de arriba
+   (misma especificidad + mismo elemento habría hecho que uno pisara al
+   otro). body ya tiene overflow-x: hidden, así que el desplazamiento
+   inicial (fuera de pantalla) nunca genera scroll horizontal. */
+.area-card-reveal {
+  opacity: 0;
+  transform: translateX(-48px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.area-card-reveal-right {
+  transform: translateX(48px);
+}
+
+.area-card-reveal.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
