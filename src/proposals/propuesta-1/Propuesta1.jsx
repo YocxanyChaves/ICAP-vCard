@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Hero from './Hero';
+import SectionsStrip from './SectionsStrip';
 import MissionVision from './MissionVision';
 import ValuesWheel from './ValuesWheel';
 import StatsSection from './StatsSection';
@@ -15,27 +16,11 @@ import {
   History,
   Building2,
   ExternalLink,
-  Home,
-  Compass,
-  Sparkles,
-  LayoutGrid,
-  MapPinned,
-  Phone,
   Smartphone,
-  Monitor,
-  Users
+  Monitor
 } from 'lucide-react';
 import { defaultContact } from '../../components/VCardDownload';
-
-const PAGES = [
-  { id: 'inicio', label: 'Inicio', icon: Home },
-  { id: 'mision', label: 'Misión', icon: Compass },
-  { id: 'valores', label: 'Valores', icon: Sparkles },
-  { id: 'autoridades', label: 'Autoridades', icon: Users },
-  { id: 'areas', label: 'Áreas', icon: LayoutGrid },
-  { id: 'presencia', label: 'Presencia', icon: MapPinned },
-  { id: 'contacto', label: 'Contacto', icon: Phone }
-];
+import { PAGES } from './navigation';
 
 export default function Propuesta1({
   contact = defaultContact,
@@ -111,6 +96,7 @@ export default function Propuesta1({
               onOpenAbout={() => setAboutModalOpen(true)}
               onScrollToContact={() => goToPage('contacto')}
             />
+            <SectionsStrip onNavigate={goToPage} />
             <StatsSection />
             <AlliesMarquee />
           </>

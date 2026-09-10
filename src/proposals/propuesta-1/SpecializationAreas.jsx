@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Scale, HeartPulse, BarChart3, Leaf, Lightbulb, GraduationCap, CheckCircle2 } from 'lucide-react';
+import { Scale, HeartPulse, BarChart3, Leaf, Lightbulb, CheckCircle2 } from 'lucide-react';
 
 // Antes esta sección abría el detalle de cada área en un modal/bottom
 // sheet aparte (había que tocar la tarjeta para leer la descripción y
@@ -66,18 +66,6 @@ const AREAS = [
       'Transformación digital del gobierno y servicios ciudadanos.',
       'Laboratorios de innovación y co-creación pública.',
       'Cultura organizacional ágil y liderazgo adaptativo.'
-    ]
-  },
-  {
-    id: 'formacion',
-    title: 'Formación institucional',
-    tag: 'Posgrados, maestrías y desarrollo del talento humano',
-    longDesc: 'Oferta académica de posgrado (maestrías y doctorados) y programas de formación a la medida para cuadros directivos y técnicos del sector público.',
-    icon: GraduationCap,
-    points: [
-      'Maestrías y doctorados especializados en administración pública.',
-      'Cursos y diplomados ejecutivos virtuales y presenciales.',
-      'Planes de carrera y competencias para el servidor público.'
     ]
   }
 ];
@@ -154,7 +142,7 @@ export default function SpecializationAreas() {
             Áreas de Especialización
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1.5 max-w-md mx-auto sm:mx-0">
-            Los seis frentes donde el ICAP acompaña a gobiernos e instituciones de la región.
+            Los cinco frentes donde el ICAP acompaña a gobiernos e instituciones de la región.
           </p>
         </div>
 
@@ -164,6 +152,12 @@ export default function SpecializationAreas() {
           {AREAS.map((area, idx) => {
             const Icon = area.icon;
             const fromRight = idx % 2 === 1;
+            // Con un número impar de áreas, la última queda sola en su
+            // propia fila — en vez de dejarla pegada a la izquierda
+            // (como si le faltara la pareja), esa fila ocupa las dos
+            // columnas y la tarjeta se centra adentro, del mismo ancho
+            // que una tarjeta normal.
+            const isLastOdd = idx === AREAS.length - 1 && AREAS.length % 2 === 1;
             return (
               <div
                 key={area.id}
@@ -173,11 +167,13 @@ export default function SpecializationAreas() {
                 data-area-id={area.id}
                 className={`h-full area-card-reveal ${fromRight ? 'area-card-reveal-right' : ''} ${
                   visibleIds.has(area.id) ? 'is-visible' : ''
-                }`}
+                } ${isLastOdd ? 'lg:col-span-2 lg:flex lg:justify-center' : ''}`}
                 style={{ transitionDelay: fromRight ? '120ms' : '0ms' }}
               >
               <article
-                className="area-card group relative rounded-[28px] p-6 sm:p-7 overflow-hidden flex flex-col text-white h-full"
+                className={`area-card group relative rounded-[28px] p-6 sm:p-7 overflow-hidden flex flex-col text-white h-full ${
+                  isLastOdd ? 'lg:w-full lg:max-w-[calc((100%-1.25rem)/2)]' : ''
+                }`}
                 style={{ background: CARD_BACKGROUND }}
               >
                 {/* Hairline superior, apenas insinuada — el toque de

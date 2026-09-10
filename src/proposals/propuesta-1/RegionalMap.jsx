@@ -390,6 +390,15 @@ export default function RegionalMap() {
   const [selectedCountry, setSelectedCountry] = useState('CR');
   const [showDetailSheet, setShowDetailSheet] = useState(false);
   const sectionRef = useRef(null);
+  // La ficha del país (columna derecha) debe verse SIEMPRE del mismo
+  // tamaño que el mapa (columna izquierda), sin importar cuánto texto
+  // tenga el país elegido — si no cabe, que scrollee adentro de su
+  // propio marco en vez de estirar la tarjeta y romper el orden visual
+  // de las dos columnas. Como el mapa no tiene una altura fija (depende
+  // del ancho responsivo del SVG), se mide su alto real con
+  // ResizeObserver y ese valor es el que se le impone a la ficha.
+  const mapPanelRef = useRef(null);
+  const [mapHeight, setMapHeight] = useState(null);
   // Empieza en `false` (celular) y se corrige apenas monta: así, si por lo
   // que sea nunca llega a medir el ancho real (entorno raro / sin DOM),
   // el país seleccionado igual se ve en la hoja inferior en vez de quedar
@@ -420,6 +429,23 @@ export default function RegionalMap() {
     const view = doc.defaultView;
     view?.addEventListener('resize', checkWidth);
     return () => view?.removeEventListener('resize', checkWidth);
+  }, []);
+
+  // Vuelve a medir el alto real del mapa (offsetHeight, con todo y
+  // padding/borde) cada vez que cambia — por el resize de la ventana o
+  // porque el SVG responsivo cambió de tamaño al cruzar un breakpoint.
+  // `offsetHeight` en vez del `contentRect` del observer porque este
+  // último NO incluye el padding/borde del panel, y necesitamos el alto
+  // "de verdad" para que la ficha calce exacto.
+  useEffect(() => {
+    const el = mapPanelRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return undefined;
+
+    const ro = new ResizeObserver(() => {
+      setMapHeight(el.offsetHeight);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
   const current = COUNTRIES.find((c) => c.id === selectedCountry) || COUNTRIES[0];
@@ -480,7 +506,10 @@ export default function RegionalMap() {
         {/* Map & Desktop Detail Card Container */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
           {/* Institutional Dark Geographic Map Canvas */}
-          <div className="lg:col-span-7 bg-[#001F3D]/90 backdrop-blur-md border border-white/15 rounded-3xl p-4 sm:p-7 flex flex-col justify-between shadow-2xl relative overflow-hidden min-h-[420px] sm:min-h-[520px] lg:sticky lg:top-4">
+          <div
+            ref={mapPanelRef}
+            className="lg:col-span-7 bg-[#001F3D]/90 backdrop-blur-md border border-white/15 rounded-3xl p-4 sm:p-7 flex flex-col justify-between shadow-2xl relative overflow-hidden min-h-[420px] sm:min-h-[520px] lg:sticky lg:top-4"
+          >
             {/* Ocean & Ambient Text Markers */}
             <div className="absolute top-4 right-6 text-right select-none pointer-events-none z-0">
               <h3 className="font-heading font-extrabold text-lg sm:text-xl text-white/90 tracking-wide">
@@ -700,7 +729,10 @@ export default function RegionalMap() {
           </div>
 
           {/* Country Detail Card (Desktop Sidebar) */}
-          <div className="lg:col-span-5 hidden lg:flex flex-col bg-[#003366] border border-white/15 rounded-3xl p-6 sm:p-7 shadow-xl max-h-[calc(100vh-8rem)] overflow-y-auto">
+          <div
+            className="lg:col-span-5 hidden lg:flex flex-col bg-[#003366] border border-white/15 rounded-3xl p-6 sm:p-7 shadow-xl max-h-[calc(100vh-8rem)] overflow-y-auto"
+            style={mapHeight ? { height: mapHeight, maxHeight: mapHeight } : undefined}
+          >
             {/* Country Header */}
             <div className="flex items-center gap-3.5 mb-4">
               <FlagIcon countryCode={current.id} className="w-10 h-7 shadow-md" />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, ArrowRight, Sparkles } from 'lucide-react';
+import { ChevronDown, ArrowRight } from 'lucide-react';
 import icapLogoMark from '../../assets/icap-logo-mark.png';
 
 // Puntos flotantes decorativos del fondo del Hero. Posiciones y tiempos
