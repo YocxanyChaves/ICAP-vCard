@@ -1,5 +1,6 @@
 import React from 'react';
 import { UserPlus, Download } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 /**
  * Default contact data for ICAP
@@ -10,12 +11,12 @@ export const defaultContact = {
   fullName: 'Nombre del Contacto',
   title: 'Cargo Institucional',
   org: 'Instituto Centroamericano de Administración Pública (ICAP)',
-  phone: '+506 2234-8400',
-  cellPhone: '+506 8888-8888',
+  phone: '+(506) 4001-2985',
+  cellPhone: '+(506) 4001-2985',
   email: 'contacto@icap.ac.cr',
   url: 'https://icap.ac.cr',
   linkedin: 'https://linkedin.com/company/icap-sica',
-  address: 'San Pedro, Montes de Oca, San José, Costa Rica',
+  address: '100 metros sur y 75 metros oeste de la heladería Pops, Curridabat, San José, Costa Rica.',
   notes: 'Organismo internacional del Sistema de la Integración Centroamericana (SICA) especializado en administración pública.',
   // Marca este contacto como dato de ejemplo. Ponelo en false (o quitá el campo)
   // en cuanto cargues los datos reales de la persona de contacto.
@@ -24,7 +25,7 @@ export const defaultContact = {
 
 /**
  * Deja solo los dígitos de un teléfono, listo para armar un link wa.me
- * (ej. "+506 8888-8888" -> "50688888888"). Si no hay número, devuelve ''.
+ * (ej. "+(506) 4001-2985" -> "5064012985"). Si no hay número, devuelve ''.
  */
 export function whatsappDigits(phone) {
   return (phone || '').replace(/\D/g, '');
@@ -71,9 +72,27 @@ export default function VCardDownload({
   style,
   children
 }) {
+  const { t } = useLanguage();
+
   const handleDownload = (e) => {
     e.preventDefault();
-    downloadVCard(contact);
+    // El objeto `defaultContact` es un dato plano de ejemplo (no un
+    // componente), así que no puede leer el idioma activo por sí
+    // mismo — si es un contacto de ejemplo, se le superponen los
+    // campos traducidos justo antes de generar el .vcf, sin tocar los
+    // datos reales de contacto (teléfono, correo, etc.) que sí son
+    // los mismos en cualquier idioma.
+    const dataToDownload = contact.isSample
+      ? {
+          ...contact,
+          firstName: t.vcard.firstName,
+          lastName: t.vcard.lastName,
+          fullName: t.vcard.fullName,
+          title: t.vcard.title,
+          notes: t.vcard.notes
+        }
+      : contact;
+    downloadVCard(dataToDownload);
   };
 
   if (variant === 'pill') {
@@ -86,7 +105,7 @@ export default function VCardDownload({
         {children || (
           <>
             <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded bg-black/10">VCF</span>
-            <span className="flex-1 text-left">Guardar contacto</span>
+            <span className="flex-1 text-left">{t.vcard.pillLabel}</span>
             <Download className="w-4 h-4 opacity-70" />
           </>
         )}
@@ -105,7 +124,7 @@ export default function VCardDownload({
       {children || (
         <>
           <UserPlus className="w-4 h-4" />
-          <span>GUARDAR CONTACTO</span>
+          <span>{t.vcard.primaryLabel}</span>
         </>
       )}
     </button>

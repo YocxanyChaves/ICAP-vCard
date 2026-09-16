@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import BottomSheet from '../../components/BottomSheet';
 import { getAreaMeta } from './areaMeta';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 /**
  * High-quality SVG Flag Components for all 10 countries
@@ -270,12 +271,18 @@ const COUNTRIES = [
  * wherever it's viewed.
  */
 function CountryDetailBody({ country, tone = 'dark' }) {
+  const { t } = useLanguage();
   const isDark = tone === 'dark';
-  const mutedText = isDark ? 'text-[#C9D9E8]' : 'text-slate-600';
-  const labelText = isDark ? 'text-[#9FC6E8]' : 'text-slate-400';
-  const cardBg = isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100';
-  const chipBg = isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100';
-  const headingText = isDark ? 'text-white' : 'text-[#003366]';
+  // El tono "light" es el que usa el modal móvil (BottomSheet) — como
+  // ese modal ahora también tiene su propia variante oscura (ver
+  // BottomSheet.jsx), estos colores "light" llevan además su `dark:`
+  // para no quedar con texto oscuro sobre fondo oscuro cuando el sitio
+  // está en modo oscuro.
+  const mutedText = isDark ? 'text-[#C9D9E8]' : 'text-slate-600 dark:text-[#C9D9E8]';
+  const labelText = isDark ? 'text-[#9FC6E8]' : 'text-slate-400 dark:text-[#9FC6E8]';
+  const cardBg = isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100 dark:bg-white/5 dark:border-white/10';
+  const chipBg = isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100 dark:bg-white/5 dark:border-white/10';
+  const headingText = isDark ? 'text-white' : 'text-[#003366] dark:text-white';
 
   return (
     <div className="space-y-5">
@@ -287,7 +294,7 @@ function CountryDetailBody({ country, tone = 'dark' }) {
       {/* Institutional Focus */}
       <div className={`p-4 rounded-2xl border space-y-1.5 ${cardBg}`}>
         <span className={`text-[10px] font-mono-code uppercase font-bold tracking-wider block ${labelText}`}>
-          Enfoque Institucional
+          {t.regionalMap.institutionalFocusLabel}
         </span>
         <div className={`flex items-center gap-2 text-xs font-semibold ${headingText}`}>
           <CheckCircle2 className="w-4 h-4 text-[#0077C8] shrink-0" />
@@ -299,16 +306,16 @@ function CountryDetailBody({ country, tone = 'dark' }) {
       <div>
         <div className="flex items-center gap-2 mb-2">
           <span className={`text-[10px] font-mono-code uppercase font-bold tracking-wider ${labelText}`}>
-            Cantidad de Proyectos
+            {t.regionalMap.projectCountLabel}
           </span>
           <span className={`text-[8px] font-mono-code font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${isDark ? 'bg-white/10 text-[#9FC6E8]' : 'bg-[#EAF3FB] text-[#003366]'}`}>
-            {country.projectCount === null ? 'Pendiente de confirmar' : 'Documentado en el brochure'}
+            {country.projectCount === null ? t.regionalMap.pendingConfirm : t.regionalMap.documented}
           </span>
         </div>
         <div className={`flex items-center gap-3 p-3.5 rounded-xl border ${chipBg}`}>
           <BarChart3 className="w-5 h-5 text-[#0077C8] shrink-0" />
           <div className={`font-heading font-extrabold leading-none ${isDark ? 'text-[#0077C8]' : 'text-[#003366]'} ${country.projectCount === null ? 'text-lg' : 'text-2xl'}`}>
-            {country.projectCount === null ? 'Cant.' : country.projectCount}
+            {country.projectCount === null ? t.regionalMap.qtyAbbrev : country.projectCount}
           </div>
           {country.dataNote && (
             <span
@@ -322,7 +329,7 @@ function CountryDetailBody({ country, tone = 'dark' }) {
       {/* Project Areas */}
       <div>
         <span className={`text-[10px] font-mono-code uppercase font-bold tracking-wider block mb-2 ${labelText}`}>
-          Áreas de Proyecto
+          {t.regionalMap.projectAreasLabel}
         </span>
         {country.projectAreas.length > 0 ? (
           <div className="flex flex-wrap gap-1.5">
@@ -336,20 +343,20 @@ function CountryDetailBody({ country, tone = 'dark' }) {
                   style={{ backgroundColor: meta.color, color: meta.text }}
                 >
                   <AreaIcon className="w-3.5 h-3.5 shrink-0" style={{ color: meta.text }} />
-                  {a}
+                  {t.areaLabels[a] || a}
                 </span>
               );
             })}
           </div>
         ) : (
-          <p className={`text-xs italic ${mutedText}`}>Sin registro de área en el brochure de referencia.</p>
+          <p className={`text-xs italic ${mutedText}`}>{t.regionalMap.noAreaRecord}</p>
         )}
       </div>
 
       {/* Partner Organizations */}
       <div>
         <span className={`text-[10px] font-mono-code uppercase font-bold tracking-wider block mb-2 ${labelText}`}>
-          Organizaciones y Contrapartes
+          {t.regionalMap.orgsLabel}
         </span>
         {country.organizations.length > 0 ? (
           <div className="space-y-1.5">
@@ -364,7 +371,7 @@ function CountryDetailBody({ country, tone = 'dark' }) {
             ))}
           </div>
         ) : (
-          <p className={`text-xs italic ${mutedText}`}>Sin registro de contraparte en el brochure de referencia.</p>
+          <p className={`text-xs italic ${mutedText}`}>{t.regionalMap.noOrgRecord}</p>
         )}
       </div>
 
@@ -375,7 +382,7 @@ function CountryDetailBody({ country, tone = 'dark' }) {
         </div>
         <div className="min-w-0">
           <span className={`text-[9px] font-mono-code uppercase font-bold tracking-wider block ${labelText}`}>
-            Contacto de oficina &middot; ejemplo
+            {t.regionalMap.officeContactLabel}
           </span>
           <span className={`text-xs font-semibold truncate block ${isDark ? 'text-white' : 'text-[#003366]'}`}>
             {country.officeEmail}
@@ -387,6 +394,7 @@ function CountryDetailBody({ country, tone = 'dark' }) {
 }
 
 export default function RegionalMap() {
+  const { t } = useLanguage();
   const [selectedCountry, setSelectedCountry] = useState('CR');
   const [showDetailSheet, setShowDetailSheet] = useState(false);
   const sectionRef = useRef(null);
@@ -448,7 +456,12 @@ export default function RegionalMap() {
     return () => ro.disconnect();
   }, []);
 
-  const current = COUNTRIES.find((c) => c.id === selectedCountry) || COUNTRIES[0];
+  // Mismos datos (id, projectCount, projectAreas/organizations por
+  // defecto, coordenadas del SVG del mapa) con nombre/estatus/
+  // descripción/etc. traducidos según el idioma activo, tomados de
+  // translations.js por id.
+  const countriesT = COUNTRIES.map((c) => ({ ...c, ...t.regionalMap.countries[c.id] }));
+  const current = countriesT.find((c) => c.id === selectedCountry) || countriesT[0];
 
   const handleSelectCountry = (id) => {
     setSelectedCountry(id);
@@ -491,15 +504,15 @@ export default function RegionalMap() {
 
       <div className="max-w-5xl mx-auto relative z-10">
         {/* Section Header */}
-        <div className="mb-6 sm:mb-8 text-center sm:text-left">
+        <div className="mb-6 sm:mb-8 text-center">
           <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
-            Alcance y Territorio
+            {t.regionalMap.kicker}
           </span>
           <h2 className="font-heading font-extrabold text-2xl sm:text-4xl text-white tracking-tight">
-            Presencia Regional
+            {t.regionalMap.title}
           </h2>
-          <p className="text-xs sm:text-sm text-[#9FC6E8] mt-1.5 max-w-xl leading-relaxed">
-            Mapa geográfico a escala real, del istmo centroamericano hasta México, el Caribe y Colombia, con sedes, oficinas nacionales y cobertura del ICAP.
+          <p className="text-xs sm:text-sm text-[#9FC6E8] mt-1.5 max-w-xl mx-auto leading-relaxed">
+            {t.regionalMap.subtitle}
           </p>
         </div>
 
@@ -513,16 +526,16 @@ export default function RegionalMap() {
             {/* Ocean & Ambient Text Markers */}
             <div className="absolute top-4 right-6 text-right select-none pointer-events-none z-0">
               <h3 className="font-heading font-extrabold text-lg sm:text-xl text-white/90 tracking-wide">
-                Cobertura ICAP
+                {t.regionalMap.mapTitle}
               </h3>
               <span className="text-[10px] sm:text-xs text-[#9FC6E8]/40 font-mono-code uppercase tracking-widest block mt-3">
-                Mar Caribe
+                {t.regionalMap.caribbeanSea}
               </span>
             </div>
 
             <div className="absolute top-16 left-6 text-left select-none pointer-events-none z-0">
               <span className="text-[10px] sm:text-xs text-[#9FC6E8]/40 font-mono-code uppercase tracking-widest">
-                Océano Pacífico
+                {t.regionalMap.pacificOcean}
               </span>
             </div>
 
@@ -555,7 +568,7 @@ export default function RegionalMap() {
                     className="hover:fill-[#2D6798] transition-all"
                   />
                   <text x="280" y="195" fill={getTextColor('MX')} fontSize="20" fontWeight="800" fontFamily="Raleway, sans-serif" textAnchor="middle" className="pointer-events-none">
-                    MÉXICO
+                    {t.regionalMap.mapLabels.MX}
                   </text>
                 </g>
 
@@ -572,7 +585,7 @@ export default function RegionalMap() {
                     className="hover:fill-[#2D6798] transition-all"
                   />
                   <text x="470" y="330" fill={getTextColor('GT')} fontSize="11" fontWeight="800" fontFamily="Raleway, sans-serif" textAnchor="middle" className="pointer-events-none">
-                    GT
+                    {t.regionalMap.mapLabels.GT}
                   </text>
                 </g>
 
@@ -589,7 +602,7 @@ export default function RegionalMap() {
                     className="hover:fill-[#2D6798] transition-all"
                   />
                   <text x="505" y="272" fill={getTextColor('BZ')} fontSize="10" fontWeight="800" fontFamily="Raleway, sans-serif" textAnchor="middle" className="pointer-events-none">
-                    BZ
+                    {t.regionalMap.mapLabels.BZ}
                   </text>
                 </g>
 
@@ -606,7 +619,7 @@ export default function RegionalMap() {
                     className="hover:fill-[#2D6798] transition-all"
                   />
                   <text x="487" y="383" fill={getTextColor('SV')} fontSize="10" fontWeight="800" fontFamily="Raleway, sans-serif" textAnchor="middle" className="pointer-events-none">
-                    SV
+                    {t.regionalMap.mapLabels.SV}
                   </text>
                 </g>
 
@@ -623,7 +636,7 @@ export default function RegionalMap() {
                     className="hover:fill-[#2D6798] transition-all"
                   />
                   <text x="560" y="330" fill={getTextColor('HN')} fontSize="11" fontWeight="800" fontFamily="Raleway, sans-serif" textAnchor="middle" className="pointer-events-none">
-                    HN
+                    {t.regionalMap.mapLabels.HN}
                   </text>
                 </g>
 
@@ -640,7 +653,7 @@ export default function RegionalMap() {
                     className="hover:fill-[#2D6798] transition-all"
                   />
                   <text x="562" y="393" fill={getTextColor('NI')} fontSize="11" fontWeight="800" fontFamily="Raleway, sans-serif" textAnchor="middle" className="pointer-events-none">
-                    NI
+                    {t.regionalMap.mapLabels.NI}
                   </text>
                 </g>
 
@@ -659,7 +672,7 @@ export default function RegionalMap() {
                   <circle cx="579.1" cy="423.7" r="4.5" fill="#003366" stroke="#FFFFFF" strokeWidth="2" />
                   <circle cx="579.1" cy="423.7" r="4.5" stroke="#0077C8" strokeWidth="2" fill="none" className="animate-svg-ping" />
                   <text x="579" y="442" fill={getTextColor('CR')} fontSize="11" fontWeight="800" fontFamily="Raleway, sans-serif" textAnchor="middle" className="pointer-events-none">
-                    CR
+                    {t.regionalMap.mapLabels.CR}
                   </text>
                 </g>
 
@@ -676,7 +689,7 @@ export default function RegionalMap() {
                     className="hover:fill-[#2D6798] transition-all"
                   />
                   <text x="645" y="465" fill={getTextColor('PA')} fontSize="13" fontWeight="800" fontFamily="Raleway, sans-serif" textAnchor="middle" className="pointer-events-none">
-                    PANAMÁ
+                    {t.regionalMap.mapLabels.PA}
                   </text>
                 </g>
 
@@ -693,7 +706,7 @@ export default function RegionalMap() {
                     className="hover:fill-[#2D6798] transition-all"
                   />
                   <text x="807" y="250" fill={getTextColor('DO')} fontSize="11" fontWeight="800" fontFamily="Raleway, sans-serif" textAnchor="middle" className="pointer-events-none">
-                    REP. DOMINICANA
+                    {t.regionalMap.mapLabels.DO}
                   </text>
                 </g>
 
@@ -710,7 +723,7 @@ export default function RegionalMap() {
                     className="hover:fill-[#2D6798] transition-all"
                   />
                   <text x="768" y="528" fill={getTextColor('CO')} fontSize="18" fontWeight="800" fontFamily="Raleway, sans-serif" textAnchor="middle" className="pointer-events-none">
-                    COLOMBIA
+                    {t.regionalMap.mapLabels.CO}
                   </text>
                 </g>
               </svg>
@@ -720,10 +733,10 @@ export default function RegionalMap() {
             <div className="flex items-center justify-between pt-2 border-t border-white/10 text-[11px] text-[#9FC6E8] z-10">
               <span className="flex items-center gap-1.5 font-medium">
                 <Navigation className="w-3.5 h-3.5 text-[#0077C8]" />
-                Toca cualquier país en el mapa para seleccionarlo
+                {t.regionalMap.mapHint}
               </span>
               <span className="font-mono-code text-[10px] text-[#9FC6E8]/70 hidden sm:inline">
-                SICA &middot; ICAP 1954
+                {t.regionalMap.mapFooterTag}
               </span>
             </div>
           </div>
@@ -754,7 +767,7 @@ export default function RegionalMap() {
             <CountryDetailBody country={current} tone="dark" />
 
             <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-[#9FC6E8] shrink-0">
-              <span>Presencia y Cooperación ICAP</span>
+              <span>{t.regionalMap.sidebarFooterLabel}</span>
               <span className="font-mono-code font-bold text-white">{current.id}</span>
             </div>
           </div>
@@ -764,15 +777,15 @@ export default function RegionalMap() {
         <div className="mt-6 sm:mt-8">
           <div className="flex items-center justify-between mb-3.5">
             <span className="text-xs font-bold tracking-wider uppercase text-slate-300 font-mono-code">
-              Listado Oficial de Países (10)
+              {t.regionalMap.countryListLabel}
             </span>
             <span className="text-[11px] text-[#9FC6E8] hidden sm:block">
-              Los 10 países se ubican en el mapa a escala real
+              {t.regionalMap.countryListHint}
             </span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-            {COUNTRIES.map((c) => {
+            {countriesT.map((c) => {
               const isSelected = selectedCountry === c.id;
               return (
                 <button
@@ -818,7 +831,7 @@ export default function RegionalMap() {
           onClick={() => setShowDetailSheet(false)}
           className="mt-5 w-full py-3.5 rounded-2xl bg-[#003366] hover:bg-[#001F3D] text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors shadow-md cursor-pointer"
         >
-          Cerrar
+          {t.common.close}
         </button>
       </BottomSheet>
     </section>

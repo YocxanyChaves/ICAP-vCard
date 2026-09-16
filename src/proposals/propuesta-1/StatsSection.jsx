@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Briefcase, Building2, Globe2 } from 'lucide-react';
+import { useLanguage } from '../../i18n/LanguageContext';
+import { useTheme } from '../../theme/ThemeContext';
 
 /**
  * Cuenta de 0 hasta `value` con una curva ease-out (arranca rápido, frena
@@ -76,13 +78,13 @@ function MiniGrowthChart({ start, hex, duration }) {
   );
 }
 
-function StatCard({ icon: Icon, value, label, sublabel, color, hex, visible, start, duration, enterDelay }) {
+function StatCard({ icon: Icon, value, label, sublabel, color, hex, visible, start, duration, enterDelay, popTick }) {
   const { display, progress } = useCountUp(value, start, duration);
   const dashOffset = RING_CIRCUMFERENCE * (1 - progress);
 
   return (
     <div
-      className={`bg-slate-50 sm:bg-transparent rounded-2xl sm:rounded-none p-3 sm:p-4 flex flex-col items-center border border-slate-100/80 sm:border-0 transition-all duration-700 ease-out ${
+      className={`bg-slate-50 dark:bg-white/5 sm:bg-transparent dark:sm:bg-transparent rounded-2xl sm:rounded-none p-3 sm:p-4 flex flex-col items-center border border-slate-100/80 dark:border-white/10 sm:border-0 transition-all duration-700 ease-out ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
       }`}
       style={{ transitionDelay: visible ? `${enterDelay}ms` : '0ms' }}
@@ -90,7 +92,7 @@ function StatCard({ icon: Icon, value, label, sublabel, color, hex, visible, sta
       {/* Ícono con anillo de progreso: se llena en sincronía con el conteo */}
       <div className="relative w-10 h-10 mb-2">
         <svg className="absolute inset-0 -rotate-90" viewBox="0 0 40 40" aria-hidden="true">
-          <circle cx="20" cy="20" r={RING_RADIUS} fill="none" strokeWidth="3" className="stroke-slate-100" />
+          <circle cx="20" cy="20" r={RING_RADIUS} fill="none" strokeWidth="3" className="stroke-slate-100 dark:stroke-white/10" />
           <circle
             cx="20"
             cy="20"
@@ -103,21 +105,30 @@ function StatCard({ icon: Icon, value, label, sublabel, color, hex, visible, sta
             style={{ strokeDasharray: RING_CIRCUMFERENCE, strokeDashoffset: dashOffset }}
           />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center text-slate-400">
+        <div className="absolute inset-0 flex items-center justify-center text-slate-400 dark:text-slate-300">
           <Icon className="w-4 h-4" />
         </div>
       </div>
 
+      {/* La primera vez cuenta completo de 0 al total (el "pop" espera a
+          que termine el conteo). De ahí en adelante, en vez de repetir
+          todo el conteo cada vez que la sección vuelve a aparecer, el
+          número ya se muestra en su valor final y solo repite el
+          "boop" — se ve más limpio que reiniciar toda la animación. El
+          `key={popTick}` fuerza que el navegador vuelva a reproducir
+          esa animación en cada reaparición (cambiar solo la clase no
+          la reinicia si ya estaba puesta). */}
       <div
+        key={popTick}
         className={`font-heading font-extrabold text-3xl sm:text-5xl ${color} leading-none mb-1 tracking-tight tabular-nums ${
           start ? 'animate-stat-pop' : ''
         }`}
-        style={start ? { animationDelay: `${duration}ms` } : undefined}
+        style={start ? { animationDelay: popTick === 0 ? `${duration}ms` : '0ms' } : undefined}
       >
         {display}
       </div>
-      <div className="font-heading font-bold text-xs sm:text-sm text-slate-800 leading-tight">{label}</div>
-      <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5">{sublabel}</div>
+      <div className="font-heading font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 leading-tight">{label}</div>
+      <div className="text-[10px] sm:text-xs text-slate-400 dark:text-slate-400 mt-0.5">{sublabel}</div>
 
       {/* Mini gráfico de barras: crece apenas arranca la animación, como
           adelanto visual antes de que el número empiece a subir. */}
@@ -127,36 +138,43 @@ function StatCard({ icon: Icon, value, label, sublabel, color, hex, visible, sta
 }
 
 export default function StatsSection() {
+  const { t } = useLanguage();
+  const { theme } = useTheme();
+  // El anillo de progreso y el mini gráfico de barras se pintan con
+  // `hex` directo en un `style` inline (SVG stroke / backgroundColor),
+  // así que no reaccionan solos a las clases `dark:` de Tailwind — acá
+  // se elige a mano un celeste más claro para el navy (#003366), que en
+  // fondo oscuro casi no se distingue.
+  const navyHex = theme === 'dark' ? '#4FB2F2' : '#003366';
   const stats = [
     {
+      id: 'proyectos',
       value: 124,
-      label: 'Proyectos',
-      sublabel: 'ejecutados',
-      color: 'text-[#003366]',
-      hex: '#003366',
+      color: 'text-[#003366] dark:text-white',
+      hex: navyHex,
       icon: Briefcase
     },
     {
+      id: 'clientes',
       value: 47,
-      label: 'Clientes',
-      sublabel: 'institucionales',
       color: 'text-[#0077C8]',
       hex: '#0077C8',
       icon: Building2
     },
     {
+      id: 'paises',
       value: 18,
-      label: 'Países',
-      sublabel: 'atendidos',
-      color: 'text-[#003366]',
-      hex: '#003366',
+      color: 'text-[#003366] dark:text-white',
+      hex: navyHex,
       icon: Globe2
     }
   ];
 
   const sectionRef = useRef(null);
-  const [visible, setVisible] = useState(false); // aparece la tarjeta (fade + subida), al toque
-  const [started, setStarted] = useState(false); // arranca el conteo, con un respiro después
+  const [visible, setVisible] = useState(false); // aparece la tarjeta (fade + subida), cada vez
+  const [started, setStarted] = useState(false); // arranca el conteo — solo la primera vez, nunca se resetea
+  const [popTick, setPopTick] = useState(0); // de la segunda vez en adelante, solo repite el "boop" final
+  const hasCountedRef = useRef(false);
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -177,6 +195,7 @@ export default function StatsSection() {
       // números en 0 para siempre.
       setVisible(true);
       setStarted(true);
+      hasCountedRef.current = true;
       return undefined;
     }
 
@@ -185,11 +204,30 @@ export default function StatsSection() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setVisible(true);
-            // Medio segundo de respiro antes de arrancar el conteo: que
-            // la sección aparezca primero y el número no se sienta como
-            // que ya viene corriendo desde antes de verse.
-            delayId = setTimeout(() => setStarted(true), 500);
-            observer.disconnect();
+            if (!hasCountedRef.current) {
+              // Primera vez que se ve la sección: conteo completo de 0
+              // al total, con su medio segundo de respiro antes de
+              // arrancar, para que la sección aparezca primero y el
+              // número no se sienta como que ya viene corriendo desde
+              // antes de verse.
+              delayId = setTimeout(() => {
+                setStarted(true);
+                hasCountedRef.current = true;
+              }, 500);
+            } else {
+              // Ya contó una vez: no repite el conteo ni el llenado del
+              // anillo/gráfico, solo el "boop" final del número — se ve
+              // más limpio que reiniciar toda la animación cada vez que
+              // se vuelve a esta sección.
+              setPopTick((n) => n + 1);
+            }
+          } else {
+            // Sale de pantalla: la tarjeta se resetea (fade + subida) y
+            // vuelve a aparecer así cada vez, pero el conteo ya hecho
+            // no se toca — solo se repite su "boop", nunca todo el
+            // conteo de nuevo.
+            if (delayId) clearTimeout(delayId);
+            setVisible(false);
           }
         });
       },
@@ -204,16 +242,16 @@ export default function StatsSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="px-4 sm:px-6 py-10 sm:py-16 bg-white border-y border-slate-100">
+    <section ref={sectionRef} className="px-4 sm:px-6 py-10 sm:py-16 bg-white dark:bg-[#001428] border-y border-slate-100 dark:border-white/10">
       <div className="max-w-4xl mx-auto text-center">
         <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
-          Trayectoria e Impacto
+          {t.stats.kicker}
         </span>
-        <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] tracking-tight mb-2">
-          ICAP en Cifras
+        <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-white tracking-tight mb-2">
+          {t.stats.title}
         </h2>
-        <div className="inline-block px-2.5 py-0.5 rounded-md bg-[#EAF3FB] text-[#003366] text-[9px] sm:text-[10px] font-mono-code font-bold tracking-wider uppercase mb-8">
-          Cifras de ejemplo &middot; a confirmar
+        <div className="inline-block px-2.5 py-0.5 rounded-md bg-[#EAF3FB] dark:bg-white/10 text-[#003366] dark:text-[#9FC6E8] text-[9px] sm:text-[10px] font-mono-code font-bold tracking-wider uppercase mb-8">
+          {t.stats.badge}
         </div>
 
         {/* 3-Column Mobile & Desktop Grid */}
@@ -223,12 +261,13 @@ export default function StatsSection() {
               key={idx}
               icon={item.icon}
               value={item.value}
-              label={item.label}
-              sublabel={item.sublabel}
+              label={t.stats.items[item.id].label}
+              sublabel={t.stats.items[item.id].sublabel}
               color={item.color}
               hex={item.hex}
               visible={visible}
               start={started}
+              popTick={popTick}
               // Misma duración para las 3 tarjetas a propósito: así el
               // "pop" final de los 3 números (y sus anillos/gráficos,
               // que se derivan de esta misma duración) aterriza exacto

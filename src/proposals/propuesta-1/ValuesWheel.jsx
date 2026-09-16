@@ -1,44 +1,18 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Shield, Star, Users, Heart, Award, Sparkles } from 'lucide-react';
 import icapLogoMark from '../../assets/icap-logo-mark.png';
+import { useLanguage } from '../../i18n/LanguageContext';
 
+// El nombre y la descripción de cada valor viven en el diccionario de
+// traducciones (t.valuesWheel.items[id]) — acá sólo quedan el id y el
+// ícono, que no cambian según el idioma.
 const VALUES = [
-  {
-    id: 'integridad',
-    name: 'Integridad',
-    icon: Shield,
-    description: 'Actuamos con ética, honestidad y apego irrestricto a los principios del servicio público y la transparencia.'
-  },
-  {
-    id: 'excelencia',
-    name: 'Excelencia',
-    icon: Star,
-    description: 'Buscamos los más altos estándares de calidad técnica, rigor académico e innovación en cada proyecto regional.'
-  },
-  {
-    id: 'equipo',
-    name: 'Trabajo en equipo',
-    icon: Users,
-    description: 'Fomentamos la colaboración multidisciplinaria e interinstitucional para alcanzar metas regionales conjuntas.'
-  },
-  {
-    id: 'compromiso',
-    name: 'Compromiso',
-    icon: Heart,
-    description: 'Dedicación total con el desarrollo, bienestar e integración de los pueblos centroamericanos.'
-  },
-  {
-    id: 'respeto',
-    name: 'Respeto',
-    icon: Award,
-    description: 'Reconocemos y valoramos la diversidad cultural, institucional y humana de nuestra región.'
-  },
-  {
-    id: 'transparencia',
-    name: 'Transparencia',
-    icon: Sparkles,
-    description: 'Rendición de cuentas clara, acceso a la información y gestión abierta hacia la ciudadanía y socios.'
-  }
+  { id: 'integridad', icon: Shield },
+  { id: 'excelencia', icon: Star },
+  { id: 'equipo', icon: Users },
+  { id: 'compromiso', icon: Heart },
+  { id: 'respeto', icon: Award },
+  { id: 'transparencia', icon: Sparkles }
 ];
 
 const N = VALUES.length;
@@ -120,6 +94,7 @@ function computeOrbitPos(index, rot, containerSize) {
 }
 
 export default function ValuesWheel() {
+  const { t } = useLanguage();
   const containerRef = useRef(null);
   const [size, setSize] = useState(280);
   const [rotation, setRotation] = useState(0);
@@ -308,6 +283,7 @@ export default function ValuesWheel() {
   const radius = size * 0.35;
   const planetR = size < 320 ? 18 : 26;
   const current = VALUES[activeIndex];
+  const currentT = t.valuesWheel.items[current.id];
   const attracted = phase === 'attract' || phase === 'hold';
   const centerX = size / 2;
   const centerY = size / 2;
@@ -335,13 +311,13 @@ export default function ValuesWheel() {
       <div className="max-w-4xl lg:max-w-5xl mx-auto flex flex-col items-center text-center relative">
         {/* Header */}
         <span className="text-[11px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1.5 font-mono-code">
-          Nuestra cultura
+          {t.valuesWheel.kicker}
         </span>
         <h2 className="font-heading font-extrabold text-2xl sm:text-4xl text-white tracking-tight mb-2.5">
-          Valores Institucionales
+          {t.valuesWheel.title}
         </h2>
         <p className="text-xs sm:text-sm text-[#9FC6E8] max-w-md mb-8 sm:mb-12 leading-relaxed">
-          Una pequeña galaxia de principios que orbitan el propósito del ICAP: toque cualquier valor para atraerlo al centro.
+          {t.valuesWheel.subtitle}
         </p>
 
         {/* Mobile Quick Selector Chips */}
@@ -358,7 +334,7 @@ export default function ValuesWheel() {
                     : 'bg-[#003366] text-slate-300 border border-white/10'
                 }`}
               >
-                <span>{v.name}</span>
+                <span>{t.valuesWheel.items[v.id].name}</span>
               </button>
             );
           })}
@@ -476,7 +452,7 @@ export default function ValuesWheel() {
                   className="text-[10px] sm:text-xs font-semibold leading-tight text-[#EAF3FB] whitespace-nowrap"
                   style={{ opacity: isFlyingToCenter ? 0 : 1, transition: `opacity ${formTransition}` }}
                 >
-                  {v.name}
+                  {t.valuesWheel.items[v.id].name}
                 </span>
               </button>
             );
@@ -496,22 +472,22 @@ export default function ValuesWheel() {
             </div>
             <div>
               <span className="text-[9px] sm:text-[10px] font-mono-code text-[#9FC6E8] uppercase tracking-wider block">
-                Pilar Institucional
+                {t.valuesWheel.pilarLabel}
               </span>
               <h3 className="font-heading font-bold text-base sm:text-lg text-white">
-                {current.name}
+                {currentT.name}
               </h3>
             </div>
           </div>
           <p className="text-xs sm:text-sm text-[#C9D9E8] leading-relaxed">
-            {current.description}
+            {currentT.description}
           </p>
         </div>
         </div>
         </div>
 
         <p className="text-[10px] sm:text-[11px] text-[#6E8AA8] mt-4 max-w-xs">
-          Toca cualquier valor para atraerlo al centro, o dejá que la galaxia gire sola.
+          {t.valuesWheel.footerHint}
         </p>
       </div>
     </section>

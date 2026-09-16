@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* Modo oscuro por clase (no por prefers-color-scheme del sistema): el
+   switch de tema en el header agrega/quita `.dark` en el contenedor
+   raíz de la app (ver Propuesta1.jsx), y esta variante hace que
+   cualquier `dark:` de Tailwind reaccione a esa clase en vez de a la
+   preferencia del sistema operativo. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
     --font-sans: 'Open Sans', system-ui, -apple-system, sans-serif;

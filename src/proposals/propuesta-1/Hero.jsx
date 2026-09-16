@@ -1,6 +1,8 @@
 import React from 'react';
 import { ChevronDown, ArrowRight } from 'lucide-react';
 import icapLogoMark from '../../assets/icap-logo-mark.png';
+import SectionsStrip from './SectionsStrip';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 // Puntos flotantes decorativos del fondo del Hero. Posiciones y tiempos
 // fijos (no aleatorios en cada render) para que la animación sea estable.
@@ -13,9 +15,10 @@ const PARTICLES = [
   { left: '88%', size: 6, duration: '11.5s', delay: '-3.5s' }
 ];
 
-export default function Hero({ onOpenAbout, onScrollToContact }) {
+export default function Hero({ onOpenAbout, onScrollToContact, onNavigate }) {
+  const { t } = useLanguage();
   return (
-    <section className="relative min-h-[560px] sm:min-h-[640px] bg-gradient-to-br from-[#003366] via-[#0B5A96] to-[#0077C8] text-white px-4 sm:px-6 py-12 sm:py-20 flex flex-col items-center justify-center text-center overflow-hidden">
+    <section className="relative min-h-[520px] sm:min-h-[584px] bg-gradient-to-br from-[#003366] via-[#0B5A96] to-[#0077C8] text-white px-4 sm:px-6 pt-4 sm:pt-6 pb-9 sm:pb-14 flex flex-col items-center justify-center text-center overflow-hidden">
       {/* Resplandor radial de fondo, con una deriva muy lenta para que respire */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,255,255,0.18),rgba(0,119,200,0)_65%)] pointer-events-none animate-glow-drift" />
 
@@ -98,18 +101,28 @@ export default function Hero({ onOpenAbout, onScrollToContact }) {
         ))}
       </div>
 
+      {/* Menú de accesos rápidos: embebido acá mismo, dentro del Hero, para
+          que comparta olas/partículas/resplandor de fondo y se sienta
+          parte de esta sección, no una franja aparte encima. Va aparte
+          de la columna angosta del texto de abajo (max-w-xl) porque
+          necesita repartirse en más ancho para que los 6 accesos
+          respiren mejor. */}
+      <div className="relative z-10 w-full max-w-3xl sm:max-w-4xl mx-auto mb-6 sm:mb-8 animate-hero-rise" style={{ animationDelay: '0ms' }}>
+        <SectionsStrip onNavigate={onNavigate} />
+      </div>
+
       <div className="relative z-10 flex flex-col items-center max-w-xl mx-auto w-full">
         {/* Kicker badge */}
         <div
           className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 text-[#9FC6E8] text-[11px] sm:text-xs font-semibold tracking-widest uppercase mb-5 shadow-sm animate-hero-rise"
-          style={{ animationDelay: '0ms' }}
+          style={{ animationDelay: '90ms' }}
         >
           <span className="w-1.5 h-1.5 rounded-full bg-[#0077C8] animate-ping" />
-          ICAP &middot; Fundado en 1954
+          {t.hero.badge}
         </div>
 
         {/* Emblem: isotipo real del ICAP con halo pulsante y un anillo punteado que gira lentamente */}
-        <div className="relative w-16 h-16 sm:w-20 sm:h-20 mb-5 shrink-0 animate-hero-rise" style={{ animationDelay: '80ms' }}>
+        <div className="relative w-16 h-16 sm:w-20 sm:h-20 mb-5 shrink-0 animate-hero-rise" style={{ animationDelay: '170ms' }}>
           <div className="absolute inset-0 rounded-full bg-white/25 blur-md animate-pulse-slow" aria-hidden="true" />
           <div
             className="absolute -inset-2 sm:-inset-2.5 rounded-full border border-dashed border-white/30 pointer-events-none"
@@ -129,53 +142,53 @@ export default function Hero({ onOpenAbout, onScrollToContact }) {
         {/* Title */}
         <h1
           className="font-heading font-extrabold text-4xl sm:text-7xl tracking-tight text-white mb-2.5 drop-shadow-sm animate-hero-rise"
-          style={{ animationDelay: '150ms' }}
+          style={{ animationDelay: '240ms' }}
         >
-          ICAP
+          {t.hero.title}
         </h1>
         <h2
           className="font-semibold text-base sm:text-2xl text-[#EAF3FB] max-w-md leading-snug mb-3.5 animate-hero-rise"
-          style={{ animationDelay: '220ms' }}
+          style={{ animationDelay: '310ms' }}
         >
-          Instituto Centroamericano de Administración Pública
+          {t.hero.subtitle}
         </h2>
 
         {/* Description */}
         <p
           className="text-xs sm:text-base text-[#9FC6E8] max-w-lg leading-relaxed mb-7 px-2 animate-hero-rise"
-          style={{ animationDelay: '290ms' }}
+          style={{ animationDelay: '380ms' }}
         >
-          Organismo regional del SICA especializado en la modernización institucional, gestión de políticas públicas y formación del talento humano.
+          {t.hero.description}
         </p>
 
         {/* CTAs: Explicit padding, no cutting off */}
         <div
           className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full max-w-md px-2 animate-hero-rise"
-          style={{ animationDelay: '360ms' }}
+          style={{ animationDelay: '450ms' }}
         >
           <button
             onClick={onOpenAbout}
             className="w-full sm:w-1/2 flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl font-heading font-bold text-xs sm:text-sm tracking-wider uppercase border-2 border-white/40 hover:border-white hover:bg-white/10 text-white transition-all active:scale-[0.98] shadow-sm cursor-pointer"
           >
-            <span>CONOCÉ EL ICAP</span>
+            <span>{t.hero.ctaAbout}</span>
             <ArrowRight className="w-4 h-4 shrink-0" />
           </button>
           <button
             onClick={onScrollToContact}
             className="w-full sm:w-1/2 flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl font-heading font-bold text-xs sm:text-sm tracking-wider uppercase bg-[#0077C8] hover:bg-[#005A96] text-white shadow-lg shadow-[#0077C8]/30 transition-all active:scale-[0.98] cursor-pointer"
           >
-            <span>CONTACTANOS</span>
+            <span>{t.hero.ctaContact}</span>
           </button>
         </div>
 
         {/* Scroll indicator */}
         <div
           className="mt-10 flex flex-col items-center gap-1.5 cursor-pointer animate-hero-rise"
-          style={{ animationDelay: '430ms' }}
+          style={{ animationDelay: '520ms' }}
           onClick={() => window.scrollBy({ top: 380, behavior: 'smooth' })}
         >
           <span className="text-[10px] tracking-widest text-[#9FC6E8] uppercase font-bold font-mono-code">
-            Descubrí más
+            {t.hero.scrollHint}
           </span>
           <ChevronDown className="w-4 h-4 text-[#9FC6E8] animate-bounce" />
         </div>

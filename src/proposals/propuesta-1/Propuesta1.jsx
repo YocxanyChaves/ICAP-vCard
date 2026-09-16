@@ -1,6 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Hero from './Hero';
-import SectionsStrip from './SectionsStrip';
 import MissionVision from './MissionVision';
 import ValuesWheel from './ValuesWheel';
 import StatsSection from './StatsSection';
@@ -17,16 +16,24 @@ import {
   Building2,
   ExternalLink,
   Smartphone,
-  Monitor
+  Monitor,
+  Globe,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { defaultContact } from '../../components/VCardDownload';
 import { PAGES } from './navigation';
+import { useLanguage } from '../../i18n/LanguageContext';
+import { useTheme } from '../../theme/ThemeContext';
+import icapLogoMark from '../../assets/icap-logo-mark.png';
 
 export default function Propuesta1({
   contact = defaultContact,
   viewMode = 'full',
   onSetViewMode = () => {}
 }) {
+  const { lang, toggleLang, t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [activePage, setActivePage] = useState('inicio');
   const mainRef = useRef(null);
@@ -95,8 +102,8 @@ export default function Propuesta1({
             <Hero
               onOpenAbout={() => setAboutModalOpen(true)}
               onScrollToContact={() => goToPage('contacto')}
+              onNavigate={goToPage}
             />
-            <SectionsStrip onNavigate={goToPage} />
             <StatsSection />
             <AlliesMarquee />
           </>
@@ -119,27 +126,40 @@ export default function Propuesta1({
   };
 
   return (
-    <div className="w-full h-screen bg-slate-50 text-slate-800 font-sans relative flex flex-col overflow-hidden">
+    <div
+      className={`w-full h-screen bg-slate-50 dark:bg-[#001428] text-slate-800 dark:text-slate-100 font-sans relative flex flex-col overflow-hidden ${
+        theme === 'dark' ? 'dark' : ''
+      }`}
+    >
       {/* Sticky Utility Navbar */}
       <header className="shrink-0 z-40 bg-[#003366]/95 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 py-3 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full border border-[#0077C8] flex items-center justify-center bg-[#003366] shrink-0">
-            <div className="w-2 h-2 rounded-full bg-[#0077C8]" />
+        <button
+          onClick={() => goToPage('inicio')}
+          className="flex items-center gap-2 cursor-pointer group"
+          title={t.header.home}
+        >
+          <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shrink-0 ring-1 ring-white/40 shadow-sm transition-transform group-hover:scale-105">
+            <img
+              src={icapLogoMark}
+              alt="Isotipo ICAP"
+              className="w-[68%] h-[68%] object-contain"
+              draggable={false}
+            />
           </div>
           <span className="font-heading font-extrabold text-white text-sm sm:text-base tracking-wider">
             ICAP
           </span>
           <span className="hidden sm:inline-block text-[11px] font-mono-code text-[#9FC6E8] border-l border-white/20 pl-2 ml-1">
-            Brochure Institucional
+            {t.header.subtitle}
           </span>
-        </div>
+        </button>
 
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Viewport preview toggle: real / mobile-frame (390px vía iframe) */}
           <div className="flex items-center bg-black/30 p-0.5 rounded-lg border border-white/10 shrink-0">
             <button
               onClick={() => onSetViewMode('full')}
-              title="Vista Completa"
+              title={t.header.fullView}
               aria-pressed={viewMode === 'full'}
               className={`flex items-center justify-center w-7 h-7 rounded-md transition-all ${
                 viewMode === 'full'
@@ -151,7 +171,7 @@ export default function Propuesta1({
             </button>
             <button
               onClick={() => onSetViewMode('mobile')}
-              title="Vista Móvil (390px)"
+              title={t.header.mobileView}
               aria-pressed={viewMode === 'mobile'}
               className={`flex items-center justify-center w-7 h-7 rounded-md transition-all ${
                 viewMode === 'mobile'
@@ -163,17 +183,46 @@ export default function Propuesta1({
             </button>
           </div>
 
+          {/* Selector de idioma: a la par del toggle de vista, mismo
+              lenguaje visual (icono de mundo + código de 2 letras) que
+              cualquier switch ES/EN reconocible al toque. */}
+          <button
+            onClick={toggleLang}
+            title={t.header.language}
+            className="flex items-center gap-1.5 bg-black/30 hover:bg-white/10 p-0.5 pr-2.5 rounded-lg border border-white/10 shrink-0 text-[#9FC6E8] hover:text-white transition-all cursor-pointer"
+          >
+            <span className="flex items-center justify-center w-7 h-7 rounded-md bg-[#0077C8] text-white shadow shrink-0">
+              <Globe className="w-3.5 h-3.5" />
+            </span>
+            <span className="text-[10px] font-heading font-bold tracking-wider uppercase">
+              {lang === 'es' ? 'EN' : 'ES'}
+            </span>
+          </button>
+
+          {/* Switch de tema claro/oscuro: mismo lenguaje visual que el de
+              idioma (ícono + fondo oscuro), a la par. Muestra el sol
+              cuando el sitio está en oscuro (click para pasar a claro) y
+              la luna cuando está en claro (click para pasar a oscuro) —
+              siempre el ícono del modo AL QUE se va a cambiar. */}
+          <button
+            onClick={toggleTheme}
+            title={t.header.theme}
+            className="flex items-center justify-center w-8 h-8 rounded-lg bg-black/30 hover:bg-white/10 border border-white/10 shrink-0 text-[#9FC6E8] hover:text-white transition-all cursor-pointer"
+          >
+            {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+          </button>
+
           <button
             onClick={() => setAboutModalOpen(true)}
             className="text-xs font-heading font-semibold text-[#EAF3FB] hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-white/10 transition-colors"
           >
-            Sobre ICAP
+            {t.header.about}
           </button>
           <button
             onClick={() => goToPage('contacto')}
             className="h-8 px-3.5 sm:px-4 rounded-xl bg-[#0077C8] hover:bg-[#005A96] text-white font-heading font-bold text-xs tracking-wider uppercase shadow transition-all active:scale-95 shrink-0"
           >
-            Contactanos
+            {t.header.contact}
           </button>
         </div>
       </header>
@@ -188,7 +237,7 @@ export default function Propuesta1({
       {/* Bottom App Navigation */}
       <nav
         ref={navRef}
-        className="shrink-0 z-30 bg-white border-t border-slate-200 shadow-[0_-4px_16px_rgba(0,51,102,0.08)] px-1 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] flex items-stretch justify-between relative"
+        className="shrink-0 z-30 bg-white dark:bg-[#00152B] border-t border-slate-200 dark:border-white/10 shadow-[0_-4px_16px_rgba(0,51,102,0.08)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.4)] px-1 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] flex items-stretch justify-between relative"
       >
         {/* Esfera animada del menú: un wrapper de posición (transición de
             traslado) que envuelve el halo pulsante y la esfera principal,
@@ -244,7 +293,7 @@ export default function Propuesta1({
                   active ? 'text-white font-bold' : 'text-slate-400 font-semibold'
                 }`}
               >
-                {page.label}
+                {t.nav[page.id]}
               </span>
             </button>
           );
@@ -255,8 +304,8 @@ export default function Propuesta1({
       <BottomSheet
         isOpen={aboutModalOpen}
         onClose={() => setAboutModalOpen(false)}
-        title="Acerca del ICAP"
-        subtitle="Organismo Internacional del SICA"
+        title={t.aboutModal.title}
+        subtitle={t.aboutModal.subtitle}
         icon={
           <div className="w-8 h-8 rounded-lg bg-[#003366] text-[#0077C8] flex items-center justify-center font-heading font-extrabold text-xs">
             SICA
@@ -264,80 +313,49 @@ export default function Propuesta1({
         }
         maxWidth="max-w-xl"
       >
-        <div className="space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
+        <div className="space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
           <p>
-            El <strong>Instituto Centroamericano de Administración Pública (ICAP)</strong> fue fundado en 1954 como organismo especializado del Sistema de la Integración Centroamericana (SICA), con el mandato de profesionalizar la función pública y fortalecer los Estados de la región.
+            {t.aboutModal.intro}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 my-4">
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3">
-              <History className="w-5 h-5 text-[#0077C8] shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-heading font-bold text-xs uppercase text-slate-800 mb-0.5">
-                  70+ Años de Historia
-                </h4>
-                <p className="text-[11px] sm:text-xs text-slate-500">
-                  Pioneros en formación y modernización estatal en Centroamérica.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3">
-              <Award className="w-5 h-5 text-[#0077C8] shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-heading font-bold text-xs uppercase text-slate-800 mb-0.5">
-                  Acreditación de Posgrados
-                </h4>
-                <p className="text-[11px] sm:text-xs text-slate-500">
-                  Maestrías y doctorados con validez internacional.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3">
-              <Globe2 className="w-5 h-5 text-[#0077C8] shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-heading font-bold text-xs uppercase text-slate-800 mb-0.5">
-                  Cooperación Multilateral
-                </h4>
-                <p className="text-[11px] sm:text-xs text-slate-500">
-                  Alianzas estratégicas con organismos globales (BID, ONU, OMS).
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3">
-              <Building2 className="w-5 h-5 text-[#0077C8] shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-heading font-bold text-xs uppercase text-slate-800 mb-0.5">
-                  Sede Central en Costa Rica
-                </h4>
-                <p className="text-[11px] sm:text-xs text-slate-500">
-                  Presencia física y centros regionales en países del SICA.
-                </p>
-              </div>
-            </div>
+            {[History, Award, Globe2, Building2].map((Icon, i) => {
+              const card = t.aboutModal.cards[i];
+              return (
+                <div key={i} className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 flex items-start gap-3">
+                  <Icon className="w-5 h-5 text-[#0077C8] shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-heading font-bold text-xs uppercase text-slate-800 dark:text-white mb-0.5">
+                      {card.title}
+                    </h4>
+                    <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
+                      {card.text}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           <p>
-            A través de la investigación aplicada, el acompañamiento en reformas y la formación de alta dirección, el ICAP contribuye al desarrollo sostenible y democrático.
+            {t.aboutModal.outro}
           </p>
 
-          <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="pt-4 border-t border-slate-100 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
             <a
               href="https://icap.ac.cr"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0077C8] hover:text-[#0077C8] transition-colors uppercase font-heading"
             >
-              <span>Visitar portal web oficial ICAP</span>
+              <span>{t.aboutModal.visitLink}</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
             <button
               onClick={() => setAboutModalOpen(false)}
               className="w-full sm:w-auto py-2.5 px-6 rounded-2xl bg-[#003366] hover:bg-[#001F3D] text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors shadow"
             >
-              Cerrar
+              {t.aboutModal.close}
             </button>
           </div>
         </div>

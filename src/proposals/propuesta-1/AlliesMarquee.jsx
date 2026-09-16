@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { MapPin, Info, X } from 'lucide-react';
 import BottomSheet from '../../components/BottomSheet';
 import { getAreaMeta } from './areaMeta';
+import { useLanguage } from '../../i18n/LanguageContext';
 import sicaLogo from '../../assets/allies/sica.png';
 import opsOmsLogo from '../../assets/allies/ops-oms.png';
 import bidLogo from '../../assets/allies/bid.png';
@@ -116,22 +117,23 @@ function AllyIconBadge({ ally, size = 'w-8 h-8', textSize = 'text-xs' }) {
 }
 
 function AllyDetailBody({ ally }) {
+  const { t } = useLanguage();
   return (
     <div className="space-y-5">
-      <p className="text-sm text-slate-600 leading-relaxed">
-        {ally.description || 'Sin registro de proyectos conjuntos documentados en el brochure de referencia.'}
+      <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+        {ally.description || t.allies.noProjectRecord}
       </p>
 
       {ally.countryNote && (
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
           <MapPin className="w-3.5 h-3.5 text-[#0077C8] shrink-0" />
           {ally.countryNote}
         </div>
       )}
 
       <div>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
-          Áreas de Proyecto
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-2">
+          {t.allies.projectAreasLabel}
         </span>
         {ally.projectAreas.length > 0 ? (
           <div className="flex flex-wrap gap-1.5">
@@ -145,13 +147,13 @@ function AllyDetailBody({ ally }) {
                   style={{ backgroundColor: meta.color, color: meta.text }}
                 >
                   <AreaIcon className="w-3.5 h-3.5 shrink-0" style={{ color: meta.text }} />
-                  {a}
+                  {t.areaLabels[a] || a}
                 </span>
               );
             })}
           </div>
         ) : (
-          <p className="text-xs text-slate-400">Sin registro de área en el brochure de referencia.</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500">{t.allies.noAreaRecord}</p>
         )}
       </div>
     </div>
@@ -159,6 +161,11 @@ function AllyDetailBody({ ally }) {
 }
 
 export default function AlliesMarquee() {
+  const { t } = useLanguage();
+  // Mismos datos (id, logo, projectAreas — llaves de areaMeta.js, no
+  // texto visible) con el nombre/etiqueta/descripción traducidos según
+  // el idioma activo, tomados de translations.js por id.
+  const alliesT = ALLIES.map((a) => ({ ...a, ...t.allies.items[a.id] }));
   const sectionRef = useRef(null);
   const isDesktopRef = useRef(false);
   const [selected, setSelected] = useState(null);
@@ -234,13 +241,13 @@ export default function AlliesMarquee() {
     <section ref={sectionRef} className="py-12 bg-[#001F3D] text-white overflow-hidden border-y border-white/5 relative">
       <div className="max-w-4xl mx-auto px-6 mb-8 text-center">
         <span className="text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
-          Red Institucional
+          {t.allies.kicker}
         </span>
         <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-white tracking-tight">
-          Organismos y Socios de Cooperación
+          {t.allies.title}
         </h2>
         <p className="text-[11px] sm:text-xs text-slate-400 mt-1.5">
-          Tocá una institución para ver los proyectos que ha trabajado en conjunto con el ICAP.
+          {t.allies.subtitle}
         </p>
       </div>
 
@@ -254,7 +261,7 @@ export default function AlliesMarquee() {
           className="animate-marquee flex items-center"
           style={selected ? { animationPlayState: 'paused' } : undefined}
         >
-          {[...ALLIES, ...ALLIES].map((item, idx) => (
+          {[...alliesT, ...alliesT].map((item, idx) => (
             <button
               key={idx}
               type="button"
@@ -281,7 +288,7 @@ export default function AlliesMarquee() {
         isOpen={showSheet}
         onClose={closeDetail}
         title={selected?.name}
-        subtitle="Organismo Aliado"
+        subtitle={t.allies.modalSubtitle}
         icon={selected && <AllyIconBadge ally={selected} size="w-8 h-8" textSize="text-xs" />}
       >
         {selected && <AllyDetailBody ally={selected} />}
@@ -292,7 +299,7 @@ export default function AlliesMarquee() {
         <>
           <div className="fixed inset-0 z-40" onClick={closeDetail} aria-hidden="true" />
           <div
-            className="fixed z-50 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-100 animate-fade-in"
+            className="fixed z-50 bg-white dark:bg-[#0B2340] text-slate-800 dark:text-slate-100 rounded-2xl shadow-2xl border border-slate-100 dark:border-white/10 animate-fade-in"
             style={{
               left: bubblePos.left,
               width: bubblePos.width,
@@ -301,24 +308,24 @@ export default function AlliesMarquee() {
                 : { top: bubblePos.top })
             }}
           >
-            <div className="flex items-start justify-between gap-3 p-4 border-b border-slate-100">
+            <div className="flex items-start justify-between gap-3 p-4 border-b border-slate-100 dark:border-white/10">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/10 flex items-center justify-center shrink-0">
                   <AllyIconBadge ally={selected} size="w-8 h-8" textSize="text-xs" />
                 </div>
                 <div className="min-w-0">
                   <span className="text-[10px] font-mono-code font-bold uppercase tracking-wider text-[#0077C8] block">
-                    Organismo Aliado
+                    {t.allies.modalSubtitle}
                   </span>
-                  <h4 className="font-heading font-extrabold text-base text-[#003366] leading-tight truncate">
+                  <h4 className="font-heading font-extrabold text-base text-[#003366] dark:text-white leading-tight truncate">
                     {selected.name}
                   </h4>
                 </div>
               </div>
               <button
                 onClick={closeDetail}
-                className="p-1.5 -mr-1 -mt-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
-                title="Cerrar"
+                className="p-1.5 -mr-1 -mt-1 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors shrink-0"
+                title={t.common.close}
               >
                 <X className="w-4 h-4" />
               </button>

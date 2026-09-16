@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Scale, HeartPulse, BarChart3, Leaf, Lightbulb, CheckCircle2 } from 'lucide-react';
+import { Stethoscope, BadgeCheck, ClipboardCheck, Cog, Users, Leaf, Scale, CheckCircle2 } from 'lucide-react';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 // Antes esta sección abría el detalle de cada área en un modal/bottom
 // sheet aparte (había que tocar la tarjeta para leer la descripción y
@@ -7,67 +8,19 @@ import { Scale, HeartPulse, BarChart3, Leaf, Lightbulb, CheckCircle2 } from 'luc
 // de un hospital. Ahora cada tarjeta va con todo su contenido a la
 // vista de una vez, en celeste institucional con letras blancas: más
 // elegante, sin esconder información detrás de un clic.
+// El título, tag, descripción larga y puntos de cada área viven en el
+// diccionario de traducciones (t.specializationAreas.items[id]) — acá
+// sólo queda el "id" (llave de esa traducción) y el ícono, que no
+// cambia según el idioma. Las 6 áreas y sus íconos son las mismas 6
+// que usan areaMeta.js/RegionalMap/AlliesMarquee, para que el ícono de
+// cada área se vea igual en todo el sitio.
 const AREAS = [
-  {
-    id: 'gobernanza',
-    title: 'Gobernanza y regulación',
-    tag: 'Políticas públicas y marcos regulatorios',
-    longDesc: 'Fortalecimiento de los marcos jurídicos, transparencia institucional, modernización del Estado y diseño de políticas públicas orientadas al impacto social y la rendición de cuentas.',
-    icon: Scale,
-    points: [
-      'Diseño y evaluación de políticas públicas sectoriales.',
-      'Marcos regulatorios y simplificación de trámites gubernamentales.',
-      'Gobernanza multinivel y descentralización administrativa.'
-    ]
-  },
-  {
-    id: 'salud',
-    title: 'Gerencia de la salud',
-    tag: 'Dirección en salud y seguridad social',
-    longDesc: 'Programas y consultorías especializadas en gestión de servicios de salud, optimización de recursos hospitalarios y sostenibilidad de los sistemas de seguridad social en la región.',
-    icon: HeartPulse,
-    points: [
-      'Gestión estratégica de servicios hospitalarios y redes de salud.',
-      'Sostenibilidad financiera en seguridad social.',
-      'Políticas públicas para la equidad y cobertura sanitaria.'
-    ]
-  },
-  {
-    id: 'proyectos',
-    title: 'Gerencia de proyectos',
-    tag: 'Planificación estratégica y dirección institucional',
-    longDesc: 'Metodologías ágiles y tradicionales para la formulación, evaluación, financiamiento y ejecución exitosa de proyectos de desarrollo nacional e internacional.',
-    icon: BarChart3,
-    points: [
-      'Formulación y evaluación ex-ante y ex-post de proyectos de inversión.',
-      'Gestión de riesgos, cronogramas y presupuestos públicos.',
-      'Cooperación técnica y vinculación con organismos multilaterales.'
-    ]
-  },
-  {
-    id: 'ambiente',
-    title: 'Ambiente y energía',
-    tag: 'Transición energética y gestión ambiental',
-    longDesc: 'Acompañamiento a ministerios e instituciones en transición energética justa, mitigación del cambio climático y gestión sostenible de los recursos naturales.',
-    icon: Leaf,
-    points: [
-      'Políticas de descarbonización y energías renovables.',
-      'Gobernanza hídrica y gestión de cuencas compartidas.',
-      'Mecanismos de financiamiento climático regional.'
-    ]
-  },
-  {
-    id: 'innovacion',
-    title: 'Innovación pública',
-    tag: 'Transformación digital y liderazgo adaptativo',
-    longDesc: 'Laboratorios de innovación ciudadana, digitalización de servicios públicos, uso ético de inteligencia artificial y nuevas tecnologías aplicadas a la gestión pública.',
-    icon: Lightbulb,
-    points: [
-      'Transformación digital del gobierno y servicios ciudadanos.',
-      'Laboratorios de innovación y co-creación pública.',
-      'Cultura organizacional ágil y liderazgo adaptativo.'
-    ]
-  }
+  { id: 'salud', icon: Stethoscope },
+  { id: 'calidad', icon: BadgeCheck },
+  { id: 'proyectos', icon: ClipboardCheck },
+  { id: 'gobernanza', icon: Cog },
+  { id: 'transformacion', icon: Users },
+  { id: 'ambiente', icon: Leaf }
 ];
 
 // Mismo celeste institucional para las 6 — un degradado (no un color
@@ -80,6 +33,7 @@ const CARD_BACKGROUND =
   'linear-gradient(160deg, #0090DD 0%, #0068AE 48%, #013A63 100%)';
 
 export default function SpecializationAreas() {
+  const { t } = useLanguage();
   // Cada tarjeta aparece deslizándose desde su propio lado al entrar en
   // pantalla (columna izquierda ← izquierda, columna derecha ←
   // derecha), en vez de todas a la vez — un observer por tarjeta, no
@@ -132,18 +86,25 @@ export default function SpecializationAreas() {
   }, []);
 
   return (
-    <section className="px-4 sm:px-6 py-10 sm:py-16 bg-slate-50 relative">
+    <section className="px-4 sm:px-6 py-10 sm:py-16 bg-slate-50 dark:bg-[#001428] relative">
       <div className="max-w-5xl mx-auto">
-        <div className="mb-8 sm:mb-10 text-center sm:text-left">
+        <div className="mb-8 sm:mb-10 text-center">
           <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
-            Expertise y Oferta
+            {t.specializationAreas.kicker}
           </span>
-          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] tracking-tight">
-            Áreas de Especialización
+          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-white tracking-tight">
+            {t.specializationAreas.title}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1.5 max-w-md mx-auto sm:mx-0">
-            Los cinco frentes donde el ICAP acompaña a gobiernos e instituciones de la región.
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-md mx-auto">
+            {t.specializationAreas.subtitle}
           </p>
+          {/* Género no es una 7ma tarjeta: es el eje transversal que
+              atraviesa las 6 áreas (igual que en la rueda del brochure
+              oficial), así que se muestra como una nota/badge aparte. */}
+          <div className="inline-flex items-center gap-2 mt-4 px-3.5 py-2 rounded-full bg-[#D86DCB]/10 border border-[#D86DCB]/25 text-[11px] sm:text-xs text-[#0B1F3D] dark:text-white font-medium">
+            <Scale className="w-3.5 h-3.5 text-[#D86DCB] shrink-0" />
+            <span>{t.specializationAreas.generoNote}</span>
+          </div>
         </div>
 
         {/* Fichas ya expandidas, con todo su contenido a la vista —
@@ -151,6 +112,7 @@ export default function SpecializationAreas() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {AREAS.map((area, idx) => {
             const Icon = area.icon;
+            const areaT = t.specializationAreas.items[area.id];
             const fromRight = idx % 2 === 1;
             // Con un número impar de áreas, la última queda sola en su
             // propia fila — en vez de dejarla pegada a la izquierda
@@ -189,18 +151,22 @@ export default function SpecializationAreas() {
                   </div>
                   <div className="min-w-0 pt-0.5">
                     <h3 className="font-heading font-extrabold text-lg sm:text-xl text-white leading-tight">
-                      {area.title}
+                      {areaT.title}
                     </h3>
-                    <p className="text-[11px] sm:text-xs text-white/70 mt-1">{area.tag}</p>
+                    <p className="text-[11px] sm:text-xs text-white/70 mt-1">{areaT.tag}</p>
                   </div>
                 </div>
 
+                {/* Descripción corta (3 renglones, redactada a partir de
+                    los puntos oficiales de la oferta institucional) +
+                    los 3 puntos principales de esa misma lista, en vez del
+                    listado completo — vista resumida de la tarjeta. */}
                 <p className="relative text-xs sm:text-sm text-white/85 leading-relaxed mb-5">
-                  {area.longDesc}
+                  {areaT.shortDesc}
                 </p>
 
                 <div className="relative space-y-2 mt-auto pt-1">
-                  {area.points.map((pt, idx) => (
+                  {areaT.highlights.map((pt, idx) => (
                     <div
                       key={idx}
                       className="flex items-start gap-2.5 p-3 rounded-2xl bg-white/10 border border-white/10 text-xs sm:text-[13px] text-white/90 leading-relaxed"

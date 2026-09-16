@@ -16,37 +16,14 @@ import {
 import icapEscudoNavy from '../../assets/icap-escudo-navy.png';
 import icapEscudoWhite from '../../assets/icap-escudo-white.png';
 import icapEscudoCeleste from '../../assets/icap-escudo-celeste.png';
+import { useLanguage } from '../../i18n/LanguageContext';
 
-const MISION_PILARES = [
-  'Desarrollo y formación de competencias directivas en el servicio público.',
-  'Modernización e innovación constante en la gestión gubernamental de Centroamérica.',
-  'Apoyo activo a la integración y cohesión regional de los países del SICA.'
-];
-
-const VISION_PILARES = [
-  'Referente regional e internacional en diseño e implementación de políticas públicas.',
-  'Generación de conocimiento aplicado para el fortalecimiento de la gerencia pública.',
-  'Impulso al desarrollo sostenible desde lo local, nacional y regional.'
-];
-
-// Contenido del "reverso" de cada ficha — no repite lo de adelante:
-// mientras el frente dice QUÉ persigue el ICAP, el reverso cuenta CÓMO
-// lo lleva a la práctica. Ejemplo/redacción propia a partir de las
-// líneas de trabajo ya descritas en el resto del sitio (Áreas de
-// Especialización, Presencia Regional) — a confirmar con ICAP.
-const MISION_REVERSO = [
-  { icon: GraduationCap, text: 'Capacitación ejecutiva y formación continua para el servidor público.' },
-  { icon: Users, text: 'Asesoría técnica especializada a gobiernos e instituciones.' },
-  { icon: BookOpen, text: 'Investigación aplicada a la gestión pública regional.' },
-  { icon: Globe2, text: 'Cooperación técnica regional e internacional.' }
-];
-
-const VISION_REVERSO = [
-  { icon: Target, text: 'Liderazgo regional en el diseño de políticas públicas innovadoras.' },
-  { icon: Handshake, text: 'Alianzas estratégicas dentro del Sistema de la Integración Centroamericana (SICA).' },
-  { icon: Leaf, text: 'Contribución activa a los Objetivos de Desarrollo Sostenible (ODS).' },
-  { icon: Sparkles, text: 'Generación de conocimiento aplicado, referente para la región.' }
-];
+// El texto de cada pilar/reverso vive en el diccionario de traducciones
+// (t.missionVision.mission.pilares / .reverso, mismo para vision) — acá
+// sólo quedan los íconos del reverso, en el mismo orden que su texto
+// traducido, porque el ícono no cambia según el idioma.
+const MISION_REVERSO_ICONS = [GraduationCap, Users, BookOpen, Globe2];
+const VISION_REVERSO_ICONS = [Target, Handshake, Leaf, Sparkles];
 
 /**
  * Sello institucional del ICAP como marca de agua, muy tenue, apenas
@@ -74,7 +51,7 @@ function SealWatermark({ src, className = '' }) {
 function FlipButton({ onClick, icon: Icon, label, tone = 'light' }) {
   const toneClasses =
     tone === 'light'
-      ? 'text-[#0077C8] hover:text-[#005A96]'
+      ? 'text-[#0077C8] hover:text-[#005A96] dark:text-[#9FC6E8] dark:hover:text-white'
       : 'text-[#9FC6E8] hover:text-white';
   return (
     <button
@@ -95,14 +72,14 @@ function NumberTile({ tone, index, children }) {
       className={
         isDark
           ? 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-white/[0.06] border border-white/5 text-xs sm:text-sm leading-relaxed text-[#C9D9E8]'
-          : 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 text-xs sm:text-sm leading-relaxed text-slate-600'
+          : 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-white/[0.06] dark:border dark:border-white/5 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-[#C9D9E8]'
       }
     >
       <span
         className={
           isDark
             ? 'w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full bg-white/15 text-[#4FB2F2] text-[9px] sm:text-[10px] font-bold font-mono-code flex items-center justify-center shrink-0 mt-0.5 border border-white/10'
-            : 'w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full bg-[#0077C8] text-white text-[9px] sm:text-[10px] font-bold font-mono-code flex items-center justify-center shrink-0 mt-0.5'
+            : 'w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full bg-[#0077C8] dark:bg-white/15 text-white dark:text-[#4FB2F2] text-[9px] sm:text-[10px] font-bold font-mono-code flex items-center justify-center shrink-0 mt-0.5 dark:border dark:border-white/10'
         }
       >
         {String(index + 1).padStart(2, '0')}
@@ -120,14 +97,14 @@ function IconTile({ tone, icon: Icon, children }) {
       className={
         isDark
           ? 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-white/[0.06] border border-white/5 text-xs sm:text-sm leading-relaxed text-[#C9D9E8]'
-          : 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 text-xs sm:text-sm leading-relaxed text-slate-600'
+          : 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-white/[0.06] dark:border dark:border-white/5 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-[#C9D9E8]'
       }
     >
       <span
         className={
           isDark
             ? 'w-8 h-8 rounded-xl bg-white/10 text-[#4FB2F2] flex items-center justify-center shrink-0 border border-white/10'
-            : 'w-8 h-8 rounded-xl bg-[#EAF3FB] text-[#0077C8] flex items-center justify-center shrink-0'
+            : 'w-8 h-8 rounded-xl bg-[#EAF3FB] dark:bg-white/10 text-[#0077C8] dark:text-[#4FB2F2] flex items-center justify-center shrink-0 dark:border dark:border-white/10'
         }
       >
         <Icon className="w-4 h-4" />
@@ -191,6 +168,7 @@ function FlipCard({ flipped, hint, tone = 'light', front, back }) {
 }
 
 export default function MissionVision() {
+  const { t } = useLanguage();
   const [misionFlipped, setMisionFlipped] = useState(false);
   const [visionFlipped, setVisionFlipped] = useState(false);
   const [misionHint, setMisionHint] = useState(false);
@@ -258,7 +236,7 @@ export default function MissionVision() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="px-4 sm:px-6 py-10 sm:py-20 bg-slate-50 relative overflow-hidden">
+    <section ref={sectionRef} className="px-4 sm:px-6 py-10 sm:py-20 bg-slate-50 dark:bg-[#001428] relative overflow-hidden">
       {/* Resplandores ambientales de fondo */}
       <div
         aria-hidden="true"
@@ -266,20 +244,20 @@ export default function MissionVision() {
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-24 -right-16 w-80 h-80 rounded-full bg-[#003366]/[0.05] blur-3xl"
+        className="pointer-events-none absolute -bottom-24 -right-16 w-80 h-80 rounded-full bg-[#003366]/[0.05] dark:bg-[#0077C8]/[0.08] blur-3xl"
       />
 
       <div className="max-w-5xl mx-auto relative">
         {/* Section Title */}
         <div className="mb-8 sm:mb-12 text-center">
           <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1.5 font-mono-code">
-            Quiénes somos
+            {t.missionVision.kicker}
           </span>
-          <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-[#003366] tracking-tight">
-            Misión y Visión
+          <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-[#003366] dark:text-white tracking-tight">
+            {t.missionVision.title}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-md mx-auto leading-relaxed">
-            Los dos pilares que orientan cada proyecto, alianza y programa del ICAP en la región centroamericana. Tocá cada ficha para ver cómo se llevan a la práctica.
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-md mx-auto leading-relaxed">
+            {t.missionVision.subtitle}
           </p>
         </div>
 
@@ -293,39 +271,43 @@ export default function MissionVision() {
             hint={misionHint}
             tone="light"
             front={
-              <article className="relative bg-white rounded-[28px] sm:rounded-r-none p-6 sm:p-9 border border-slate-100 overflow-hidden h-full flex flex-col mv-card-light">
+              <article className="relative bg-white dark:bg-[#0B2340] rounded-[28px] sm:rounded-r-none p-6 sm:p-9 border border-slate-100 dark:border-white/10 overflow-hidden h-full flex flex-col mv-card-light">
                 <span
                   aria-hidden="true"
                   className="absolute top-0 left-6 right-6 sm:right-auto sm:left-9 sm:w-16 h-[3px] rounded-full bg-gradient-to-r from-[#0077C8] to-[#4FB2F2]"
                 />
                 <SealWatermark
                   src={icapEscudoNavy}
-                  className="w-56 sm:w-72 -right-12 -bottom-16 opacity-[0.08] rotate-[9deg]"
+                  className="w-56 sm:w-72 -right-12 -bottom-16 opacity-[0.08] dark:opacity-[0.05] rotate-[9deg] dark:hidden"
+                />
+                <SealWatermark
+                  src={icapEscudoWhite}
+                  className="w-56 sm:w-72 -right-12 -bottom-16 opacity-0 dark:opacity-[0.06] rotate-[9deg] hidden dark:block"
                 />
 
                 <div className="relative flex flex-col h-full">
                   <div className="flex items-center gap-3.5 mb-6">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#EAF3FB] flex items-center justify-center text-[#0077C8] shrink-0">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#EAF3FB] dark:bg-white/10 flex items-center justify-center text-[#0077C8] dark:text-[#4FB2F2] shrink-0">
                       <Compass className="w-6 h-6 sm:w-7 sm:h-7" />
                     </div>
                     <div>
-                      <span className="text-[10px] font-mono-code uppercase font-bold text-[#0077C8] tracking-wider block">
-                        Propósito &middot; 01
+                      <span className="text-[10px] font-mono-code uppercase font-bold text-[#0077C8] dark:text-[#4FB2F2] tracking-wider block">
+                        {t.missionVision.mission.badge}
                       </span>
-                      <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-[#003366] leading-tight">
-                        Misión
+                      <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-[#003366] dark:text-white leading-tight">
+                        {t.missionVision.mission.heading}
                       </h3>
                     </div>
                   </div>
 
-                  <blockquote className="border-l-[3px] border-[#0077C8]/30 pl-4 sm:pl-5 mb-7">
-                    <p className="font-heading text-base sm:text-xl font-semibold text-[#003366] leading-snug">
-                      Fortalecer las competencias y capacidades de los Estados y las instituciones por medio de su recurso humano, la modernización de las entidades públicas y el apoyo a la integración centroamericana.
+                  <blockquote className="border-l-[3px] border-[#0077C8]/30 dark:border-white/20 pl-4 sm:pl-5 mb-7">
+                    <p className="font-heading text-base sm:text-xl font-semibold text-[#003366] dark:text-[#EAF3FB] leading-snug">
+                      {t.missionVision.mission.quote}
                     </p>
                   </blockquote>
 
                   <div className="space-y-2 sm:space-y-2.5">
-                    {MISION_PILARES.map((item, i) => (
+                    {t.missionVision.mission.pilares.map((item, i) => (
                       <NumberTile key={i} tone="light" index={i}>
                         {item}
                       </NumberTile>
@@ -340,7 +322,7 @@ export default function MissionVision() {
                     <FlipButton
                       onClick={() => toggleMision(true)}
                       icon={RotateCw}
-                      label="Cómo lo cumplimos"
+                      label={t.missionVision.mission.flipLabel}
                       tone="light"
                     />
                   </div>
@@ -348,34 +330,38 @@ export default function MissionVision() {
               </article>
             }
             back={
-              <article className="relative bg-white rounded-[28px] sm:rounded-r-none p-6 sm:p-9 border border-slate-100 overflow-hidden h-full flex flex-col mv-card-light">
+              <article className="relative bg-white dark:bg-[#0B2340] rounded-[28px] sm:rounded-r-none p-6 sm:p-9 border border-slate-100 dark:border-white/10 overflow-hidden h-full flex flex-col mv-card-light">
                 <SealWatermark
                   src={icapEscudoNavy}
-                  className="w-52 sm:w-64 -left-12 -top-14 opacity-[0.07] -rotate-[11deg]"
+                  className="w-52 sm:w-64 -left-12 -top-14 opacity-[0.07] dark:opacity-0 -rotate-[11deg]"
+                />
+                <SealWatermark
+                  src={icapEscudoWhite}
+                  className="w-52 sm:w-64 -left-12 -top-14 opacity-0 dark:opacity-[0.05] -rotate-[11deg]"
                 />
 
                 <div className="relative flex flex-col h-full">
-                  <span className="text-[10px] font-mono-code uppercase font-bold text-[#0077C8] tracking-wider block mb-1.5">
-                    Cómo lo cumplimos
+                  <span className="text-[10px] font-mono-code uppercase font-bold text-[#0077C8] dark:text-[#4FB2F2] tracking-wider block mb-1.5">
+                    {t.missionVision.mission.backBadge}
                   </span>
-                  <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-[#003366] leading-tight mb-6">
-                    En la práctica
+                  <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-[#003366] dark:text-white leading-tight mb-6">
+                    {t.missionVision.mission.backHeading}
                   </h3>
 
                   <div className="space-y-2 sm:space-y-2.5 flex-1">
-                    {MISION_REVERSO.map((item, i) => (
-                      <IconTile key={i} tone="light" icon={item.icon}>
-                        {item.text}
+                    {MISION_REVERSO_ICONS.map((Icon, i) => (
+                      <IconTile key={i} tone="light" icon={Icon}>
+                        {t.missionVision.mission.reverso[i]}
                       </IconTile>
                     ))}
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-[10px] text-slate-400 font-mono-code">ICAP &middot; Fundado en 1954</span>
+                  <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono-code">{t.missionVision.mission.footerNote}</span>
                     <FlipButton
                       onClick={() => toggleMision(false)}
                       icon={RotateCcw}
-                      label="Volver"
+                      label={t.missionVision.mission.backLabel}
                       tone="light"
                     />
                   </div>
@@ -386,11 +372,11 @@ export default function MissionVision() {
 
           {/* Eje central: línea + escudo, horizontal en móvil, vertical desde sm */}
           <div className="flex sm:flex-col items-center justify-center gap-3 py-1.5 sm:py-0 sm:px-1">
-            <span className="h-px sm:h-auto sm:w-px flex-1 bg-gradient-to-r sm:bg-gradient-to-b from-transparent via-slate-300 to-transparent" />
-            <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white border border-slate-200 shadow-md flex items-center justify-center shrink-0 z-10">
+            <span className="h-px sm:h-auto sm:w-px flex-1 bg-gradient-to-r sm:bg-gradient-to-b from-transparent via-slate-300 dark:via-white/20 to-transparent" />
+            <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-[#0B2340] border border-slate-200 dark:border-white/15 shadow-md flex items-center justify-center shrink-0 z-10">
               <img src={icapEscudoCeleste} alt="" aria-hidden="true" className="w-7 h-7 sm:w-8 sm:h-8 opacity-90" />
             </div>
-            <span className="h-px sm:h-auto sm:w-px flex-1 bg-gradient-to-r sm:bg-gradient-to-b from-transparent via-slate-300 to-transparent" />
+            <span className="h-px sm:h-auto sm:w-px flex-1 bg-gradient-to-r sm:bg-gradient-to-b from-transparent via-slate-300 dark:via-white/20 to-transparent" />
           </div>
 
           {/* Visión */}
@@ -416,22 +402,22 @@ export default function MissionVision() {
                     </div>
                     <div>
                       <span className="text-[10px] font-mono-code uppercase font-bold text-[#4FB2F2] tracking-wider block">
-                        Horizonte &middot; 02
+                        {t.missionVision.vision.badge}
                       </span>
                       <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-white leading-tight">
-                        Visión
+                        {t.missionVision.vision.heading}
                       </h3>
                     </div>
                   </div>
 
                   <blockquote className="border-l-[3px] border-white/20 pl-4 sm:pl-5 mb-7">
                     <p className="font-heading text-base sm:text-xl font-semibold text-[#EAF3FB] leading-snug">
-                      Ser la institución del Sistema de la Integración Centroamericana especializada en la gestión pública, que genera conocimiento para las organizaciones y fortalece la gerencia de las políticas públicas a nivel local, nacional y regional, para avanzar hacia el desarrollo sostenible.
+                      {t.missionVision.vision.quote}
                     </p>
                   </blockquote>
 
                   <div className="space-y-2 sm:space-y-2.5">
-                    {VISION_PILARES.map((item, i) => (
+                    {t.missionVision.vision.pilares.map((item, i) => (
                       <NumberTile key={i} tone="dark" index={i}>
                         {item}
                       </NumberTile>
@@ -444,7 +430,7 @@ export default function MissionVision() {
                     <FlipButton
                       onClick={() => toggleVision(true)}
                       icon={RotateCw}
-                      label="Compromisos estratégicos"
+                      label={t.missionVision.vision.flipLabel}
                       tone="dark"
                     />
                   </div>
@@ -460,26 +446,26 @@ export default function MissionVision() {
 
                 <div className="relative flex flex-col h-full">
                   <span className="text-[10px] font-mono-code uppercase font-bold text-[#4FB2F2] tracking-wider block mb-1.5">
-                    Compromisos estratégicos
+                    {t.missionVision.vision.backBadge}
                   </span>
                   <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-white leading-tight mb-6">
-                    Hacia dónde vamos
+                    {t.missionVision.vision.backHeading}
                   </h3>
 
                   <div className="space-y-2 sm:space-y-2.5 flex-1">
-                    {VISION_REVERSO.map((item, i) => (
-                      <IconTile key={i} tone="dark" icon={item.icon}>
-                        {item.text}
+                    {VISION_REVERSO_ICONS.map((Icon, i) => (
+                      <IconTile key={i} tone="dark" icon={Icon}>
+                        {t.missionVision.vision.reverso[i]}
                       </IconTile>
                     ))}
                   </div>
 
                   <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
-                    <span className="text-[10px] text-[#6E8AA8] font-mono-code">ICAP &middot; SICA</span>
+                    <span className="text-[10px] text-[#6E8AA8] font-mono-code">{t.missionVision.vision.footerNote}</span>
                     <FlipButton
                       onClick={() => toggleVision(false)}
                       icon={RotateCcw}
-                      label="Volver"
+                      label={t.missionVision.vision.backLabel}
                       tone="dark"
                     />
                   </div>
