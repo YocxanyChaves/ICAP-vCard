@@ -15,7 +15,7 @@ const PARTICLES = [
   { left: '88%', size: 6, duration: '11.5s', delay: '-3.5s' }
 ];
 
-export default function Hero({ onOpenAbout, onScrollToContact, onNavigate }) {
+export default function Hero({ onOpenAbout, onScrollToContact, onNavigate, pages }) {
   const { t } = useLanguage();
   return (
     <section className="relative min-h-[520px] sm:min-h-[584px] bg-gradient-to-br from-[#003366] via-[#0B5A96] to-[#0077C8] text-white px-4 sm:px-6 pt-4 sm:pt-6 pb-9 sm:pb-14 flex flex-col items-center justify-center text-center overflow-hidden">
@@ -108,7 +108,7 @@ export default function Hero({ onOpenAbout, onScrollToContact, onNavigate }) {
           necesita repartirse en más ancho para que los 6 accesos
           respiren mejor. */}
       <div className="relative z-10 w-full max-w-3xl sm:max-w-4xl mx-auto mb-6 sm:mb-8 animate-hero-rise" style={{ animationDelay: '0ms' }}>
-        <SectionsStrip onNavigate={onNavigate} />
+        <SectionsStrip onNavigate={onNavigate} pages={pages} />
       </div>
 
       <div className="relative z-10 flex flex-col items-center max-w-xl mx-auto w-full">

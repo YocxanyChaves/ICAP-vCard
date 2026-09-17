@@ -120,12 +120,12 @@ function AllyDetailBody({ ally }) {
   const { t } = useLanguage();
   return (
     <div className="space-y-5">
-      <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+      <p className="text-sm text-slate-900 dark:text-slate-100 leading-relaxed">
         {ally.description || t.allies.noProjectRecord}
       </p>
 
       {ally.countryNote && (
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
           <MapPin className="w-3.5 h-3.5 text-[#0077C8] shrink-0" />
           {ally.countryNote}
         </div>
@@ -238,15 +238,15 @@ export default function AlliesMarquee() {
   const showSheet = Boolean(selected && !isDesktopRef.current);
 
   return (
-    <section ref={sectionRef} className="py-12 bg-[#001F3D] text-white overflow-hidden border-y border-white/5 relative">
+    <section ref={sectionRef} className="py-12 bg-gradient-to-br from-[#003366] via-[#0B5A96] to-[#0077C8] text-white overflow-hidden border-y border-white/5 relative">
       <div className="max-w-4xl mx-auto px-6 mb-8 text-center">
-        <span className="text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
+        <span className="text-xs font-bold tracking-widest uppercase text-[#EAF3FB] block mb-1 font-mono-code">
           {t.allies.kicker}
         </span>
         <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-white tracking-tight">
           {t.allies.title}
         </h2>
-        <p className="text-[11px] sm:text-xs text-slate-400 mt-1.5">
+        <p className="text-[11px] sm:text-xs text-[#D6E9F7] mt-1.5">
           {t.allies.subtitle}
         </p>
       </div>
@@ -254,8 +254,8 @@ export default function AlliesMarquee() {
       {/* Infinite scrolling track */}
       <div className="relative w-full overflow-hidden flex items-center py-2">
         {/* Gradient fades at borders */}
-        <div className="absolute left-0 inset-y-0 w-16 bg-gradient-to-r from-[#001F3D] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 inset-y-0 w-16 bg-gradient-to-l from-[#001F3D] to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 inset-y-0 w-16 bg-gradient-to-r from-[#003366] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 inset-y-0 w-16 bg-gradient-to-l from-[#0077C8] to-transparent z-10 pointer-events-none" />
 
         <div
           className="animate-marquee flex items-center"
@@ -266,18 +266,18 @@ export default function AlliesMarquee() {
               key={idx}
               type="button"
               onClick={(e) => handleSelect(item, e)}
-              className="flex items-center gap-3 px-6 py-3.5 mr-4 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-[#0077C8]/50 hover:bg-white/[0.08] transition-all min-w-[200px] sm:min-w-[240px] shrink-0 group text-left cursor-pointer"
+              className="flex items-center gap-3 px-6 py-3.5 mr-4 rounded-2xl bg-white/10 border border-white/20 hover:border-white/50 hover:bg-white/20 transition-all min-w-[200px] sm:min-w-[240px] shrink-0 group text-left cursor-pointer"
             >
               <AllyIconBadge ally={item} size="w-9 h-9" textSize="text-xs" />
               <div className="flex flex-col min-w-0 flex-1">
-                <span className="font-heading font-bold text-sm text-slate-100 group-hover:text-white transition-colors">
+                <span className="font-heading font-bold text-sm text-white group-hover:text-white transition-colors">
                   {item.name}
                 </span>
-                <span className="text-[11px] text-slate-400 line-clamp-1 leading-snug">
+                <span className="text-[11px] text-[#D6E9F7]/80 line-clamp-1 leading-snug">
                   {item.label}
                 </span>
               </div>
-              <Info className="w-3.5 h-3.5 text-white/20 group-hover:text-[#0077C8] transition-colors shrink-0" />
+              <Info className="w-3.5 h-3.5 text-white/40 group-hover:text-white transition-colors shrink-0" />
             </button>
           ))}
         </div>
@@ -317,7 +317,7 @@ export default function AlliesMarquee() {
                   <span className="text-[10px] font-mono-code font-bold uppercase tracking-wider text-[#0077C8] block">
                     {t.allies.modalSubtitle}
                   </span>
-                  <h4 className="font-heading font-extrabold text-base text-[#003366] dark:text-white leading-tight truncate">
+                  <h4 className="font-heading font-extrabold text-base text-[#003366] dark:text-[#9FC6E8] leading-tight truncate">
                     {selected.name}
                   </h4>
                 </div>

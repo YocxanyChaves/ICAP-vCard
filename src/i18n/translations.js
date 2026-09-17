@@ -30,7 +30,17 @@ export const translations = {
       about: 'Sobre ICAP',
       contact: 'Contactanos',
       language: 'Cambiar idioma',
-      theme: 'Cambiar tema claro/oscuro'
+      theme: 'Cambiar tema claro/oscuro',
+      settings: 'Configuración',
+      settingsView: 'Vista',
+      settingsLanguage: 'Idioma',
+      settingsTheme: 'Tema',
+      viewFullShort: 'Completa',
+      viewMobileShort: 'Móvil',
+      themeLight: 'Claro',
+      themeDark: 'Oscuro',
+      deptAT: 'Asistencia Técnica',
+      deptDocencia: 'Docencia'
     },
 
     nav: {
@@ -40,7 +50,12 @@ export const translations = {
       autoridades: 'Autoridades',
       areas: 'Áreas',
       presencia: 'Presencia',
-      contacto: 'Contacto'
+      contacto: 'Contacto',
+      docenciaMision: 'Formación',
+      docenciaImpacto: 'Impacto',
+      docenciaInvestigacion: 'Investigación',
+      docenciaPublicaciones: 'Publicaciones',
+      docenciaAreas: 'Áreas'
     },
 
     sectionsStrip: {
@@ -446,6 +461,204 @@ export const translations = {
       }
     },
 
+    docenciaMision: {
+      kicker: 'Formación con Visión de Futuro',
+      title: 'Capacidades para Comprender la Complejidad',
+      subtitle:
+        'Conocimiento para anticipar, liderar y transformar. Las instituciones enfrentan escenarios cada vez más complejos: transformación digital, nuevas demandas ciudadanas, cambios demográficos, desafíos sanitarios, sostenibilidad, innovación tecnológica y evolución de los modelos de gobernanza. Frente a este entorno, el ICAP forma profesionales capaces de interpretar tendencias, anticipar escenarios y transformar conocimiento en decisiones estratégicas. El Departamento de Docencia e Investigación impulsa una formación de posgrado conectada con la realidad regional, la investigación aplicada, la innovación académica y la generación de conocimiento con impacto. Prepárese para liderar los desafíos del futuro.',
+      // Encabezado propio que va arriba del carrusel de cards, en la
+      // página dedicada "Formación" del menú (no en el texto de Inicio,
+      // que ya tiene su propio kicker/título/subtítulo arriba).
+      cardsIntro: {
+        kicker: 'Formación con Visión de Futuro',
+        text: 'La experiencia académica del ICAP trasciende la adquisición de conocimientos. Promueve capacidades para comprender la complejidad, anticipar escenarios y conducir procesos de transformación en las organizaciones y sociedades de la región.'
+      },
+      items: {
+        prospectiva: {
+          name: 'Prospectiva',
+          description: 'Interpretar tendencias, identificar señales de cambio y construir escenarios para fortalecer la toma de decisiones.'
+        },
+        pensamientoEstrategico: {
+          name: 'Pensamiento Estratégico',
+          description: 'Analizar problemas complejos, reconocer oportunidades y diseñar respuestas con visión de largo plazo.'
+        },
+        investigacionAplicada: {
+          name: 'Investigación Aplicada',
+          description: 'Transformar datos, evidencia y conocimiento científico en soluciones para desafíos reales.'
+        },
+        innovacionDigital: {
+          name: 'Innovación y Transformación Digital',
+          description: 'Incorporar nuevas metodologías, tecnologías emergentes e inteligencia artificial de manera estratégica, crítica y responsable.'
+        },
+        liderazgo: {
+          name: 'Liderazgo',
+          description: 'Fortalecer capacidades para impulsar cambios, articular actores y orientar organizaciones hacia resultados.'
+        },
+        visionRegional: {
+          name: 'Visión Regional',
+          description: 'Comprender los desafíos nacionales desde una perspectiva centroamericana, comparada y global.'
+        },
+        aprendizajeAplicado: {
+          name: 'Aprendizaje Aplicado',
+          description: 'Conectar la formación académica con situaciones concretas, experiencias profesionales y necesidades institucionales.'
+        }
+      }
+    },
+
+    docenciaImpacto: {
+      kicker: 'Formación para Generar Impacto',
+      title: 'La Experiencia ICAP Integra',
+      subtitle:
+        'Nuestros programas están orientados a profesionales que buscan fortalecer su perfil, asumir nuevas responsabilidades y ampliar su capacidad para incidir en organizaciones, políticas públicas y procesos de desarrollo.',
+      items: {
+        conocimientoEspecializado: {
+          name: 'Conocimiento Especializado',
+          description: 'Formación vinculada con los principales desafíos de la gestión contemporánea.'
+        },
+        aplicacionPractica: {
+          name: 'Aplicación Práctica',
+          description: 'Herramientas para abordar problemas reales desde el ejercicio profesional.'
+        },
+        investigacion: {
+          name: 'Investigación',
+          description: 'Capacidad para producir, interpretar y utilizar evidencia.'
+        },
+        redesRegionales: {
+          name: 'Redes Regionales',
+          description: 'Intercambio de experiencias con profesionales de distintos países, disciplinas e instituciones.'
+        },
+        innovacion: {
+          name: 'Innovación',
+          description: 'Nuevas perspectivas para modernizar organizaciones y fortalecer la gestión.'
+        }
+      },
+      tagline: 'Más que obtener un posgrado, se trata de ampliar su capacidad para transformar.'
+    },
+
+    docenciaInvestigacion: {
+      kicker: 'Investigación',
+      title: 'Comprender el Presente y Construir Futuro',
+      paragraphs: [
+        'La investigación constituye un componente estratégico de la experiencia académica del ICAP.',
+        'Se promueve una producción de conocimiento vinculada con los desafíos de las instituciones, las políticas públicas y el desarrollo regional, con énfasis en su aplicación y utilidad para la toma de decisiones.'
+      ],
+      fieldsLabel: 'Campos de interés',
+      fields: [
+        'Gobernanza',
+        'Políticas públicas',
+        'Prospectiva',
+        'Innovación pública',
+        'Transformación digital',
+        'Salud',
+        'Epidemiología',
+        'Gestión de proyectos',
+        'Calidad institucional',
+        'Energía',
+        'Desarrollo sostenible',
+        'Integración centroamericana'
+      ],
+      closing:
+        'La investigación permite pasar de la información al conocimiento, del conocimiento a la evidencia y de la evidencia a mejores decisiones.',
+      tagline: 'Investigar para comprender. Comprender para transformar.'
+    },
+
+    docenciaPublicaciones: {
+      kicker: 'Ecosistemas Regionales del Conocimiento',
+      title: 'Alianzas Interactivas',
+      subtitle:
+        'El conocimiento producido en el ICAP trasciende el aula. La formación académica se articula con investigación, publicación científica, divulgación y acceso abierto, fortaleciendo la circulación del conocimiento en Centroamérica.',
+      items: {
+        rcap: {
+          name: 'Revista Centroamericana de Administración Pública',
+          description:
+            'La RCAP, existente desde 1981, constituye un espacio científico especializado para el análisis de la administración pública, la gobernanza, las políticas públicas y los desafíos del desarrollo regional. Su carácter académico permite proyectar investigaciones, reflexiones y experiencias relevantes para la gestión pública centroamericana.'
+        },
+        cuadernos: {
+          name: 'Cuadernos Centroamericanos',
+          description: 'Publicación orientada a difundir investigación aplicada, análisis académico y aportes sobre temas estratégicos para Centroamérica.'
+        },
+        editorial: {
+          name: 'Editorial ICAP',
+          description: 'Producción especializada que contribuye al debate académico y a la generación de conocimiento sobre gestión pública, integración y desarrollo regional.'
+        },
+        yaxche: {
+          name: 'Repositorio Institucional Yaxché',
+          description:
+            'Yaxché preserva, organiza y facilita el acceso a la producción académica, científica y editorial del Instituto. Integra Trabajos Finales de Graduación, publicaciones de la RCAP, Cuadernos Centroamericanos, libros y otros productos de conocimiento generados desde la comunidad académica del ICAP.'
+        }
+      },
+      tagline: 'Investigar – Publicar – Divulgar – Compartir – Socializar – Transferir – Transformar'
+    },
+
+    docenciaAreas: {
+      kicker: 'Nuestra Oferta',
+      title: 'Áreas para los Desafíos del Presente y del Futuro',
+      subtitle:
+        'La oferta académica del ICAP evoluciona de acuerdo con las necesidades de las instituciones y las transformaciones del entorno. Toque cualquier área para atraerla al centro.',
+      pilarLabel: 'Área Estratégica',
+      footerHint: 'Toca cualquier área para atraerla al centro, o dejá que la galaxia gire sola.',
+      items: {
+        integracionRegional: {
+          name: 'Integración Regional',
+          description: 'Gobernanza y mejoras regulatorias para fortalecer la integración centroamericana.'
+        },
+        politicasPublicas: {
+          name: 'Políticas Públicas',
+          description: 'Diseño, análisis e implementación de políticas públicas con impacto regional.'
+        },
+        gestionPredictiva: {
+          name: 'Gestión Pública Predictiva',
+          description: 'Uso de datos y evidencia para anticipar escenarios en la gestión pública.'
+        },
+        gerenciaProyectos: {
+          name: 'Gerencia de Proyectos',
+          description: 'Formulación, dirección y evaluación de proyectos institucionales.'
+        },
+        transformacionDigital: {
+          name: 'Transformación Digital',
+          description: 'Incorporación estratégica de tecnología e inteligencia artificial en la gestión.'
+        },
+        innovacionInstitucional: {
+          name: 'Innovación Institucional',
+          description: 'Nuevas perspectivas para modernizar organizaciones y fortalecer su gestión.'
+        },
+        calidad: {
+          name: 'Calidad',
+          description: 'Sistemas y certificaciones para fortalecer la calidad institucional.'
+        },
+        saludPublica: {
+          name: 'Salud Pública',
+          description: 'Gestión y políticas orientadas al fortalecimiento de los sistemas de salud.'
+        },
+        epidemiologia: {
+          name: 'Epidemiología',
+          description: 'Análisis e interpretación de evidencia epidemiológica para la toma de decisiones.'
+        },
+        regulacionEnergia: {
+          name: 'Regulación Sector Energía',
+          description: 'Marcos regulatorios y gestión estratégica del sector energético.'
+        },
+        investigacionAplicada: {
+          name: 'Investigación Aplicada',
+          description: 'Producción de conocimiento vinculado a los desafíos institucionales y regionales.'
+        },
+        modernizacionOrganizacional: {
+          name: 'Modernización Organizacional',
+          description: 'Procesos de cambio orientados a fortalecer la capacidad institucional.'
+        }
+      }
+    },
+
+    docenciaComunidad: {
+      kicker: 'Alcance Regional',
+      title: 'Una Comunidad Académica Centroamericana',
+      paragraphs: [
+        'Estudiar en el ICAP significa integrarse a una comunidad regional donde convergen profesionales, docentes, investigadores, especialistas y tomadores de decisión.',
+        'Esta diversidad permite enriquecer el aprendizaje mediante el intercambio de experiencias, realidades institucionales y perspectivas provenientes de distintos países de Centroamérica.',
+        'La dimensión regional constituye uno de los principales elementos diferenciadores de la experiencia ICAP: una formación que permite comprender lo nacional, dialogar con lo regional y actuar frente a desafíos globales.'
+      ]
+    },
+
     allies: {
       kicker: 'Red Institucional',
       title: 'Organismos y Socios de Cooperación',
@@ -569,7 +782,17 @@ export const translations = {
       about: 'About ICAP',
       contact: 'Contact Us',
       language: 'Switch language',
-      theme: 'Switch light/dark theme'
+      theme: 'Switch light/dark theme',
+      settings: 'Settings',
+      settingsView: 'View',
+      settingsLanguage: 'Language',
+      settingsTheme: 'Theme',
+      viewFullShort: 'Full',
+      viewMobileShort: 'Mobile',
+      themeLight: 'Light',
+      themeDark: 'Dark',
+      deptAT: 'Technical Assistance',
+      deptDocencia: 'Teaching'
     },
 
     nav: {
@@ -579,7 +802,12 @@ export const translations = {
       autoridades: 'Leadership',
       areas: 'Focus Areas',
       presencia: 'Presence',
-      contacto: 'Contact'
+      contacto: 'Contact',
+      docenciaMision: 'Training',
+      docenciaImpacto: 'Impact',
+      docenciaInvestigacion: 'Research',
+      docenciaPublicaciones: 'Publications',
+      docenciaAreas: 'Areas'
     },
 
     sectionsStrip: {
@@ -978,6 +1206,204 @@ export const translations = {
           dataNote: 'Project shared with Costa Rica and Mexico'
         }
       }
+    },
+
+    docenciaMision: {
+      kicker: 'Education with a Vision for the Future',
+      title: 'Capacities to Understand Complexity',
+      subtitle:
+        'Knowledge to anticipate, lead, and transform. Institutions face increasingly complex scenarios: digital transformation, new citizen demands, demographic shifts, health challenges, sustainability, technological innovation, and evolving governance models. In this environment, ICAP trains professionals capable of interpreting trends, anticipating scenarios, and turning knowledge into strategic decisions. The Department of Teaching and Research drives graduate-level education connected to regional realities, applied research, academic innovation, and the generation of knowledge with impact. Get ready to lead the challenges of the future.',
+      // Heading shown above the cards carousel on the dedicated
+      // "Formación" (Training) menu page — not on the Inicio text,
+      // which already has its own kicker/title/subtitle above.
+      cardsIntro: {
+        kicker: 'Education with a Vision for the Future',
+        text: "ICAP's academic experience goes beyond acquiring knowledge. It builds capacities to understand complexity, anticipate scenarios, and lead transformation processes in organizations and societies across the region."
+      },
+      items: {
+        prospectiva: {
+          name: 'Foresight',
+          description: 'Interpreting trends, identifying signals of change, and building scenarios to strengthen decision-making.'
+        },
+        pensamientoEstrategico: {
+          name: 'Strategic Thinking',
+          description: 'Analyzing complex problems, recognizing opportunities, and designing long-term responses.'
+        },
+        investigacionAplicada: {
+          name: 'Applied Research',
+          description: 'Turning data, evidence, and scientific knowledge into solutions for real challenges.'
+        },
+        innovacionDigital: {
+          name: 'Innovation and Digital Transformation',
+          description: 'Incorporating new methodologies, emerging technologies, and artificial intelligence strategically, critically, and responsibly.'
+        },
+        liderazgo: {
+          name: 'Leadership',
+          description: 'Strengthening capacities to drive change, engage stakeholders, and steer organizations toward results.'
+        },
+        visionRegional: {
+          name: 'Regional Vision',
+          description: 'Understanding national challenges from a Central American, comparative, and global perspective.'
+        },
+        aprendizajeAplicado: {
+          name: 'Applied Learning',
+          description: 'Connecting academic training with real situations, professional experience, and institutional needs.'
+        }
+      }
+    },
+
+    docenciaImpacto: {
+      kicker: 'Education that Drives Impact',
+      title: 'What the ICAP Experience Includes',
+      subtitle:
+        'Our programs are designed for professionals who want to strengthen their profile, take on new responsibilities, and expand their ability to influence organizations, public policy, and development processes.',
+      items: {
+        conocimientoEspecializado: {
+          name: 'Specialized Knowledge',
+          description: 'Training linked to the main challenges of contemporary management.'
+        },
+        aplicacionPractica: {
+          name: 'Practical Application',
+          description: 'Tools to address real problems from professional practice.'
+        },
+        investigacion: {
+          name: 'Research',
+          description: 'The ability to produce, interpret, and use evidence.'
+        },
+        redesRegionales: {
+          name: 'Regional Networks',
+          description: 'Exchange of experience with professionals from different countries, disciplines, and institutions.'
+        },
+        innovacion: {
+          name: 'Innovation',
+          description: 'New perspectives to modernize organizations and strengthen management.'
+        }
+      },
+      tagline: "It's not just about earning a graduate degree — it's about expanding your capacity to transform."
+    },
+
+    docenciaInvestigacion: {
+      kicker: 'Research',
+      title: 'Understanding the Present, Building the Future',
+      paragraphs: [
+        "Research is a strategic component of ICAP's academic experience.",
+        'Knowledge production is linked to the challenges facing institutions, public policy, and regional development, with an emphasis on its application and usefulness for decision-making.'
+      ],
+      fieldsLabel: 'Fields of interest',
+      fields: [
+        'Governance',
+        'Public policy',
+        'Foresight',
+        'Public innovation',
+        'Digital transformation',
+        'Health',
+        'Epidemiology',
+        'Project management',
+        'Institutional quality',
+        'Energy',
+        'Sustainable development',
+        'Central American integration'
+      ],
+      closing:
+        'Research makes it possible to move from information to knowledge, from knowledge to evidence, and from evidence to better decisions.',
+      tagline: 'Research to understand. Understand to transform.'
+    },
+
+    docenciaPublicaciones: {
+      kicker: 'Regional Knowledge Ecosystems',
+      title: 'Interactive Alliances',
+      subtitle:
+        'Knowledge produced at ICAP goes beyond the classroom. Academic training is linked to research, scientific publishing, outreach, and open access, strengthening the flow of knowledge across Central America.',
+      items: {
+        rcap: {
+          name: 'Central American Journal of Public Administration',
+          description:
+            'The RCAP, published since 1981, is a specialized scientific space for analyzing public administration, governance, public policy, and regional development challenges. Its academic standing showcases research, reflections, and experiences relevant to Central American public management.'
+        },
+        cuadernos: {
+          name: 'Cuadernos Centroamericanos',
+          description: 'A publication dedicated to disseminating applied research, academic analysis, and contributions on strategic topics for Central America.'
+        },
+        editorial: {
+          name: 'ICAP Editorial',
+          description: 'Specialized production that contributes to academic debate and knowledge generation on public management, integration, and regional development.'
+        },
+        yaxche: {
+          name: 'Yaxché Institutional Repository',
+          description:
+            "Yaxché preserves, organizes, and provides access to the Institute's academic, scientific, and editorial output. It brings together graduation theses, RCAP publications, Cuadernos Centroamericanos, books, and other knowledge products generated by the ICAP academic community."
+        }
+      },
+      tagline: 'Research – Publish – Share – Disseminate – Socialize – Transfer – Transform'
+    },
+
+    docenciaAreas: {
+      kicker: 'Our Offering',
+      title: "Areas for Today's and Tomorrow's Challenges",
+      subtitle:
+        "ICAP's academic offering evolves alongside the needs of institutions and a changing environment. Tap any area to draw it to the center.",
+      pilarLabel: 'Strategic Area',
+      footerHint: 'Tap any area to draw it to the center, or let the galaxy spin on its own.',
+      items: {
+        integracionRegional: {
+          name: 'Regional Integration',
+          description: 'Governance and regulatory improvements that strengthen Central American integration.'
+        },
+        politicasPublicas: {
+          name: 'Public Policy',
+          description: 'Design, analysis, and implementation of public policy with regional impact.'
+        },
+        gestionPredictiva: {
+          name: 'Predictive Public Management',
+          description: 'Using data and evidence to anticipate scenarios in public management.'
+        },
+        gerenciaProyectos: {
+          name: 'Project Management',
+          description: 'Formulation, direction, and evaluation of institutional projects.'
+        },
+        transformacionDigital: {
+          name: 'Digital Transformation',
+          description: 'Strategic incorporation of technology and artificial intelligence into management.'
+        },
+        innovacionInstitucional: {
+          name: 'Institutional Innovation',
+          description: 'New perspectives to modernize organizations and strengthen their management.'
+        },
+        calidad: {
+          name: 'Quality',
+          description: 'Systems and certifications that strengthen institutional quality.'
+        },
+        saludPublica: {
+          name: 'Public Health',
+          description: 'Management and policy aimed at strengthening health systems.'
+        },
+        epidemiologia: {
+          name: 'Epidemiology',
+          description: 'Analysis and interpretation of epidemiological evidence for decision-making.'
+        },
+        regulacionEnergia: {
+          name: 'Energy Sector Regulation',
+          description: 'Regulatory frameworks and strategic management of the energy sector.'
+        },
+        investigacionAplicada: {
+          name: 'Applied Research',
+          description: 'Knowledge production linked to institutional and regional challenges.'
+        },
+        modernizacionOrganizacional: {
+          name: 'Organizational Modernization',
+          description: 'Change processes aimed at strengthening institutional capacity.'
+        }
+      }
+    },
+
+    docenciaComunidad: {
+      kicker: 'Regional Reach',
+      title: 'A Central American Academic Community',
+      paragraphs: [
+        'Studying at ICAP means joining a regional community where professionals, faculty, researchers, specialists, and decision-makers converge.',
+        'This diversity enriches learning through the exchange of experiences, institutional realities, and perspectives from across Central America.',
+        'The regional dimension is one of the defining features of the ICAP experience: an education that lets you understand the national context, engage with the regional one, and act on global challenges.'
+      ]
     },
 
     allies: {

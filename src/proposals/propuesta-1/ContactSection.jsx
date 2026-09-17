@@ -56,7 +56,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
   }, []);
 
   return (
-    <section id={id} className="px-4 sm:px-6 py-14 sm:py-24 bg-slate-50 dark:bg-[#001428] relative overflow-hidden">
+    <section id={id} className="px-4 sm:px-6 py-14 sm:py-24 bg-[#D6E9F7] dark:bg-[#001F3D] relative overflow-hidden">
       {/* Escudo grande y apenas insinuado de fondo, como el que ya
           "marca de agua" a Misión — el mismo gesto para cerrar el
           brochure con esa firma institucional. */}
@@ -74,17 +74,17 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
           <span className="text-[11px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1.5 font-mono-code">
             {t.contact.kicker}
           </span>
-          <h2 className="font-heading font-extrabold text-2xl sm:text-4xl text-[#003366] dark:text-white tracking-tight">
+          <h2 className="font-heading font-extrabold text-2xl sm:text-4xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
             {t.contact.title}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-2 max-w-sm mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-900 dark:text-slate-300 mt-2 max-w-sm mx-auto leading-relaxed">
             {t.contact.subtitle}
           </p>
         </div>
 
         {/* Executive Card */}
         <div className={visible ? 'animate-value-card-in' : 'opacity-0'}>
-          <div className="mv-card-light bg-white dark:bg-[#0B2340] rounded-[28px] overflow-hidden">
+          <div className="mv-card-light bg-white dark:bg-[#003366] rounded-[28px] overflow-hidden">
             {/* Franja de perfil en el mismo celeste 3D de Áreas — sella
                 el "carné" con la misma ilusión de volumen del resto del
                 brochure, en vez de la barra plana de antes. */}
@@ -200,7 +200,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
                   className="w-full text-white hover:brightness-110"
                   style={{ background: 'linear-gradient(135deg, #0090DD 0%, #0068AE 55%, #013A63 100%)' }}
                 />
-                <p className="text-[11px] text-center text-slate-400 dark:text-slate-500 mt-2">
+                <p className="text-[11px] text-center text-slate-500 dark:text-slate-300 mt-2">
                   {t.contact.saveHint}
                 </p>
               </div>
@@ -209,7 +209,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
         </div>
 
         {/* Footer info */}
-        <div className="text-center mt-8 text-xs text-slate-500 dark:text-slate-400 space-y-1">
+        <div className="text-center mt-8 text-xs text-slate-700 dark:text-slate-300 space-y-1">
           <div className="font-heading font-semibold text-slate-700 dark:text-slate-200">
             {t.contact.footerLine}
           </div>
@@ -233,7 +233,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
         icon={<Calendar className="w-5 h-5 text-[#0077C8]" />}
       >
         <div className="space-y-4 text-center sm:text-left">
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-900 dark:text-slate-100 leading-relaxed">
             {t.contact.scheduleModalText}
           </p>
 

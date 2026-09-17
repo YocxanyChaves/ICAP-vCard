@@ -128,7 +128,7 @@ function StatCard({ icon: Icon, value, label, sublabel, color, hex, visible, sta
         {display}
       </div>
       <div className="font-heading font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 leading-tight">{label}</div>
-      <div className="text-[10px] sm:text-xs text-slate-400 dark:text-slate-400 mt-0.5">{sublabel}</div>
+      <div className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-300 mt-0.5">{sublabel}</div>
 
       {/* Mini gráfico de barras: crece apenas arranca la animación, como
           adelanto visual antes de que el número empiece a subir. */}
@@ -242,12 +242,12 @@ export default function StatsSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="px-4 sm:px-6 py-10 sm:py-16 bg-white dark:bg-[#001428] border-y border-slate-100 dark:border-white/10">
+    <section ref={sectionRef} className="px-4 sm:px-6 py-10 sm:py-16 bg-[#D6E9F7] dark:bg-[#001F3D] border-y border-slate-100 dark:border-white/10">
       <div className="max-w-4xl mx-auto text-center">
         <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
           {t.stats.kicker}
         </span>
-        <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-white tracking-tight mb-2">
+        <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-[#9FC6E8] tracking-tight mb-2">
           {t.stats.title}
         </h2>
         <div className="inline-block px-2.5 py-0.5 rounded-md bg-[#EAF3FB] dark:bg-white/10 text-[#003366] dark:text-[#9FC6E8] text-[9px] sm:text-[10px] font-mono-code font-bold tracking-wider uppercase mb-8">

@@ -49,7 +49,7 @@ export default function BottomSheet({ isOpen, onClose, title, subtitle, icon, ch
                 </span>
               )}
               {title && (
-                <h3 className="font-heading font-extrabold text-lg sm:text-xl text-[#003366] dark:text-white leading-tight">
+                <h3 className="font-heading font-extrabold text-lg sm:text-xl text-[#003366] dark:text-[#9FC6E8] leading-tight">
                   {title}
                 </h3>
               )}

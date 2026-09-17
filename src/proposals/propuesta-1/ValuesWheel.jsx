@@ -1,12 +1,16 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Shield, Star, Users, Heart, Award, Sparkles } from 'lucide-react';
 import icapLogoMark from '../../assets/icap-logo-mark.png';
 import { useLanguage } from '../../i18n/LanguageContext';
 
 // El nombre y la descripción de cada valor viven en el diccionario de
 // traducciones (t.valuesWheel.items[id]) — acá sólo quedan el id y el
-// ícono, que no cambian según el idioma.
-const VALUES = [
+// ícono, que no cambian según el idioma. Este es el set por defecto
+// (Valores, de Asistencia Técnica); el componente también acepta un
+// `items`/`t` distintos por prop — así lo reutiliza tal cual Docencia
+// para su rueda de Áreas, sin duplicar toda la física orbital de acá
+// abajo para un segundo set de esferas.
+const DEFAULT_VALUES = [
   { id: 'integridad', icon: Shield },
   { id: 'excelencia', icon: Star },
   { id: 'equipo', icon: Users },
@@ -15,7 +19,6 @@ const VALUES = [
   { id: 'transparencia', icon: Sparkles }
 ];
 
-const N = VALUES.length;
 // Misma duración yendo al centro que volviendo a la órbita, para que el
 // "recorrido" se vea igual de claro en los dos sentidos. Pero la CURVA
 // sí es distinta a propósito: ATTRACT_EASE arranca rapidísimo (es un
@@ -51,27 +54,34 @@ const STARS = Array.from({ length: 26 }, (_, i) => {
    ese orden) — es lo que evita que con el tiempo dos esferas terminen
    superpuestas: antes cada una giraba a su propia velocidad y, tarde o
    temprano, una más rápida le pasaba por encima a una más lenta. Ahora
-   las 6 comparten exactamente la misma velocidad base (nunca se
+   todas comparten exactamente la misma velocidad base (nunca se
    adelantan entre sí) y sólo tienen un vaivén angular pequeño y
    ACOTADO (un seno, no una deriva) alrededor de su propio slot — se
    sigue sintiendo que cada una tiene vida propia, pero jamás cruza a
    su vecina. Semillas fijas (no Math.random) para que el layout no
-   "salte" entre renders. */
-const ORBIT_CONFIG = VALUES.map((v, i) => {
-  const seed = i * 91.7;
-  const r1 = Math.sin(seed) * 0.5 + 0.5;
-  const r2 = Math.sin(seed * 1.9 + 3.1) * 0.5 + 0.5;
-  const r3 = Math.sin(seed * 2.7 + 1.3) * 0.5 + 0.5;
-  return {
-    radiusFactor: 0.92 + r1 * 0.16, // 0.92–1.08 × radio base
-    phaseOffset: (i / N) * 2 * Math.PI, // slot fijo: nunca cambia el orden circular
-    angleWobbleAmp: 0.05 + r2 * 0.05, // ±0.05–0.10 rad (~3°–6°): vaivén, no deriva
-    angleWobbleSpeed: 0.005 + r2 * 0.003,
-    wobbleAmp: 3 + r1 * 4, // vaivén del radio (px)
-    wobbleSpeed: 0.004 + r2 * 0.003,
-    wobblePhase: r3 * Math.PI * 2
-  };
-});
+   "salte" entre renders. Factorizado como función de `items` (en vez de
+   una constante de módulo atada a los 6 Valores de siempre) para poder
+   reusar toda esta física orbital con un set de esferas distinto —
+   como las 12 Áreas de Docencia — sin duplicar nada de lo de abajo.
+*/
+function buildOrbitConfig(items) {
+  const n = items.length;
+  return items.map((v, i) => {
+    const seed = i * 91.7;
+    const r1 = Math.sin(seed) * 0.5 + 0.5;
+    const r2 = Math.sin(seed * 1.9 + 3.1) * 0.5 + 0.5;
+    const r3 = Math.sin(seed * 2.7 + 1.3) * 0.5 + 0.5;
+    return {
+      radiusFactor: 0.92 + r1 * 0.16, // 0.92–1.08 × radio base
+      phaseOffset: (i / n) * 2 * Math.PI, // slot fijo: nunca cambia el orden circular
+      angleWobbleAmp: 0.05 + r2 * 0.05, // ±0.05–0.10 rad (~3°–6°): vaivén, no deriva
+      angleWobbleSpeed: 0.005 + r2 * 0.003,
+      wobbleAmp: 3 + r1 * 4, // vaivén del radio (px)
+      wobbleSpeed: 0.004 + r2 * 0.003,
+      wobblePhase: r3 * Math.PI * 2
+    };
+  });
+}
 
 /**
  * Posición orbital de un valor para una rotación y un tamaño de
@@ -79,10 +89,13 @@ const ORBIT_CONFIG = VALUES.map((v, i) => {
  * en el render, ahora factorizada para poder usarla también para
  * PREDECIR dónde va a estar el slot un poco más adelante en el tiempo
  * (ver `releaseTargetRef` más abajo: es la pieza que arregla que la
- * esfera se viera "trabada" al volver a su órbita).
+ * esfera se viera "trabada" al volver a su órbita). Recibe el
+ * `orbitConfig` ya calculado (ver buildOrbitConfig) en vez de leerlo de
+ * una constante de módulo, para poder servir tanto a la rueda de
+ * Valores como a la de Áreas.
  */
-function computeOrbitPos(index, rot, containerSize) {
-  const cfg = ORBIT_CONFIG[index];
+function computeOrbitPos(orbitConfig, index, rot, containerSize) {
+  const cfg = orbitConfig[index];
   const rad = containerSize * 0.35;
   const cx = containerSize / 2;
   const cy = containerSize / 2;
@@ -93,8 +106,20 @@ function computeOrbitPos(index, rot, containerSize) {
   return { x: cx + Math.cos(angle) * orbitRadius, y: cy + Math.sin(angle) * orbitRadius };
 }
 
-export default function ValuesWheel() {
+/**
+ * `items`: lista de `{ id, icon }` a mostrar en la rueda (por defecto,
+ * los 6 Valores de Asistencia Técnica). `content`: el namespace de
+ * traducciones correspondiente (con kicker/title/subtitle/pilarLabel/
+ * footerHint/items[id].name|description) — si no se pasa, usa
+ * `t.valuesWheel` como hasta ahora. Así Docencia reutiliza el mismo
+ * componente para su rueda de Áreas pasando `items={DOCENCIA_AREAS}
+ * content={t.docenciaAreas}`, sin tocar nada de la animación.
+ */
+export default function ValuesWheel({ items = DEFAULT_VALUES, content }) {
   const { t } = useLanguage();
+  const wheelT = content || t.valuesWheel;
+  const N = items.length;
+  const orbitConfig = useMemo(() => buildOrbitConfig(items), [items]);
   const containerRef = useRef(null);
   const [size, setSize] = useState(280);
   const [rotation, setRotation] = useState(0);
@@ -189,7 +214,10 @@ export default function ValuesWheel() {
         // mientras dura el regreso — así la transición corre entera y
         // sin interrupciones, tan fluida como la ida.
         const predictedRotation = rotationRef.current + 0.012 * RELEASE_S * 1000;
-        releaseTargetRef.current = { index: idx, ...computeOrbitPos(idx, predictedRotation, sizeRef.current) };
+        releaseTargetRef.current = {
+          index: idx,
+          ...computeOrbitPos(orbitConfig, idx, predictedRotation, sizeRef.current)
+        };
         setPhase('release');
 
         const t3 = setTimeout(() => {
@@ -211,7 +239,7 @@ export default function ValuesWheel() {
       }, HOLD_MS);
       timeoutsRef.current.push(t2);
     },
-    []
+    [N, orbitConfig]
   );
 
   const runCycle = useCallback(
@@ -282,20 +310,20 @@ export default function ValuesWheel() {
 
   const radius = size * 0.35;
   const planetR = size < 320 ? 18 : 26;
-  const current = VALUES[activeIndex];
-  const currentT = t.valuesWheel.items[current.id];
+  const current = items[activeIndex];
+  const currentT = wheelT.items[current.id];
   const attracted = phase === 'attract' || phase === 'hold';
   const centerX = size / 2;
   const centerY = size / 2;
 
   return (
-    <section className="px-4 sm:px-6 py-14 sm:py-24 bg-[#001F3D] text-white relative overflow-hidden">
+    <section className="px-4 sm:px-6 py-14 sm:py-24 bg-[#D6E9F7] dark:bg-[#001F3D] text-slate-900 dark:text-white relative overflow-hidden">
       {/* Starfield */}
       <div className="absolute inset-0 pointer-events-none">
         {STARS.map((s, i) => (
           <span
             key={i}
-            className="absolute rounded-full bg-white/70 animate-pulse"
+            className="absolute rounded-full bg-[#003366]/40 dark:bg-white/70 animate-pulse"
             style={{
               top: `${s.top}%`,
               left: `${s.left}%`,
@@ -311,18 +339,18 @@ export default function ValuesWheel() {
       <div className="max-w-4xl lg:max-w-5xl mx-auto flex flex-col items-center text-center relative">
         {/* Header */}
         <span className="text-[11px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1.5 font-mono-code">
-          {t.valuesWheel.kicker}
+          {wheelT.kicker}
         </span>
-        <h2 className="font-heading font-extrabold text-2xl sm:text-4xl text-white tracking-tight mb-2.5">
-          {t.valuesWheel.title}
+        <h2 className="font-heading font-extrabold text-2xl sm:text-4xl text-[#003366] dark:text-[#9FC6E8] tracking-tight mb-2.5">
+          {wheelT.title}
         </h2>
-        <p className="text-xs sm:text-sm text-[#9FC6E8] max-w-md mb-8 sm:mb-12 leading-relaxed">
-          {t.valuesWheel.subtitle}
+        <p className="text-xs sm:text-sm text-slate-700 dark:text-[#9FC6E8] max-w-md mb-8 sm:mb-12 leading-relaxed">
+          {wheelT.subtitle}
         </p>
 
         {/* Mobile Quick Selector Chips */}
         <div className="flex sm:hidden items-center gap-1.5 overflow-x-auto w-full pb-3 mb-4 scrollbar-none px-1">
-          {VALUES.map((v, i) => {
+          {items.map((v, i) => {
             const isSelected = activeIndex === i;
             return (
               <button
@@ -334,7 +362,7 @@ export default function ValuesWheel() {
                     : 'bg-[#003366] text-slate-300 border border-white/10'
                 }`}
               >
-                <span>{t.valuesWheel.items[v.id].name}</span>
+                <span>{wheelT.items[v.id].name}</span>
               </button>
             );
           })}
@@ -387,10 +415,10 @@ export default function ValuesWheel() {
           </div>
 
           {/* Orbiting / Attracted Value Nodes */}
-          {VALUES.map((v, i) => {
+          {items.map((v, i) => {
             const Icon = v.icon;
             const isActive = activeIndex === i;
-            const { x: orbitX, y: orbitY } = computeOrbitPos(i, rotation, size);
+            const { x: orbitX, y: orbitY } = computeOrbitPos(orbitConfig, i, rotation, size);
             const isFlyingToCenter = isActive && attracted;
             // Mientras vuelve a su órbita usa el destino CONGELADO (ver
             // handleArrival) en vez del recalculado en vivo, para que
@@ -437,8 +465,8 @@ export default function ValuesWheel() {
                   key={isActive && phase === 'orbit' ? `settle-${settleSeq}` : v.id}
                   className={`rounded-full flex items-center justify-center shadow-md ${
                     isActive
-                      ? 'bg-[#0077C8] text-white shadow-lg shadow-[#0077C8]/40 border-2 border-white'
-                      : 'bg-[#003366] text-[#0077C8] border border-white/20'
+                      ? 'bg-[#003366] dark:bg-[#0077C8] text-[#9FC6E8] dark:text-white shadow-lg shadow-[#003366]/40 dark:shadow-[#0077C8]/40 border-2 border-white'
+                      : 'bg-[#0077C8] dark:bg-[#003366] text-white dark:text-[#0077C8] border border-white/30 dark:border-white/20'
                   } ${isActive && phase === 'orbit' ? 'animate-stat-pop' : ''}`}
                   style={{
                     width: isFlyingToCenter ? planetR * 1.55 : planetR * 1.3,
@@ -449,10 +477,10 @@ export default function ValuesWheel() {
                   <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <span
-                  className="text-[10px] sm:text-xs font-semibold leading-tight text-[#EAF3FB] whitespace-nowrap"
+                  className="text-[10px] sm:text-xs font-semibold leading-tight text-[#003366] dark:text-[#EAF3FB] whitespace-nowrap"
                   style={{ opacity: isFlyingToCenter ? 0 : 1, transition: `opacity ${formTransition}` }}
                 >
-                  {t.valuesWheel.items[v.id].name}
+                  {wheelT.items[v.id].name}
                 </span>
               </button>
             );
@@ -464,30 +492,30 @@ export default function ValuesWheel() {
         <div className="lg:col-span-5 flex justify-center">
         <div
           key={current.id}
-          className="animate-value-card-in mt-6 sm:mt-8 lg:mt-0 max-w-md w-full bg-[#003366]/90 border border-white/15 rounded-3xl p-5 sm:p-6 backdrop-blur-sm shadow-xl text-left"
+          className="animate-value-card-in mt-6 sm:mt-8 lg:mt-0 max-w-md w-full bg-[#0077C8]/90 dark:bg-[#003366]/90 border border-white/15 rounded-3xl p-5 sm:p-6 backdrop-blur-sm shadow-xl text-left"
         >
           <div className="flex items-center gap-3 mb-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#0077C8]/20 border border-[#0077C8]/40 flex items-center justify-center text-[#0077C8]">
+            <div className="w-8 h-8 rounded-xl bg-white/20 dark:bg-[#0077C8]/20 border border-white/30 dark:border-[#0077C8]/40 flex items-center justify-center text-white dark:text-[#0077C8]">
               {React.createElement(current.icon, { className: 'w-4 h-4' })}
             </div>
             <div>
-              <span className="text-[9px] sm:text-[10px] font-mono-code text-[#9FC6E8] uppercase tracking-wider block">
-                {t.valuesWheel.pilarLabel}
+              <span className="text-[9px] sm:text-[10px] font-mono-code text-white/80 dark:text-[#9FC6E8] uppercase tracking-wider block">
+                {wheelT.pilarLabel}
               </span>
               <h3 className="font-heading font-bold text-base sm:text-lg text-white">
                 {currentT.name}
               </h3>
             </div>
           </div>
-          <p className="text-xs sm:text-sm text-[#C9D9E8] leading-relaxed">
+          <p className="text-xs sm:text-sm text-white/90 dark:text-[#C9D9E8] leading-relaxed">
             {currentT.description}
           </p>
         </div>
         </div>
         </div>
 
-        <p className="text-[10px] sm:text-[11px] text-[#6E8AA8] mt-4 max-w-xs">
-          {t.valuesWheel.footerHint}
+        <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-[#6E8AA8] mt-4 max-w-xs">
+          {wheelT.footerHint}
         </p>
       </div>
     </section>

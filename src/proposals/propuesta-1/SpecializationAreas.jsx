@@ -86,16 +86,16 @@ export default function SpecializationAreas() {
   }, []);
 
   return (
-    <section className="px-4 sm:px-6 py-10 sm:py-16 bg-slate-50 dark:bg-[#001428] relative">
+    <section className="px-4 sm:px-6 py-10 sm:py-16 bg-[#D6E9F7] dark:bg-[#001F3D] relative">
       <div className="max-w-5xl mx-auto">
         <div className="mb-8 sm:mb-10 text-center">
           <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
             {t.specializationAreas.kicker}
           </span>
-          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-white tracking-tight">
+          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
             {t.specializationAreas.title}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-md mx-auto">
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1.5 max-w-md mx-auto">
             {t.specializationAreas.subtitle}
           </p>
           {/* Género no es una 7ma tarjeta: es el eje transversal que

@@ -8,6 +8,11 @@ import AuthoritiesSection from './AuthoritiesSection';
 import RegionalMap from './RegionalMap';
 import AlliesMarquee from './AlliesMarquee';
 import ContactSection from './ContactSection';
+import DocenciaMision from './DocenciaMision';
+import DocenciaImpacto from './DocenciaImpacto';
+import DocenciaInvestigacion from './DocenciaInvestigacion';
+import DocenciaPublicaciones from './DocenciaPublicaciones';
+import DocenciaAreasWheel from './DocenciaAreasWheel';
 import BottomSheet from '../../components/BottomSheet';
 import {
   Globe2,
@@ -19,10 +24,11 @@ import {
   Monitor,
   Globe,
   Sun,
-  Moon
+  Moon,
+  Settings
 } from 'lucide-react';
 import { defaultContact } from '../../components/VCardDownload';
-import { PAGES } from './navigation';
+import { PAGES, DOCENCIA_PAGES } from './navigation';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useTheme } from '../../theme/ThemeContext';
 import icapLogoMark from '../../assets/icap-logo-mark.png';
@@ -32,11 +38,47 @@ export default function Propuesta1({
   viewMode = 'full',
   onSetViewMode = () => {}
 }) {
-  const { lang, toggleLang, t } = useLanguage();
-  const { theme, toggleTheme } = useTheme();
+  const { lang, setLang, t } = useLanguage();
+  const { theme, setTheme } = useTheme();
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [activePage, setActivePage] = useState('inicio');
   const mainRef = useRef(null);
+
+  // --- Departamento activo: Asistencia Técnica / Docencia --------------
+  // Los dos comparten el mismo Hero, el mismo tema/idioma/vista (todo
+  // eso vive arriba, fuera de este componente) y, por ahora, también
+  // Autoridades y Contacto (mismos ids en PAGES/DOCENCIA_PAGES => mismo
+  // componente, mismo contenido — puede que más adelante Autoridades
+  // termine variando por departamento, pero eso se decide después). El
+  // resto de subsecciones son propias de cada uno.
+  const [activeDept, setActiveDept] = useState('at');
+  const activePages = activeDept === 'at' ? PAGES : DOCENCIA_PAGES;
+
+  // Cambiar de departamento siempre aterriza en el Hero compartido, sin
+  // importar en qué subsección se estuviera — nunca deja al usuario
+  // viendo, por ejemplo, "Valores" de AT con el menú ya en Docencia.
+  const switchDept = (dept) => {
+    setActiveDept(dept);
+    setActivePage('inicio');
+  };
+
+  // --- Menú de configuración (engranaje) --------------------------------
+  // Agrupa vista/idioma/tema en un solo dropdown en vez de tres controles
+  // sueltos en el header, que ya competían por espacio con "Sobre ICAP" y
+  // "Contactanos" en pantallas angostas.
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsRef = useRef(null);
+
+  useEffect(() => {
+    if (!settingsOpen) return undefined;
+    const handleClickOutside = (event) => {
+      if (settingsRef.current && !settingsRef.current.contains(event.target)) {
+        setSettingsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [settingsOpen]);
 
   const goToPage = (id) => {
     setActivePage(id);
@@ -83,7 +125,7 @@ export default function Propuesta1({
     }
     return undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePage]);
+  }, [activePage, activePages]);
 
   useEffect(() => {
     const nav = navRef.current;
@@ -103,9 +145,23 @@ export default function Propuesta1({
               onOpenAbout={() => setAboutModalOpen(true)}
               onScrollToContact={() => goToPage('contacto')}
               onNavigate={goToPage}
+              pages={activePages}
             />
-            <StatsSection />
-            <AlliesMarquee />
+            {/* Debajo del Hero, cada departamento sigue con lo suyo: AT
+                mantiene "ICAP en Cifras" y "Organismos y Socios" (así
+                estaba antes de Docencia), mientras que en Docencia el
+                Hero va solo — al bajar entra directo al texto de
+                Formación, sin el carrusel de cards (eso queda sólo en
+                la página dedicada "Formación" del menú — ver el prop
+                showCards en DocenciaMision.jsx). */}
+            {activeDept === 'at' ? (
+              <>
+                <StatsSection />
+                <AlliesMarquee />
+              </>
+            ) : (
+              <DocenciaMision showCards={false} />
+            )}
           </>
         );
       case 'mision':
@@ -120,6 +176,23 @@ export default function Propuesta1({
         return <RegionalMap />;
       case 'contacto':
         return <ContactSection id="propuesta1-contact" contact={contact} />;
+      // --- Subsecciones propias de Docencia ---------------------------
+      // "Formación" en el menú va sólo con el carrusel de cards — el
+      // texto de introducción ya se muestra debajo del Hero en Inicio,
+      // así que acá no se repite (ver showIntro en DocenciaMision.jsx).
+      case 'docenciaMision':
+        return <DocenciaMision showIntro={false} />;
+      case 'docenciaImpacto':
+        return <DocenciaImpacto />;
+      case 'docenciaInvestigacion':
+        return <DocenciaInvestigacion />;
+      case 'docenciaPublicaciones':
+        return <DocenciaPublicaciones />;
+      // "Áreas" ahora incluye también el cierre de "Comunidad" — se
+      // fusionaron en una sola página, ya no tiene entrada propia en el
+      // menú (ver DocenciaAreasWheel.jsx).
+      case 'docenciaAreas':
+        return <DocenciaAreasWheel />;
       default:
         return null;
     }
@@ -127,15 +200,15 @@ export default function Propuesta1({
 
   return (
     <div
-      className={`w-full h-screen bg-slate-50 dark:bg-[#001428] text-slate-800 dark:text-slate-100 font-sans relative flex flex-col overflow-hidden ${
+      className={`w-full h-screen bg-[#D6E9F7] dark:bg-[#001F3D] text-slate-900 dark:text-white font-sans relative flex flex-col overflow-hidden ${
         theme === 'dark' ? 'dark' : ''
       }`}
     >
       {/* Sticky Utility Navbar */}
-      <header className="shrink-0 z-40 bg-[#003366]/95 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 py-3 flex items-center justify-between shadow-sm">
+      <header className="shrink-0 z-40 bg-gradient-to-br from-[#003366]/95 via-[#0B5A96]/95 to-[#0077C8]/95 dark:bg-none dark:bg-[#003366]/95 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 py-3 flex items-center gap-2 shadow-sm">
         <button
           onClick={() => goToPage('inicio')}
-          className="flex items-center gap-2 cursor-pointer group"
+          className="flex items-center gap-2 cursor-pointer group shrink-0"
           title={t.header.home}
         >
           <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shrink-0 ring-1 ring-white/40 shadow-sm transition-transform group-hover:scale-105">
@@ -154,64 +227,39 @@ export default function Propuesta1({
           </span>
         </button>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Viewport preview toggle: real / mobile-frame (390px vía iframe) */}
-          <div className="flex items-center bg-black/30 p-0.5 rounded-lg border border-white/10 shrink-0">
+        {/* Selector de departamento: Asistencia Técnica / Docencia — sólo
+            en desktop (md+), centrado entre el logo y los controles de
+            la derecha. En móvil este mismo selector vive en su propia
+            fila, justo debajo del header (ver más abajo), para no
+            competir por espacio con "Sobre ICAP" / "Contactanos". */}
+        <div className="hidden md:flex flex-1 justify-center px-2">
+          <div className="flex items-center bg-black/30 p-0.5 rounded-xl border border-white/10">
             <button
-              onClick={() => onSetViewMode('full')}
-              title={t.header.fullView}
-              aria-pressed={viewMode === 'full'}
-              className={`flex items-center justify-center w-7 h-7 rounded-md transition-all ${
-                viewMode === 'full'
+              onClick={() => switchDept('at')}
+              aria-pressed={activeDept === 'at'}
+              className={`px-4 py-1.5 rounded-lg text-xs font-heading font-bold tracking-wide whitespace-nowrap transition-all ${
+                activeDept === 'at'
                   ? 'bg-[#0077C8] text-white shadow'
                   : 'text-[#9FC6E8] hover:text-white hover:bg-white/10'
               }`}
             >
-              <Monitor className="w-3.5 h-3.5" />
+              {t.header.deptAT}
             </button>
             <button
-              onClick={() => onSetViewMode('mobile')}
-              title={t.header.mobileView}
-              aria-pressed={viewMode === 'mobile'}
-              className={`flex items-center justify-center w-7 h-7 rounded-md transition-all ${
-                viewMode === 'mobile'
+              onClick={() => switchDept('docencia')}
+              aria-pressed={activeDept === 'docencia'}
+              className={`px-4 py-1.5 rounded-lg text-xs font-heading font-bold tracking-wide whitespace-nowrap transition-all ${
+                activeDept === 'docencia'
                   ? 'bg-[#0077C8] text-white shadow'
                   : 'text-[#9FC6E8] hover:text-white hover:bg-white/10'
               }`}
             >
-              <Smartphone className="w-3.5 h-3.5" />
+              {t.header.deptDocencia}
             </button>
           </div>
+        </div>
 
-          {/* Selector de idioma: a la par del toggle de vista, mismo
-              lenguaje visual (icono de mundo + código de 2 letras) que
-              cualquier switch ES/EN reconocible al toque. */}
-          <button
-            onClick={toggleLang}
-            title={t.header.language}
-            className="flex items-center gap-1.5 bg-black/30 hover:bg-white/10 p-0.5 pr-2.5 rounded-lg border border-white/10 shrink-0 text-[#9FC6E8] hover:text-white transition-all cursor-pointer"
-          >
-            <span className="flex items-center justify-center w-7 h-7 rounded-md bg-[#0077C8] text-white shadow shrink-0">
-              <Globe className="w-3.5 h-3.5" />
-            </span>
-            <span className="text-[10px] font-heading font-bold tracking-wider uppercase">
-              {lang === 'es' ? 'EN' : 'ES'}
-            </span>
-          </button>
-
-          {/* Switch de tema claro/oscuro: mismo lenguaje visual que el de
-              idioma (ícono + fondo oscuro), a la par. Muestra el sol
-              cuando el sitio está en oscuro (click para pasar a claro) y
-              la luna cuando está en claro (click para pasar a oscuro) —
-              siempre el ícono del modo AL QUE se va a cambiar. */}
-          <button
-            onClick={toggleTheme}
-            title={t.header.theme}
-            className="flex items-center justify-center w-8 h-8 rounded-lg bg-black/30 hover:bg-white/10 border border-white/10 shrink-0 text-[#9FC6E8] hover:text-white transition-all cursor-pointer"
-          >
-            {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-          </button>
-
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <button
             onClick={() => setAboutModalOpen(true)}
             className="text-xs font-heading font-semibold text-[#EAF3FB] hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-white/10 transition-colors"
@@ -220,12 +268,167 @@ export default function Propuesta1({
           </button>
           <button
             onClick={() => goToPage('contacto')}
-            className="h-8 px-3.5 sm:px-4 rounded-xl bg-[#0077C8] hover:bg-[#005A96] text-white font-heading font-bold text-xs tracking-wider uppercase shadow transition-all active:scale-95 shrink-0"
+            className="h-8 px-3.5 sm:px-4 rounded-xl bg-black/30 hover:bg-white/10 border border-white/10 text-white font-heading font-bold text-xs tracking-wider uppercase shadow transition-all active:scale-95 shrink-0"
           >
             {t.header.contact}
           </button>
+
+          {/* Menú de configuración: agrupa vista / idioma / tema detrás de
+              un engranaje en vez de tres controles sueltos — evita que el
+              header se sienta saturado en pantallas angostas. Va al final
+              del todo (extremo derecho) para que quede como el último
+              control, separado de los accesos principales. */}
+          <div className="relative shrink-0" ref={settingsRef}>
+            <button
+              onClick={() => setSettingsOpen((prev) => !prev)}
+              title={t.header.settings}
+              aria-expanded={settingsOpen}
+              className={`flex items-center justify-center w-8 h-8 rounded-lg border border-white/10 shrink-0 transition-all cursor-pointer ${
+                settingsOpen
+                  ? 'bg-[#0077C8] text-white'
+                  : 'bg-black/30 hover:bg-white/10 text-[#9FC6E8] hover:text-white'
+              }`}
+            >
+              <Settings className="w-3.5 h-3.5" />
+            </button>
+
+            {settingsOpen && (
+              <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-60 rounded-xl bg-[#00203E] border border-white/10 shadow-2xl p-3 animate-fade-in">
+                {/* Vista */}
+                <div className="mb-3">
+                  <span className="block text-[10px] font-mono-code font-bold uppercase tracking-wider text-[#9FC6E8]/70 mb-1.5">
+                    {t.header.settingsView}
+                  </span>
+                  <div className="flex items-center bg-black/30 p-0.5 rounded-lg border border-white/10">
+                    <button
+                      onClick={() => onSetViewMode('full')}
+                      aria-pressed={viewMode === 'full'}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[11px] font-heading font-semibold transition-all ${
+                        viewMode === 'full'
+                          ? 'bg-[#0077C8] text-white shadow'
+                          : 'text-[#9FC6E8] hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <Monitor className="w-3.5 h-3.5" />
+                      {t.header.viewFullShort}
+                    </button>
+                    <button
+                      onClick={() => onSetViewMode('mobile')}
+                      aria-pressed={viewMode === 'mobile'}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[11px] font-heading font-semibold transition-all ${
+                        viewMode === 'mobile'
+                          ? 'bg-[#0077C8] text-white shadow'
+                          : 'text-[#9FC6E8] hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <Smartphone className="w-3.5 h-3.5" />
+                      {t.header.viewMobileShort}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Idioma */}
+                <div className="mb-3">
+                  <span className="block text-[10px] font-mono-code font-bold uppercase tracking-wider text-[#9FC6E8]/70 mb-1.5">
+                    {t.header.settingsLanguage}
+                  </span>
+                  <div className="flex items-center bg-black/30 p-0.5 rounded-lg border border-white/10">
+                    <button
+                      onClick={() => setLang('es')}
+                      aria-pressed={lang === 'es'}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[11px] font-heading font-semibold transition-all ${
+                        lang === 'es'
+                          ? 'bg-[#0077C8] text-white shadow'
+                          : 'text-[#9FC6E8] hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                      ES
+                    </button>
+                    <button
+                      onClick={() => setLang('en')}
+                      aria-pressed={lang === 'en'}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[11px] font-heading font-semibold transition-all ${
+                        lang === 'en'
+                          ? 'bg-[#0077C8] text-white shadow'
+                          : 'text-[#9FC6E8] hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                      EN
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tema */}
+                <div>
+                  <span className="block text-[10px] font-mono-code font-bold uppercase tracking-wider text-[#9FC6E8]/70 mb-1.5">
+                    {t.header.settingsTheme}
+                  </span>
+                  <div className="flex items-center bg-black/30 p-0.5 rounded-lg border border-white/10">
+                    <button
+                      onClick={() => setTheme('light')}
+                      aria-pressed={theme === 'light'}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[11px] font-heading font-semibold transition-all ${
+                        theme === 'light'
+                          ? 'bg-[#0077C8] text-white shadow'
+                          : 'text-[#9FC6E8] hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <Sun className="w-3.5 h-3.5" />
+                      {t.header.themeLight}
+                    </button>
+                    <button
+                      onClick={() => setTheme('dark')}
+                      aria-pressed={theme === 'dark'}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[11px] font-heading font-semibold transition-all ${
+                        theme === 'dark'
+                          ? 'bg-[#0077C8] text-white shadow'
+                          : 'text-[#9FC6E8] hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <Moon className="w-3.5 h-3.5" />
+                      {t.header.themeDark}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </header>
+
+      {/* Selector de departamento en móvil: su propia fila, justo debajo
+          del header y arriba de lo que sea que venga en el main (en
+          "Inicio" eso es el Hero, con su tira de "Navegación Rápida" ya
+          adentro) — mismo degradado que el header, para que se sienta
+          una extensión de él y no una barra suelta aparte. */}
+      <div className="md:hidden shrink-0 z-30 bg-gradient-to-br from-[#003366]/95 via-[#0B5A96]/95 to-[#0077C8]/95 dark:bg-none dark:bg-[#003366]/95 border-b border-white/10 px-3 py-2">
+        <div className="flex items-center bg-black/30 p-0.5 rounded-xl border border-white/10 w-full">
+          <button
+            onClick={() => switchDept('at')}
+            aria-pressed={activeDept === 'at'}
+            className={`flex-1 py-1.5 rounded-lg text-[11px] sm:text-xs font-heading font-bold tracking-wide transition-all ${
+              activeDept === 'at'
+                ? 'bg-[#0077C8] text-white shadow'
+                : 'text-[#9FC6E8] hover:text-white hover:bg-white/10'
+            }`}
+          >
+            {t.header.deptAT}
+          </button>
+          <button
+            onClick={() => switchDept('docencia')}
+            aria-pressed={activeDept === 'docencia'}
+            className={`flex-1 py-1.5 rounded-lg text-[11px] sm:text-xs font-heading font-bold tracking-wide transition-all ${
+              activeDept === 'docencia'
+                ? 'bg-[#0077C8] text-white shadow'
+                : 'text-[#9FC6E8] hover:text-white hover:bg-white/10'
+            }`}
+          >
+            {t.header.deptDocencia}
+          </button>
+        </div>
+      </div>
 
       {/* Active Page */}
       <main ref={mainRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
@@ -237,7 +440,7 @@ export default function Propuesta1({
       {/* Bottom App Navigation */}
       <nav
         ref={navRef}
-        className="shrink-0 z-30 bg-white dark:bg-[#00152B] border-t border-slate-200 dark:border-white/10 shadow-[0_-4px_16px_rgba(0,51,102,0.08)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.4)] px-1 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] flex items-stretch justify-between relative"
+        className="shrink-0 z-30 bg-white dark:bg-[#003366]/95 backdrop-blur-md border-t border-slate-200 dark:border-white/10 shadow-[0_-4px_16px_rgba(0,51,102,0.08)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.4)] px-1 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] flex items-stretch justify-between relative"
       >
         {/* Esfera animada del menú: un wrapper de posición (transición de
             traslado) que envuelve el halo pulsante y la esfera principal,
@@ -270,7 +473,7 @@ export default function Propuesta1({
             }}
           />
         </div>
-        {PAGES.map((page) => {
+        {activePages.map((page) => {
           const Icon = page.icon;
           const active = activePage === page.id;
           return (
@@ -313,7 +516,7 @@ export default function Propuesta1({
         }
         maxWidth="max-w-xl"
       >
-        <div className="space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+        <div className="space-y-4 text-xs sm:text-sm text-slate-900 dark:text-slate-100 leading-relaxed">
           <p>
             {t.aboutModal.intro}
           </p>
@@ -325,10 +528,10 @@ export default function Propuesta1({
                 <div key={i} className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 flex items-start gap-3">
                   <Icon className="w-5 h-5 text-[#0077C8] shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-heading font-bold text-xs uppercase text-slate-800 dark:text-white mb-0.5">
+                    <h4 className="font-heading font-bold text-xs uppercase text-slate-800 dark:text-[#9FC6E8] mb-0.5">
                       {card.title}
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-[11px] sm:text-xs text-slate-700 dark:text-slate-300">
                       {card.text}
                     </p>
                   </div>

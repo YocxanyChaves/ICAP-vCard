@@ -1,11 +1,5 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { PAGES } from './navigation';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
-
-// Mismas secciones que el menú inferior (misma lista compartida, ver
-// navigation.js), menos "Inicio" — ya estamos ahí, no tiene sentido
-// ofrecerlo como atajo.
-const SECTIONS = PAGES.filter((p) => p.id !== 'inicio');
 
 // Cada cuánto avanza sola la esfera a la siguiente sección.
 const CYCLE_MS = 2200;
@@ -24,15 +18,35 @@ const CYCLE_MS = 2200;
  * hay — y se detiene apenas el mouse pasa por encima, para no
  * competirle a quien la está usando de verdad. Un clic navega al
  * toque, igual que abajo.
+ *
+ * `pages` es la lista completa del departamento activo (misma forma que
+ * PAGES/DOCENCIA_PAGES en navigation.js, con "Inicio" incluido) — la
+ * pasa Hero, que a su vez la recibe de Propuesta1.jsx. Así, al cambiar
+ * de departamento, esta tira siempre muestra las subsecciones que
+ * corresponden (nunca las del otro departamento).
  */
-export default function SectionsStrip({ onNavigate }) {
+export default function SectionsStrip({ onNavigate, pages }) {
   const { t } = useLanguage();
+  // Mismas secciones que el menú inferior del departamento activo, menos
+  // "Inicio" — ya estamos ahí, no tiene sentido ofrecerlo como atajo.
+  const SECTIONS = useMemo(() => pages.filter((p) => p.id !== 'inicio'), [pages]);
   const navRef = useRef(null);
   const itemRefs = useRef({});
   const [activeIndex, setActiveIndex] = useState(0);
   const [orb, setOrb] = useState({ left: 0, top: 0, width: 0, height: 0 });
   const [orbReady, setOrbReady] = useState(false);
   const pausedRef = useRef(false);
+  // Sentido del recorrido automático: 1 = avanzando, -1 = de vuelta. Al
+  // llegar a una punta se invierte en vez de saltar directo de Contacto
+  // a Misión (eso se sentía como un salto brusco cruzando toda la
+  // barra) — así la esfera siempre se mueve de a una burbuja, sea de
+  // ida o de vuelta, nunca de golpe. Se calcula todo por fuera del
+  // updater de useState (en vez de mutar esta ref ADENTRO de un
+  // `setActiveIndex(i => ...)`) porque React puede invocar ese updater
+  // más de una vez por tick (p. ej. en StrictMode), y ahí la mutación
+  // del sentido se duplicaba y el rebote se desincronizaba.
+  const directionRef = useRef(1);
+  const activeIndexRef = useRef(0);
 
   const measureOrb = (index) => {
     const nav = navRef.current;
@@ -69,17 +83,41 @@ export default function SectionsStrip({ onNavigate }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // El recorrido automático de la esfera.
+  // Al cambiar de departamento (pages cambia de PAGES a DOCENCIA_PAGES o
+  // viceversa) arrancamos de nuevo desde la primera sección — si no, el
+  // índice viejo podía quedar apuntando a una sección que ya no existe
+  // en la lista nueva.
+  useEffect(() => {
+    activeIndexRef.current = 0;
+    directionRef.current = 1;
+    setActiveIndex(0);
+  }, [SECTIONS]);
+
+  // El recorrido automático de la esfera: va y vuelve (ping-pong) en
+  // vez de dar toda la vuelta — al llegar a la última sección se
+  // devuelve hacia la primera pasando de a una sección a la vez, igual
+  // que a la ida. Depende de SECTIONS para reiniciar el intervalo (con
+  // el largo correcto) apenas cambia el departamento activo.
   useEffect(() => {
     const id = setInterval(() => {
       if (pausedRef.current) return;
-      setActiveIndex((i) => (i + 1) % SECTIONS.length);
+      let next = activeIndexRef.current + directionRef.current;
+      if (next >= SECTIONS.length - 1) {
+        next = SECTIONS.length - 1;
+        directionRef.current = -1;
+      } else if (next <= 0) {
+        next = 0;
+        directionRef.current = 1;
+      }
+      activeIndexRef.current = next;
+      setActiveIndex(next);
     }, CYCLE_MS);
     return () => clearInterval(id);
-  }, []);
+  }, [SECTIONS]);
 
   const handleEnter = (index) => {
     pausedRef.current = true;
+    activeIndexRef.current = index;
     setActiveIndex(index);
   };
   const handleLeave = () => {

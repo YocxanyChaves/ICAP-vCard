@@ -278,11 +278,11 @@ function CountryDetailBody({ country, tone = 'dark' }) {
   // BottomSheet.jsx), estos colores "light" llevan además su `dark:`
   // para no quedar con texto oscuro sobre fondo oscuro cuando el sitio
   // está en modo oscuro.
-  const mutedText = isDark ? 'text-[#C9D9E8]' : 'text-slate-600 dark:text-[#C9D9E8]';
-  const labelText = isDark ? 'text-[#9FC6E8]' : 'text-slate-400 dark:text-[#9FC6E8]';
+  const mutedText = isDark ? 'text-[#C9D9E8]' : 'text-slate-900 dark:text-[#C9D9E8]';
+  const labelText = isDark ? 'text-[#9FC6E8]' : 'text-slate-500 dark:text-[#9FC6E8]';
   const cardBg = isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100 dark:bg-white/5 dark:border-white/10';
   const chipBg = isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100 dark:bg-white/5 dark:border-white/10';
-  const headingText = isDark ? 'text-white' : 'text-[#003366] dark:text-white';
+  const headingText = isDark ? 'text-white' : 'text-[#003366] dark:text-[#9FC6E8]';
 
   return (
     <div className="space-y-5">
@@ -497,7 +497,7 @@ export default function RegionalMap() {
   };
 
   return (
-    <section ref={sectionRef} className="px-4 sm:px-6 py-12 sm:py-20 bg-[#001F3D] text-white relative overflow-hidden">
+    <section ref={sectionRef} className="px-4 sm:px-6 py-12 sm:py-20 bg-[#D6E9F7] dark:bg-[#001F3D] text-slate-900 dark:text-white relative overflow-hidden">
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#0077C8]/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-[#0077C8]/10 rounded-full blur-3xl pointer-events-none" />
@@ -508,10 +508,10 @@ export default function RegionalMap() {
           <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
             {t.regionalMap.kicker}
           </span>
-          <h2 className="font-heading font-extrabold text-2xl sm:text-4xl text-white tracking-tight">
+          <h2 className="font-heading font-extrabold text-2xl sm:text-4xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
             {t.regionalMap.title}
           </h2>
-          <p className="text-xs sm:text-sm text-[#9FC6E8] mt-1.5 max-w-xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-[#9FC6E8] mt-1.5 max-w-xl mx-auto leading-relaxed">
             {t.regionalMap.subtitle}
           </p>
         </div>
@@ -776,10 +776,10 @@ export default function RegionalMap() {
         {/* 10 Countries Interactive Grid with Flags */}
         <div className="mt-6 sm:mt-8">
           <div className="flex items-center justify-between mb-3.5">
-            <span className="text-xs font-bold tracking-wider uppercase text-slate-300 font-mono-code">
+            <span className="text-xs font-bold tracking-wider uppercase text-slate-700 dark:text-slate-300 font-mono-code">
               {t.regionalMap.countryListLabel}
             </span>
-            <span className="text-[11px] text-[#9FC6E8] hidden sm:block">
+            <span className="text-[11px] text-slate-600 dark:text-[#9FC6E8] hidden sm:block">
               {t.regionalMap.countryListHint}
             </span>
           </div>

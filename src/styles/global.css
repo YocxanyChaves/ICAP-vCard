@@ -149,6 +149,56 @@ h1, h2, h3, h4, h5, h6 {
   animation: valueCardIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Tarjetas de "Formación" (Docencia — DocenciaMision.jsx), que rotan
+   solas de a 2: la entrada tenía que sentirse como un "fluuush" bien
+   marcado, no apenas una subidita — así que además de recorrer bastante
+   más distancia que .animate-slide-up, el blur es lo que hace la
+   estela: arranca bien desenfocada y se va aclarando a medida que
+   "frena" en su lugar, en vez de llegar siempre nítida. A propósito NO
+   se apoya en que la animación sea rápida (eso se ve como un salto, no
+   como una estela) — dura más que el resto de transiciones del sitio y
+   el desenfoque es lo que vende el movimiento. La salida (cardWhooshOut)
+   es la misma idea al revés: se va hacia arriba perdiendo foco y
+   achicándose, como si la tarjeta se disolviera en su propia estela en
+   vez de cortarse en seco. */
+@keyframes cardWhooshIn {
+  0% {
+    opacity: 0;
+    transform: translateY(85%) scale(0.94);
+    filter: blur(14px);
+  }
+  45% {
+    opacity: 1;
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes cardWhooshOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60%) scale(0.94);
+    filter: blur(10px);
+  }
+}
+
+.animate-card-whoosh-in {
+  animation: cardWhooshIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-card-whoosh-out {
+  animation: cardWhooshOut 0.5s cubic-bezier(0.5, 0, 1, 1) both;
+}
+
 @keyframes orbitSpin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

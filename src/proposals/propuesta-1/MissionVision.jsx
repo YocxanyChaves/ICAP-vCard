@@ -72,7 +72,7 @@ function NumberTile({ tone, index, children }) {
       className={
         isDark
           ? 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-white/[0.06] border border-white/5 text-xs sm:text-sm leading-relaxed text-[#C9D9E8]'
-          : 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-white/[0.06] dark:border dark:border-white/5 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-[#C9D9E8]'
+          : 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-white/[0.06] dark:border dark:border-white/5 text-xs sm:text-sm leading-relaxed text-slate-900 dark:text-[#C9D9E8]'
       }
     >
       <span
@@ -97,7 +97,7 @@ function IconTile({ tone, icon: Icon, children }) {
       className={
         isDark
           ? 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-white/[0.06] border border-white/5 text-xs sm:text-sm leading-relaxed text-[#C9D9E8]'
-          : 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-white/[0.06] dark:border dark:border-white/5 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-[#C9D9E8]'
+          : 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-white/[0.06] dark:border dark:border-white/5 text-xs sm:text-sm leading-relaxed text-slate-900 dark:text-[#C9D9E8]'
       }
     >
       <span
@@ -236,7 +236,7 @@ export default function MissionVision() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="px-4 sm:px-6 py-10 sm:py-20 bg-slate-50 dark:bg-[#001428] relative overflow-hidden">
+    <section ref={sectionRef} className="px-4 sm:px-6 py-10 sm:py-20 bg-[#D6E9F7] dark:bg-[#001F3D] relative overflow-hidden">
       {/* Resplandores ambientales de fondo */}
       <div
         aria-hidden="true"
@@ -253,10 +253,10 @@ export default function MissionVision() {
           <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1.5 font-mono-code">
             {t.missionVision.kicker}
           </span>
-          <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-[#003366] dark:text-white tracking-tight">
+          <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
             {t.missionVision.title}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-md mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-2 max-w-md mx-auto leading-relaxed">
             {t.missionVision.subtitle}
           </p>
         </div>
@@ -271,7 +271,7 @@ export default function MissionVision() {
             hint={misionHint}
             tone="light"
             front={
-              <article className="relative bg-white dark:bg-[#0B2340] rounded-[28px] sm:rounded-r-none p-6 sm:p-9 border border-slate-100 dark:border-white/10 overflow-hidden h-full flex flex-col mv-card-light">
+              <article className="relative bg-white dark:bg-[#003366] rounded-[28px] sm:rounded-r-none p-6 sm:p-9 border border-slate-100 dark:border-white/10 overflow-hidden h-full flex flex-col mv-card-light">
                 <span
                   aria-hidden="true"
                   className="absolute top-0 left-6 right-6 sm:right-auto sm:left-9 sm:w-16 h-[3px] rounded-full bg-gradient-to-r from-[#0077C8] to-[#4FB2F2]"
@@ -294,7 +294,7 @@ export default function MissionVision() {
                       <span className="text-[10px] font-mono-code uppercase font-bold text-[#0077C8] dark:text-[#4FB2F2] tracking-wider block">
                         {t.missionVision.mission.badge}
                       </span>
-                      <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-[#003366] dark:text-white leading-tight">
+                      <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-[#003366] dark:text-[#9FC6E8] leading-tight">
                         {t.missionVision.mission.heading}
                       </h3>
                     </div>
@@ -330,7 +330,7 @@ export default function MissionVision() {
               </article>
             }
             back={
-              <article className="relative bg-white dark:bg-[#0B2340] rounded-[28px] sm:rounded-r-none p-6 sm:p-9 border border-slate-100 dark:border-white/10 overflow-hidden h-full flex flex-col mv-card-light">
+              <article className="relative bg-white dark:bg-[#003366] rounded-[28px] sm:rounded-r-none p-6 sm:p-9 border border-slate-100 dark:border-white/10 overflow-hidden h-full flex flex-col mv-card-light">
                 <SealWatermark
                   src={icapEscudoNavy}
                   className="w-52 sm:w-64 -left-12 -top-14 opacity-[0.07] dark:opacity-0 -rotate-[11deg]"
@@ -344,7 +344,7 @@ export default function MissionVision() {
                   <span className="text-[10px] font-mono-code uppercase font-bold text-[#0077C8] dark:text-[#4FB2F2] tracking-wider block mb-1.5">
                     {t.missionVision.mission.backBadge}
                   </span>
-                  <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-[#003366] dark:text-white leading-tight mb-6">
+                  <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-[#003366] dark:text-[#9FC6E8] leading-tight mb-6">
                     {t.missionVision.mission.backHeading}
                   </h3>
 
@@ -357,7 +357,7 @@ export default function MissionVision() {
                   </div>
 
                   <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono-code">{t.missionVision.mission.footerNote}</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-300 font-mono-code">{t.missionVision.mission.footerNote}</span>
                     <FlipButton
                       onClick={() => toggleMision(false)}
                       icon={RotateCcw}
@@ -383,42 +383,46 @@ export default function MissionVision() {
           <FlipCard
             flipped={visionFlipped}
             hint={visionHint}
-            tone="dark"
+            tone="light"
             front={
-              <article className="relative bg-[#003366] text-white rounded-[28px] sm:rounded-l-none p-6 sm:p-9 border border-white/5 overflow-hidden h-full flex flex-col mv-card-dark">
+              <article className="relative bg-white dark:bg-[#003366] rounded-[28px] sm:rounded-l-none p-6 sm:p-9 border border-slate-100 dark:border-white/10 overflow-hidden h-full flex flex-col mv-card-light">
                 <span
                   aria-hidden="true"
                   className="absolute top-0 left-6 right-6 sm:left-auto sm:right-9 sm:w-16 h-[3px] rounded-full bg-gradient-to-r from-[#4FB2F2] to-[#0077C8]"
                 />
                 <SealWatermark
+                  src={icapEscudoNavy}
+                  className="w-56 sm:w-72 -left-12 -bottom-16 opacity-[0.08] dark:opacity-0 -rotate-[9deg]"
+                />
+                <SealWatermark
                   src={icapEscudoWhite}
-                  className="w-56 sm:w-72 -left-12 -bottom-16 opacity-[0.08] -rotate-[9deg]"
+                  className="w-56 sm:w-72 -left-12 -bottom-16 opacity-0 dark:opacity-[0.08] -rotate-[9deg]"
                 />
 
                 <div className="relative flex flex-col h-full">
                   <div className="flex items-center gap-3.5 mb-6">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/10 flex items-center justify-center text-[#4FB2F2] shrink-0">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#EAF3FB] dark:bg-white/10 flex items-center justify-center text-[#0077C8] dark:text-[#4FB2F2] shrink-0">
                       <Eye className="w-6 h-6 sm:w-7 sm:h-7" />
                     </div>
                     <div>
-                      <span className="text-[10px] font-mono-code uppercase font-bold text-[#4FB2F2] tracking-wider block">
+                      <span className="text-[10px] font-mono-code uppercase font-bold text-[#0077C8] dark:text-[#4FB2F2] tracking-wider block">
                         {t.missionVision.vision.badge}
                       </span>
-                      <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-white leading-tight">
+                      <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-[#003366] dark:text-[#9FC6E8] leading-tight">
                         {t.missionVision.vision.heading}
                       </h3>
                     </div>
                   </div>
 
-                  <blockquote className="border-l-[3px] border-white/20 pl-4 sm:pl-5 mb-7">
-                    <p className="font-heading text-base sm:text-xl font-semibold text-[#EAF3FB] leading-snug">
+                  <blockquote className="border-l-[3px] border-[#0077C8]/30 dark:border-white/20 pl-4 sm:pl-5 mb-7">
+                    <p className="font-heading text-base sm:text-xl font-semibold text-[#003366] dark:text-[#EAF3FB] leading-snug">
                       {t.missionVision.vision.quote}
                     </p>
                   </blockquote>
 
                   <div className="space-y-2 sm:space-y-2.5">
                     {t.missionVision.vision.pilares.map((item, i) => (
-                      <NumberTile key={i} tone="dark" index={i}>
+                      <NumberTile key={i} tone="light" index={i}>
                         {item}
                       </NumberTile>
                     ))}
@@ -431,42 +435,46 @@ export default function MissionVision() {
                       onClick={() => toggleVision(true)}
                       icon={RotateCw}
                       label={t.missionVision.vision.flipLabel}
-                      tone="dark"
+                      tone="light"
                     />
                   </div>
                 </div>
               </article>
             }
             back={
-              <article className="relative bg-[#003366] text-white rounded-[28px] sm:rounded-l-none p-6 sm:p-9 border border-white/5 overflow-hidden h-full flex flex-col mv-card-dark">
+              <article className="relative bg-white dark:bg-[#003366] rounded-[28px] sm:rounded-l-none p-6 sm:p-9 border border-slate-100 dark:border-white/10 overflow-hidden h-full flex flex-col mv-card-light">
+                <SealWatermark
+                  src={icapEscudoNavy}
+                  className="w-52 sm:w-64 -right-12 -top-14 opacity-[0.07] dark:opacity-0 rotate-[11deg]"
+                />
                 <SealWatermark
                   src={icapEscudoWhite}
-                  className="w-52 sm:w-64 -right-12 -top-14 opacity-[0.07] rotate-[11deg]"
+                  className="w-52 sm:w-64 -right-12 -top-14 opacity-0 dark:opacity-[0.07] rotate-[11deg]"
                 />
 
                 <div className="relative flex flex-col h-full">
-                  <span className="text-[10px] font-mono-code uppercase font-bold text-[#4FB2F2] tracking-wider block mb-1.5">
+                  <span className="text-[10px] font-mono-code uppercase font-bold text-[#0077C8] dark:text-[#4FB2F2] tracking-wider block mb-1.5">
                     {t.missionVision.vision.backBadge}
                   </span>
-                  <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-white leading-tight mb-6">
+                  <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-[#003366] dark:text-[#9FC6E8] leading-tight mb-6">
                     {t.missionVision.vision.backHeading}
                   </h3>
 
                   <div className="space-y-2 sm:space-y-2.5 flex-1">
                     {VISION_REVERSO_ICONS.map((Icon, i) => (
-                      <IconTile key={i} tone="dark" icon={Icon}>
+                      <IconTile key={i} tone="light" icon={Icon}>
                         {t.missionVision.vision.reverso[i]}
                       </IconTile>
                     ))}
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
-                    <span className="text-[10px] text-[#6E8AA8] font-mono-code">{t.missionVision.vision.footerNote}</span>
+                  <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
+                    <span className="text-[10px] text-slate-500 dark:text-[#6E8AA8] font-mono-code">{t.missionVision.vision.footerNote}</span>
                     <FlipButton
                       onClick={() => toggleVision(false)}
                       icon={RotateCcw}
                       label={t.missionVision.vision.backLabel}
-                      tone="dark"
+                      tone="light"
                     />
                   </div>
                 </div>
