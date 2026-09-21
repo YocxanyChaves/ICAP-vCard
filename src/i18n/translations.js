@@ -594,9 +594,7 @@ export const translations = {
       kicker: 'Nuestra Oferta',
       title: 'Áreas para los Desafíos del Presente y del Futuro',
       subtitle:
-        'La oferta académica del ICAP evoluciona de acuerdo con las necesidades de las instituciones y las transformaciones del entorno. Toque cualquier área para atraerla al centro.',
-      pilarLabel: 'Área Estratégica',
-      footerHint: 'Toca cualquier área para atraerla al centro, o dejá que la galaxia gire sola.',
+        'La oferta académica del ICAP evoluciona de acuerdo con las necesidades de las instituciones y las transformaciones del entorno.',
       items: {
         integracionRegional: {
           name: 'Integración Regional',
@@ -1341,9 +1339,7 @@ export const translations = {
       kicker: 'Our Offering',
       title: "Areas for Today's and Tomorrow's Challenges",
       subtitle:
-        "ICAP's academic offering evolves alongside the needs of institutions and a changing environment. Tap any area to draw it to the center.",
-      pilarLabel: 'Strategic Area',
-      footerHint: 'Tap any area to draw it to the center, or let the galaxy spin on its own.',
+        "ICAP's academic offering evolves alongside the needs of institutions and a changing environment.",
       items: {
         integracionRegional: {
           name: 'Regional Integration',

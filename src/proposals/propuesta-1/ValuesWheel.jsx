@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { Shield, Star, Users, Heart, Award, Sparkles } from 'lucide-react';
 import icapLogoMark from '../../assets/icap-logo-mark.png';
 import { useLanguage } from '../../i18n/LanguageContext';
+import KickerBadge from './KickerBadge';
 
 // El nombre y la descripción de cada valor viven en el diccionario de
 // traducciones (t.valuesWheel.items[id]) — acá sólo quedan el id y el
@@ -338,9 +339,9 @@ export default function ValuesWheel({ items = DEFAULT_VALUES, content }) {
 
       <div className="max-w-4xl lg:max-w-5xl mx-auto flex flex-col items-center text-center relative">
         {/* Header */}
-        <span className="text-[11px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1.5 font-mono-code">
-          {wheelT.kicker}
-        </span>
+        <div className="mb-1.5 sm:mb-2">
+          <KickerBadge variant="glow">{wheelT.kicker}</KickerBadge>
+        </div>
         <h2 className="font-heading font-extrabold text-2xl sm:text-4xl text-[#003366] dark:text-[#9FC6E8] tracking-tight mb-2.5">
           {wheelT.title}
         </h2>

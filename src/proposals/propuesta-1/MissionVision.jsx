@@ -17,6 +17,7 @@ import icapEscudoNavy from '../../assets/icap-escudo-navy.png';
 import icapEscudoWhite from '../../assets/icap-escudo-white.png';
 import icapEscudoCeleste from '../../assets/icap-escudo-celeste.png';
 import { useLanguage } from '../../i18n/LanguageContext';
+import KickerBadge from './KickerBadge';
 
 // El texto de cada pilar/reverso vive en el diccionario de traducciones
 // (t.missionVision.mission.pilares / .reverso, mismo para vision) — acá
@@ -248,11 +249,14 @@ export default function MissionVision() {
       />
 
       <div className="max-w-5xl mx-auto relative">
-        {/* Section Title */}
+        {/* Section Title — kicker en variant="glow" (halo + barrita de
+            luz celeste en vez del puntito) porque esta es una sección
+            de Asistencia Técnica: mismo "marco" que el kicker de
+            Docencia, pero con su propio distintivo — ver KickerBadge.jsx. */}
         <div className="mb-8 sm:mb-12 text-center">
-          <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1.5 font-mono-code">
-            {t.missionVision.kicker}
-          </span>
+          <div className="mb-1.5 sm:mb-2">
+            <KickerBadge variant="glow">{t.missionVision.kicker}</KickerBadge>
+          </div>
           <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
             {t.missionVision.title}
           </h2>

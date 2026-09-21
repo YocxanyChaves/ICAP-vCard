@@ -9,6 +9,7 @@ import {
 import BottomSheet from '../../components/BottomSheet';
 import { getAreaMeta } from './areaMeta';
 import { useLanguage } from '../../i18n/LanguageContext';
+import KickerBadge from './KickerBadge';
 
 /**
  * High-quality SVG Flag Components for all 10 countries
@@ -505,9 +506,9 @@ export default function RegionalMap() {
       <div className="max-w-5xl mx-auto relative z-10">
         {/* Section Header */}
         <div className="mb-6 sm:mb-8 text-center">
-          <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
-            {t.regionalMap.kicker}
-          </span>
+          <div className="mb-1 sm:mb-1.5">
+            <KickerBadge variant="glow">{t.regionalMap.kicker}</KickerBadge>
+          </div>
           <h2 className="font-heading font-extrabold text-2xl sm:text-4xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
             {t.regionalMap.title}
           </h2>

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Telescope, TrendingUp, FlaskConical, Cpu, Flag, Globe2, BookOpen } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import KickerBadge from './KickerBadge';
 
 // Mismos ids que t.docenciaMision.items en translations.js — nombre y
 // descripción de cada capacidad viven ahí; acá sólo quedan el id y el
@@ -43,6 +44,16 @@ const ENTER_MS = 850;
  *   disuelve) -> se cambia el índice -> enter (ENTER_MS, el par nuevo
  *   sube desde abajo con estela) -> vuelve a idle.
  *
+ * Con el texto de contexto de la página "Formación" (cardsIntro) justo
+ * encima de las cards, esta salida hacia arriba pasaba POR ENCIMA del
+ * texto y lo tapaba un instante. Yocxany aclaró que no quería cambiar
+ * la dirección de la animación (se probó que bajara en vez de subir,
+ * pero no era eso lo que pedía) sino que la tarjeta se escondiera
+ * DETRÁS del texto al cruzarlo — así que el párrafo cardsIntro.text
+ * (más abajo) lleva `relative z-10` para quedar siempre por encima de
+ * las cards en el eje de profundidad, sin importar hacia dónde se
+ * mueva la tarjeta.
+ *
  * Los puntitos de abajo permiten saltar directo a cualquier par —
  * deshabilitados mientras hay una transición en curso, para no pisar
  * una animación a mitad de camino. El scroll (rueda/trackpad o swipe
@@ -59,6 +70,40 @@ const ENTER_MS = 850;
  * distintas: showCards={false} justo después del Hero, y
  * showIntro={false} en la página dedicada de "Formación".
  */
+
+/**
+ * KickerBadge (píldora + puntito) ahora vive en su propio archivo
+ * compartido — ver KickerBadge.jsx — porque Yocxany pidió el mismo
+ * "marco" para el kicker de DocenciaImpacto. Sigue sin llevar su
+ * propio `mb-3`: en esta página "Formación" el espaciado entre
+ * kicker/texto/cards lo reparte justify-evenly en el contenedor padre
+ * (ver más abajo), y ese `mb-3` extra hacía que ese espacio quedara
+ * más grande que los demás. El margen para separarlo del <h2> en la
+ * página de Inicio (showIntro) vive en el wrapper de esa sección.
+ */
+
+/**
+ * Ícono de cada card de "Formación", ahora circular (antes un
+ * cuadrado redondeado) con el marco de puntitos animado alrededor —
+ * acá el círculo rota de verdad (orbitSpin, ya definido en
+ * global.css para el logo del Hero) sin el problema de deformación
+ * que tenía en el badge de arriba.
+ */
+function CardIcon({ Icon }) {
+  return (
+    <div className="relative w-16 h-16 mx-auto shrink-0">
+      <div
+        className="absolute -inset-1.5 rounded-full border border-dashed border-[#0077C8]/45 dark:border-white/25 pointer-events-none"
+        style={{ animation: 'orbitSpin 9s linear infinite' }}
+        aria-hidden="true"
+      />
+      <div className="relative w-full h-full rounded-full bg-[#EAF3FB] dark:bg-white/10 text-[#0077C8] dark:text-[#4FB2F2] flex items-center justify-center">
+        <Icon className="w-7 h-7" />
+      </div>
+    </div>
+  );
+}
+
 export default function DocenciaMision({ showCards = true, showIntro = true }) {
   const { t } = useLanguage();
   const c = t.docenciaMision;
@@ -133,22 +178,21 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
 
   // Scroll para cambiar de par: bajar avanza, subir retrocede — igual
   // que un clic en los puntitos, pero disparado por el scroll en vez
-  // del mouse. En los extremos (primer/último par) NO se intercepta el
-  // scroll, para que la página siga bajando/subiendo normal una vez
-  // recorridos todos los pares — así no queda "atrapada" acá.
+  // del mouse. En los extremos (primer/último par) da la vuelta (del
+  // último vuelve al primero, y viceversa) en lugar de dejar pasar el
+  // scroll a la página — esta sección llena toda la pantalla, así que
+  // "dejarlo pasar" no hacía nada visible y el scroll se sentía
+  // pegado/trabado en el último par.
   useEffect(() => {
     if (!showCards) return undefined;
     const el = wheelZoneRef.current;
     if (!el) return undefined;
 
     const tryAdvance = (goingDown) => {
-      const atLast = groupIndex === groups.length - 1;
-      const atFirst = groupIndex === 0;
-      if ((goingDown && atLast) || (!goingDown && atFirst)) return false;
       const now = Date.now();
       if (phase !== 'idle' || now - lastWheelRef.current < 700) return false;
       lastWheelRef.current = now;
-      pendingIndexRef.current = goingDown ? groupIndex + 1 : groupIndex - 1;
+      pendingIndexRef.current = goingDown ? (groupIndex + 1) % groups.length : (groupIndex - 1 + groups.length) % groups.length;
       setPhase('exit');
       return true;
     };
@@ -157,9 +201,6 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
       const goingDown = e.deltaY > 12;
       const goingUp = e.deltaY < -12;
       if (!goingDown && !goingUp) return;
-      const atLast = groupIndex === groups.length - 1;
-      const atFirst = groupIndex === 0;
-      if ((goingDown && atLast) || (goingUp && atFirst)) return; // deja scrollear la página
       e.preventDefault();
       tryAdvance(goingDown);
     };
@@ -174,15 +215,12 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
       const goingDown = dy > 30;
       const goingUp = dy < -30;
       if (!goingDown && !goingUp) return;
-      const atLast = groupIndex === groups.length - 1;
-      const atFirst = groupIndex === 0;
-      if ((goingDown && atLast) || (goingUp && atFirst)) return; // deja scrollear la página
       e.preventDefault();
       tryAdvance(goingDown);
     };
 
-    // passive: false para poder frenar el scroll de la página (preventDefault)
-    // mientras todavía queden pares por recorrer.
+    // passive: false para poder frenar el scroll de la página
+    // (preventDefault) y manejar nosotros el cambio de par.
     el.addEventListener('wheel', handleWheel, { passive: false });
     el.addEventListener('touchstart', handleTouchStart, { passive: true });
     el.addEventListener('touchmove', handleTouchMove, { passive: false });
@@ -198,48 +236,96 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
 
   return (
     <section
-      className={`px-4 sm:px-6 py-10 sm:py-16 bg-[#D6E9F7] dark:bg-[#001F3D] relative flex flex-col overflow-hidden ${
+      className={`px-4 sm:px-6 ${
+        !showIntro && showCards ? 'pt-0 pb-10 sm:pb-16' : 'py-10 sm:py-16'
+      } bg-[#D6E9F7] dark:bg-[#001F3D] relative flex flex-col overflow-hidden ${
         showCards ? 'min-h-[85vh] sm:min-h-[88vh]' : ''
       }`}
     >
-      <div className={`max-w-4xl mx-auto w-full flex flex-col ${showCards ? 'flex-1' : ''}`}>
+      <div
+        className={`max-w-4xl mx-auto w-full flex flex-col ${showCards ? 'flex-1' : ''} ${
+          !showIntro && showCards ? 'justify-evenly' : ''
+        }`}
+      >
+        {/* Entrada animada al llegar a la página — Yocxany pidió que se
+            sintiera "más fluida y lenta, como palabras que las trae el
+            viento" en vez del fade+subida rápido que usa el Hero, así
+            que acá se usa animate-breeze-in (desplazamiento lateral +
+            desenfoque que se aclara, 1.1s, definido en global.css) en
+            vez de animate-hero-rise, en cascada: kicker primero,
+            título/texto un poquito después. Como este bloque no cambia
+            de key entre los ciclos automáticos de las cards, la
+            animación corre una sola vez al montar la página, no se
+            repite solita. */}
         {showIntro && (
           <div className="mb-6 sm:mb-8 text-center shrink-0">
-            <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
-              {c.kicker}
-            </span>
-            <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
+            <div className="mb-3 animate-breeze-in" style={{ animationDelay: '0ms' }}>
+              <KickerBadge>{c.kicker}</KickerBadge>
+            </div>
+            <h2
+              className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-[#9FC6E8] tracking-tight animate-breeze-in"
+              style={{ animationDelay: '180ms' }}
+            >
               {c.title}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1.5 max-w-xl mx-auto leading-relaxed">
+            <p
+              className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1.5 max-w-xl mx-auto leading-relaxed animate-breeze-in"
+              style={{ animationDelay: '340ms' }}
+            >
               {c.subtitle}
             </p>
           </div>
         )}
 
         {/* En la página dedicada "Formación" (showIntro=false, showCards=
-            true) no va el kicker/título/subtítulo de arriba — pero sí un
-            encabezado propio, más corto, para no dejar las cards sin
-            ningún texto de contexto encima. */}
+            true) no va el kicker/título/subtítulo de arriba — sólo el
+            kicker propio + el texto de contexto (cardsIntro) + las
+            cards, como TRES puntos repartidos con la misma distancia
+            entre cada uno. Yocxany fue bien específica: quiere que la
+            separación entre el menú de arriba y el título, entre el
+            título y el texto, y entre el texto y las cards sea
+            exactamente la misma — no cada bloque centrado por su
+            cuenta en su propia mitad (eso daba espacios distintos).
+            La forma correcta de lograr esto en CSS es justify-evenly
+            en el contenedor padre (ver el className del div de más
+            arriba): reparte el espacio sobrante en partes IGUALES
+            antes del primer hijo, entre cada par de hijos, y después
+            del último — con exactamente 3 hijos acá (kicker, texto,
+            cards) eso da 4 espacios iguales: menú→título,
+            título→texto, texto→cards, y cards→fin de sección. Por eso
+            cada bloque ahora es shrink-0 (tamaño natural) en vez de
+            flex-1/centrado — el que reparte el espacio es el padre,
+            no cada uno por separado.
+
+            Ojo: la <section> de más abajo también le quita su propio
+            padding-top fijo (py-10/16) en este caso — si se dejaba,
+            el espacio "menú→título" salía más grande que los otros
+            tres porque sumaba ese padding fijo ADEMÁS del espacio que
+            reparte justify-evenly. Sin ese padding, el primer espacio
+            de justify-evenly queda como el único responsable de la
+            distancia menú→título, igual que los demás. */}
         {!showIntro && showCards && (
-          <div className="mb-6 sm:mb-8 text-center shrink-0">
-            <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-2 font-mono-code">
-              {c.cardsIntro.kicker}
-            </span>
-            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 max-w-xl mx-auto leading-relaxed">
-              {c.cardsIntro.text}
-            </p>
+          <div className="shrink-0 animate-breeze-in text-center" style={{ animationDelay: '0ms' }}>
+            <KickerBadge>{c.cardsIntro.kicker}</KickerBadge>
           </div>
         )}
 
+        {!showIntro && showCards && (
+          <p
+            className="shrink-0 relative z-10 text-sm sm:text-base text-slate-700 dark:text-slate-300 max-w-xl mx-auto leading-relaxed text-center animate-breeze-in"
+            style={{ animationDelay: '180ms' }}
+          >
+            {c.cardsIntro.text}
+          </p>
+        )}
+
         {showCards && (
-          /* El par de tarjetas queda centrado en el espacio vertical que
-             sobra debajo del título (no pegado arriba) — así, con la
-             sección ya más alta, el bloque de tarjetas cae a la mitad
-             de la página en vez de dejar un vacío grande abajo. Esto
-             sólo aplica en la página dedicada "Formación" — debajo del
-             Hero (showCards=false) no hay carrusel, sólo el texto. */
-          <div ref={wheelZoneRef} className="flex-1 flex flex-col justify-center">
+          /* El bloque de cards es el tercer (y último) punto de la
+             distribución pareja de arriba — ver el comentario sobre
+             justify-evenly más arriba. Esto sólo aplica en la página
+             dedicada "Formación" — debajo del Hero (showCards=false)
+             no hay carrusel, sólo el texto. */
+          <div ref={wheelZoneRef} className="shrink-0">
             <div
               className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-7"
               onMouseEnter={() => setPaused(true)}
@@ -252,20 +338,51 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
                 return (
                   <div
                     key={`${groupIndex}-${item.id}`}
-                    className={`${isExiting ? 'animate-card-whoosh-out' : 'animate-card-whoosh-in'} bg-white dark:bg-[#003366] rounded-[28px] p-7 sm:p-9 border border-slate-100 dark:border-white/10 shadow-sm flex flex-col gap-4 min-h-[220px] sm:min-h-[240px] ${
+                    className={`relative rounded-[28px] min-h-[220px] sm:min-h-[240px] ${
                       soloCard ? 'sm:col-span-2 sm:max-w-md sm:mx-auto sm:w-full' : ''
                     }`}
                   >
-                    <div className="w-14 h-14 rounded-2xl bg-[#EAF3FB] dark:bg-white/10 text-[#0077C8] dark:text-[#4FB2F2] flex items-center justify-center shrink-0">
-                      <Icon className="w-7 h-7" />
+                    {/* Capa fantasma: puramente decorativa (aria-hidden,
+                        pointer-events-none) — lleva el blur de la estela
+                        de siempre. Al estar exactamente detrás y con el
+                        mismo movimiento que la capa real, sólo se nota
+                        como un leve resplandor difuso mientras entra o
+                        sale; nunca es lo que se lee. */}
+                    <div
+                      aria-hidden="true"
+                      className={`absolute inset-0 p-7 sm:p-9 flex flex-col gap-4 pointer-events-none ${
+                        isExiting ? 'animate-card-whoosh-out' : 'animate-card-whoosh-in'
+                      }`}
+                    >
+                      <CardIcon Icon={Icon} />
+                      <div className="text-center">
+                        <h3 className="font-heading font-bold text-lg sm:text-xl text-[#003366] dark:text-[#9FC6E8] mb-1.5">
+                          {itemT.name}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                          {itemT.description}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-heading font-bold text-lg sm:text-xl text-[#003366] dark:text-[#9FC6E8] mb-1.5">
-                        {itemT.name}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                        {itemT.description}
-                      </p>
+
+                    {/* Capa real: el ícono y el texto que se leen de
+                        verdad — mismo movimiento (translateY + scale +
+                        opacity) que la fantasma, pero SIN blur, así el
+                        desenfoque de la estela nunca los afecta. */}
+                    <div
+                      className={`relative p-7 sm:p-9 flex flex-col gap-4 ${
+                        isExiting ? 'animate-card-content-out' : 'animate-card-content-in'
+                      }`}
+                    >
+                      <CardIcon Icon={Icon} />
+                      <div className="text-center">
+                        <h3 className="font-heading font-bold text-lg sm:text-xl text-[#003366] dark:text-[#9FC6E8] mb-1.5">
+                          {itemT.name}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                          {itemT.description}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 );

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Briefcase, Building2, Globe2 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useTheme } from '../../theme/ThemeContext';
+import KickerBadge from './KickerBadge';
 
 /**
  * Cuenta de 0 hasta `value` con una curva ease-out (arranca rápido, frena
@@ -244,9 +245,9 @@ export default function StatsSection() {
   return (
     <section ref={sectionRef} className="px-4 sm:px-6 py-10 sm:py-16 bg-[#D6E9F7] dark:bg-[#001F3D] border-y border-slate-100 dark:border-white/10">
       <div className="max-w-4xl mx-auto text-center">
-        <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
-          {t.stats.kicker}
-        </span>
+        <div className="mb-1 sm:mb-1.5">
+          <KickerBadge variant="glow">{t.stats.kicker}</KickerBadge>
+        </div>
         <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-[#9FC6E8] tracking-tight mb-2">
           {t.stats.title}
         </h2>
