@@ -413,6 +413,25 @@ h1, h2, h3, h4, h5, h6 {
   animation: statPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+/* Rebote MUY sutil para la frase de cierre de "Formación con Visión de
+   Futuro" (FormacionVisionHero.jsx) cuando el scroll de esa sección
+   termina de acomodarse. Yocxany pidió específicamente "menos boop,
+   algo más sutil" después de probar `animate-stat-pop` (pensado para
+   los contadores de "ICAP en Cifras", con un rebote bien marcado) —
+   por eso este es un keyframe propio, no una versión reducida vía
+   props: mismo espíritu (un pequeño "pop" de escala al aterrizar) pero
+   con una amplitud mucho menor. */
+@keyframes closingBoop {
+  0% { scale: 1; }
+  40% { scale: 1.035; }
+  70% { scale: 0.99; }
+  100% { scale: 1; }
+}
+
+.animate-closing-boop {
+  animation: closingBoop 0.45s ease-out both;
+}
+
 /* Rayito de luz que da casi una vuelta alrededor del logo del ICAP
    (Valores Institucionales) justo cuando un valor "aterriza" en el
    centro. `mask` deja visible sólo un anillo delgado (no un círculo

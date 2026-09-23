@@ -54,12 +54,20 @@ export default function Propuesta1({
   const [activeDept, setActiveDept] = useState('at');
   const activePages = activeDept === 'at' ? PAGES : DOCENCIA_PAGES;
 
-  // Cambiar de departamento siempre aterriza en el Hero compartido, sin
-  // importar en qué subsección se estuviera — nunca deja al usuario
-  // viendo, por ejemplo, "Valores" de AT con el menú ya en Docencia.
+  // Cambiar de departamento aterriza en el Hero compartido, salvo que
+  // ya se esté en Autoridades o Contacto — esas dos son las únicas
+  // subsecciones compartidas entre los dos departamentos (mismo
+  // componente/contenido, sólo cambia el color del kicker — ver
+  // AuthoritiesSection.jsx/ContactSection.jsx), así que ahí sí tiene
+  // sentido quedarse viéndolas en vez de mandar de vuelta al Hero.
+  // Para cualquier otra subsección (propia de un solo departamento,
+  // como "Valores" de AT o "Impacto" de Docencia) sí hay que volver,
+  // porque esa subsección no existe del otro lado.
   const switchDept = (dept) => {
     setActiveDept(dept);
-    setActivePage('inicio');
+    if (activePage !== 'autoridades' && activePage !== 'contacto') {
+      setActivePage('inicio');
+    }
   };
 
   // --- Menú de configuración (engranaje) --------------------------------
@@ -169,13 +177,13 @@ export default function Propuesta1({
       case 'valores':
         return <ValuesWheel />;
       case 'autoridades':
-        return <AuthoritiesSection />;
+        return <AuthoritiesSection dept={activeDept} />;
       case 'areas':
         return <SpecializationAreas />;
       case 'presencia':
         return <RegionalMap />;
       case 'contacto':
-        return <ContactSection id="propuesta1-contact" contact={contact} />;
+        return <ContactSection id="propuesta1-contact" contact={contact} dept={activeDept} />;
       // --- Subsecciones propias de Docencia ---------------------------
       // "Formación" en el menú va sólo con el carrusel de cards — el
       // texto de introducción ya se muestra debajo del Hero en Inicio,

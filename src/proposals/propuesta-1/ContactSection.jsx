@@ -3,6 +3,7 @@ import { User, MessageCircle, Mail, Calendar, ExternalLink, Sparkles } from 'luc
 import { LinkedinIcon } from '../../components/Icons';
 import VCardDownload, { defaultContact, whatsappDigits } from '../../components/VCardDownload';
 import BottomSheet from '../../components/BottomSheet';
+import KickerBadge from './KickerBadge';
 import { useLanguage } from '../../i18n/LanguageContext';
 import icapEscudoNavy from '../../assets/icap-escudo-navy.png';
 import icapEscudoWhite from '../../assets/icap-escudo-white.png';
@@ -16,7 +17,11 @@ const PROFILE_BACKGROUND =
   'radial-gradient(65% 70% at 14% -8%, rgba(255,255,255,0.4), transparent 42%), ' +
   'linear-gradient(160deg, #0090DD 0%, #0068AE 48%, #013A63 100%)';
 
-export default function ContactSection({ contact = defaultContact, id = 'contacto' }) {
+// Mismo caso que AuthoritiesSection: Contacto es compartido entre AT y
+// Docencia (mismo componente/contenido), pero el kicker sí toma la
+// identidad visual del departamento activo (glow de AT / dot de
+// Docencia) vía `dept` — el texto se queda igual en los dos.
+export default function ContactSection({ contact = defaultContact, id = 'contacto', dept = 'at' }) {
   const { t } = useLanguage();
   const [scheduleModal, setScheduleModal] = useState(false);
 
@@ -71,9 +76,9 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
       <div ref={sectionRef} className="max-w-xl mx-auto relative">
         {/* Header */}
         <div className="text-center mb-8">
-          <span className="text-[11px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1.5 font-mono-code">
-            {t.contact.kicker}
-          </span>
+          <div className="mb-1.5 sm:mb-2 flex justify-center">
+            <KickerBadge variant={dept === 'docencia' ? 'dot' : 'glow'}>{t.contact.kicker}</KickerBadge>
+          </div>
           <h2 className="font-heading font-extrabold text-2xl sm:text-4xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
             {t.contact.title}
           </h2>

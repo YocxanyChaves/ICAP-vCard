@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Stethoscope, BadgeCheck, ClipboardCheck, Cog, Users, Leaf, Scale, CheckCircle2, ChevronLeft, ChevronRight, RotateCw } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Stethoscope, BadgeCheck, ClipboardCheck, Cog, Users, Leaf, Scale, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import KickerBadge from './KickerBadge';
 import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
@@ -27,6 +27,27 @@ const AREAS = [
   { id: 'ambiente', icon: Leaf }
 ];
 
+// Yocxany pidió que al entrar a la sección la tarjeta que queda armada
+// en el centro (la "principal") sea "Proyectos" en vez de la primera
+// del arreglo ("Salud y Seguridad Social") — acá queda como constante
+// para que cambiarla el día de mañana sea de una sola línea.
+const DEFAULT_AREA_ID = 'proyectos';
+const DEFAULT_AREA_INDEX = Math.max(0, AREAS.findIndex((a) => a.id === DEFAULT_AREA_ID));
+
+// Carrusel "infinito": en vez de renderizar las 6 tarjetas una sola
+// vez (una tira con principio y fin), se repite el arreglo 3 veces
+// seguidas (copia anterior + copia real + copia siguiente) y el
+// carril arranca parado en la copia del MEDIO. Así siempre hay
+// tarjetas de sobra a los dos lados para seguir girando en cualquier
+// dirección — cuando el scroll se queda quieto (ver el debounce de
+// "recenter" más abajo) y la tarjeta activa cayó en una copia de los
+// extremos, se salta en silencio (sin animación, ni un pixel distinto
+// en pantalla porque las copias son pixel-idénticas) de vuelta a la
+// copia del medio, dejando otra vez margen de sobra de los dos lados.
+// Es la misma técnica que usan los carruseles "infinitos" de
+// librerías tipo Swiper, sólo que a mano.
+const LOOPS = 3;
+
 // Mismo celeste institucional para las 6 — un degradado (no un color
 // plano) más un brillo radial arriba-izquierda, como si la superficie
 // fuera ligeramente curva/pulida. Esa combinación es la que da la
@@ -43,24 +64,38 @@ const CARD_BACKGROUND =
 // geométrico perfecto. Sólo 6 valores porque son 6 áreas siempre.
 const SHUFFLE_ROTATE = [-16, 12, -20, 15, -12, 19];
 
-// Textitos de la UI del carrusel (flechas, puntos, botón de repetir) —
-// viven acá, no en translations.js, porque son sólo aria-label/title
-// (nunca texto visible en pantalla) y así no hay que tocar el
-// diccionario grande por un cambio tan chiquito.
+// Textitos de la UI del carrusel (flechas, puntos) — viven acá, no en
+// translations.js, porque son sólo aria-label (nunca texto visible en
+// pantalla) y así no hay que tocar el diccionario grande por un cambio
+// tan chiquito.
 const UI = {
   es: {
     prev: 'Área anterior',
     next: 'Área siguiente',
-    goTo: (name) => `Ir a ${name}`,
-    replay: 'Volver al inicio y repetir la animación'
+    goTo: (name) => `Ir a ${name}`
   },
   en: {
     prev: 'Previous area',
     next: 'Next area',
-    goTo: (name) => `Go to ${name}`,
-    replay: 'Back to start and replay the animation'
+    goTo: (name) => `Go to ${name}`
   }
 };
+
+// Centra una tarjeta en el carril, sin animación de scroll (se usa
+// sólo para la corrección instantánea de entrada, antes de mostrar
+// nada). Vive fuera del componente — a propósito NO usa el callback
+// `scrollToIndex` de más abajo: ese depende de un useEffect para
+// quedar accesible desde el IntersectionObserver (mismo patrón que
+// settledRef), y el IntersectionObserver puede disparar su primer
+// callback ANTES de que React llegue a correr ese efecto (es una
+// tarea del navegador, no de React, así que no hay garantía de orden
+// entre los dos) — pasando `track`/`cardEl` directo se evita esa
+// carrera del todo.
+function centerCardInstant(track, cardEl) {
+  if (!track || !cardEl) return;
+  const target = cardEl.offsetLeft - (track.clientWidth - cardEl.clientWidth) / 2;
+  track.scrollTo({ left: target, behavior: 'instant' });
+}
 
 /**
  * Rayita de luz celeste con puntas de flecha + estela difuminada detrás
@@ -85,8 +120,42 @@ export default function SpecializationAreas() {
 
   const sectionRef = useRef(null);
   const trackRef = useRef(null);
+  // Antes cardRefs iba llave por `area.id` (6 llaves únicas). Con el
+  // carrusel infinito el mismo id se repite 3 veces (una por copia),
+  // así que ahora la llave es `renderKey` (única por tarjeta física
+  // en pantalla, no por área) — ver RENDER_AREAS más abajo.
   const cardRefs = useRef({});
-  const [activeIndex, setActiveIndex] = useState(0);
+  // `activeIndex` sigue siendo 0-5 (para resaltar el puntito correcto,
+  // que sólo representa las 6 áreas reales, no cada copia). La copia
+  // física donde está parado el carril en cada momento vive aparte, en
+  // closestRenderIndexRef.
+  const [activeIndex, setActiveIndex] = useState(DEFAULT_AREA_INDEX);
+
+  // Las 18 tarjetas físicas (3 copias de las 6 áreas) — se arma una
+  // sola vez, nunca cambia entre renders.
+  const RENDER_AREAS = useMemo(
+    () =>
+      Array.from({ length: LOOPS * AREAS.length }, (_, i) => {
+        const baseIndex = i % AREAS.length;
+        return {
+          ...AREAS[baseIndex],
+          baseIndex,
+          renderIndex: i,
+          renderKey: `copy${Math.floor(i / AREAS.length)}-${AREAS[baseIndex].id}`
+        };
+      }),
+    []
+  );
+  // Índice (dentro de RENDER_AREAS, 0-17) de la tarjeta física más
+  // cercana al centro ahora mismo — lo escribe updateCoverflow en cada
+  // frame de scroll y lo leen scrollByStep/scrollToBaseIndex/el
+  // recentrado, sin depender de un re-render.
+  const closestRenderIndexRef = useRef(AREAS.length + DEFAULT_AREA_INDEX);
+  // Distancia (en px) entre el centro de dos tarjetas consecutivas,
+  // medida en vivo por updateCoverflow — se reusa acá para calcular
+  // el salto de "recentrado" (exactamente AREAS.length pasos).
+  const stepRef = useRef(300);
+  const recenterTimeoutRef = useRef(null);
 
   // Fase de entrada — mismo espíritu de "llegan juntas y después se
   // acomodan" que el abanico de DocenciaImpacto, pero acá NO hay que
@@ -162,6 +231,17 @@ export default function SpecializationAreas() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
+            // Antes de mostrar nada (fase 'hidden' todavía, opacidad 0)
+            // se para el carril de una, sin animación, ya centrado en
+            // la tarjeta por defecto ("Proyectos", en la copia del
+            // medio) — así el reparto de las cards sucede directo en
+            // el lugar correcto, sin el salto que había antes cuando
+            // el reparto pasaba en scrollLeft:0 y recién después se
+            // corregía la posición.
+            {
+              const targetArea = RENDER_AREAS[AREAS.length + DEFAULT_AREA_INDEX];
+              centerCardInstant(trackRef.current, targetArea && cardRefs.current[targetArea.renderKey]);
+            }
             setPhase('stacked');
             dealTimeoutId = setTimeout(() => setPhase('dealt'), 420);
           } else {
@@ -185,14 +265,45 @@ export default function SpecializationAreas() {
   // 'smooth' se vería como un deslizamiento de más, encima de la
   // animación de reparto que recién terminó); 'smooth' es el default
   // para cuando la persona toca las flechas/puntitos.
-  const scrollToIndex = useCallback((idx, behavior = 'smooth') => {
-    const track = trackRef.current;
-    const area = AREAS[idx];
-    const cardEl = area && cardRefs.current[area.id];
-    if (!track || !cardEl) return;
-    const target = cardEl.offsetLeft - (track.clientWidth - cardEl.clientWidth) / 2;
-    track.scrollTo({ left: target, behavior });
-  }, []);
+  // Ahora `idx` es un índice dentro de RENDER_AREAS (0-17, una de las
+  // 3 copias), no dentro de AREAS (0-5) — ver scrollToBaseIndex más
+  // abajo para ir a un área por su id sin importar en qué copia caiga.
+  const scrollToIndex = useCallback(
+    (idx, behavior = 'smooth') => {
+      const track = trackRef.current;
+      const clamped = Math.max(0, Math.min(RENDER_AREAS.length - 1, idx));
+      const area = RENDER_AREAS[clamped];
+      const cardEl = area && cardRefs.current[area.renderKey];
+      if (!track || !cardEl) return;
+      const target = cardEl.offsetLeft - (track.clientWidth - cardEl.clientWidth) / 2;
+      track.scrollTo({ left: target, behavior });
+    },
+    [RENDER_AREAS]
+  );
+
+  // Ir a un área por su id (lo que usan los puntitos de abajo) en vez
+  // de por índice de copia: busca, de las 3 copias, cuál queda más
+  // cerca de donde está parado el carril ahora mismo, para que el
+  // salto sea siempre cortito — a Yocxany no le importa en qué copia
+  // física caiga cada tarjeta, sólo que el movimiento se sienta sutil.
+  const scrollToBaseIndex = useCallback(
+    (baseIdx, behavior = 'smooth') => {
+      const n = AREAS.length;
+      const cur = closestRenderIndexRef.current ?? n + baseIdx;
+      let best = baseIdx;
+      let bestDist = Infinity;
+      for (let copy = 0; copy < LOOPS; copy++) {
+        const candidate = copy * n + baseIdx;
+        const dist = Math.abs(candidate - cur);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = candidate;
+        }
+      }
+      scrollToIndex(best, behavior);
+    },
+    [scrollToIndex]
+  );
 
   // El efecto "coverflow": mientras se desliza el carril, cada tarjeta
   // se va girando en 3D según qué tan lejos quede de la tarjeta central
@@ -222,21 +333,23 @@ export default function SpecializationAreas() {
     // Distancia entre el centro de dos tarjetas consecutivas, medida
     // en vivo (en vez de una constante): así sigue siendo correcta sin
     // importar el breakpoint (w-[80vw] en mobile, 360px fijo desde sm),
-    // sin necesidad de duplicar esa cuenta acá.
-    const firstEl = cardRefs.current[AREAS[0].id];
-    const secondEl = cardRefs.current[AREAS[1].id];
+    // sin necesidad de duplicar esa cuenta acá. Se guarda en stepRef
+    // porque también la usa el recentrado del scroll infinito.
+    const firstEl = cardRefs.current[RENDER_AREAS[0].renderKey];
+    const secondEl = cardRefs.current[RENDER_AREAS[1].renderKey];
     let step = firstEl ? firstEl.getBoundingClientRect().width + 24 : 300;
     if (firstEl && secondEl) {
       const a = firstEl.getBoundingClientRect();
       const b = secondEl.getBoundingClientRect();
       step = b.left + b.width / 2 - (a.left + a.width / 2) || step;
     }
+    stepRef.current = step;
 
     let closestIdx = 0;
     let closestDist = Infinity;
 
-    AREAS.forEach((area, idx) => {
-      const cardEl = cardRefs.current[area.id];
+    RENDER_AREAS.forEach((area, idx) => {
+      const cardEl = cardRefs.current[area.renderKey];
       if (!cardEl) return;
       const r = cardEl.getBoundingClientRect();
       const cardCenter = r.left + r.width / 2;
@@ -259,7 +372,31 @@ export default function SpecializationAreas() {
       cardEl.style.zIndex = String(Math.round(200 - Math.abs(d) * 20));
     });
 
-    setActiveIndex((prev) => (prev === closestIdx ? prev : closestIdx));
+    closestRenderIndexRef.current = closestIdx;
+    const baseIdx = closestIdx % AREAS.length;
+    setActiveIndex((prev) => (prev === baseIdx ? prev : baseIdx));
+  }, [RENDER_AREAS]);
+
+  // Auto-recentrado del carrusel "infinito": cuando el scroll se queda
+  // quieto (nadie lo sigue arrastrando/soltando — por eso el debounce),
+  // si la tarjeta activa cayó en la copia de la izquierda o la derecha
+  // se salta EN SILENCIO (asignando scrollLeft directo, sin scrollTo
+  // ni transición: como las 3 copias son pixel-idénticas, no se nota
+  // ni un parpadeo) de vuelta a la copia del medio — así siempre queda
+  // una copia entera de margen para seguir girando para cualquier lado
+  // sin toparse nunca con el final real de la tira.
+  const recenterIfNeeded = useCallback(() => {
+    const track = trackRef.current;
+    if (!track || !settledRef.current) return;
+    const n = AREAS.length;
+    const idx = closestRenderIndexRef.current;
+    if (idx < n) {
+      track.scrollLeft += n * stepRef.current;
+      closestRenderIndexRef.current = idx + n;
+    } else if (idx >= n * 2) {
+      track.scrollLeft -= n * stepRef.current;
+      closestRenderIndexRef.current = idx - n;
+    }
   }, []);
 
   useEffect(() => {
@@ -273,6 +410,8 @@ export default function SpecializationAreas() {
         rafId = null;
         updateCoverflow();
       });
+      if (recenterTimeoutRef.current) clearTimeout(recenterTimeoutRef.current);
+      recenterTimeoutRef.current = setTimeout(recenterIfNeeded, 140);
     };
 
     track.addEventListener('scroll', onScroll, { passive: true });
@@ -297,48 +436,90 @@ export default function SpecializationAreas() {
       if (ro) ro.disconnect();
       else view?.removeEventListener('resize', onScroll);
       if (rafId != null) cancelAnimationFrame(rafId);
+      if (recenterTimeoutRef.current) clearTimeout(recenterTimeoutRef.current);
     };
-  }, [updateCoverflow]);
+  }, [updateCoverflow, recenterIfNeeded]);
 
-  // En cuanto el reparto termina de asentarse (`settled` pasa a true):
-  // 1) se centra la PRIMERA tarjeta de una — con el padding lateral del
-  //    carril (px-[14vw]), a scrollLeft:0 ninguna tarjeta queda
-  //    perfectamente centrada, así que sin este paso la "principal" de
-  //    entrada sería la que haya quedado más cerca por azar (según el
-  //    ancho de pantalla), no necesariamente la primera. `instant` a
-  //    propósito: un scroll 'smooth' acá se sentiría como un
-  //    deslizamiento de más, pegado a la cola de la animación de
-  //    reparto que recién terminó.
-  // 2) recién ahí se aplica el coverflow — si no, las tarjetas se
-  //    quedarían "planas parejas" (el estado final de la animación de
-  //    reparto) hasta que la persona empiece a scrollear.
+  // En cuanto el reparto termina de asentarse (`settled` pasa a true)
+  // el coverflow toma control del transform/opacity de cada tarjeta.
+  // El carril ya está centrado en la tarjeta por defecto desde ANTES
+  // de que arrancara el reparto (ver el IntersectionObserver más
+  // arriba), así que acá ya no hace falta corregir el scroll — sólo
+  // falta el primer cálculo de coverflow. Pasar de "plana" (estado
+  // final del reparto) a "inclinada en 3D" de un jalón, en un solo
+  // frame sin transición, era justo lo que Yocxany sentía como
+  // brusco/"de ladito" — por eso se le da una transición CSS corta
+  // SOLO para este primer cuadro (se saca enseguida después: el
+  // coverflow normal, mientras la persona scrollea, necesita responder
+  // pixel a pixel sin ningún easing de por medio, si no se siente
+  // pegajoso/atrasado).
   useEffect(() => {
     if (!settled) return undefined;
-    scrollToIndex(0, 'instant');
+    RENDER_AREAS.forEach((area) => {
+      const el = cardRefs.current[area.renderKey];
+      if (el) {
+        el.style.transition =
+          'transform 560ms cubic-bezier(0.16,1,0.3,1), opacity 560ms cubic-bezier(0.16,1,0.3,1)';
+      }
+    });
     const rafId = requestAnimationFrame(updateCoverflow);
-    return () => cancelAnimationFrame(rafId);
-  }, [settled, updateCoverflow, scrollToIndex]);
+    const clearId = setTimeout(() => {
+      RENDER_AREAS.forEach((area) => {
+        const el = cardRefs.current[area.renderKey];
+        if (el) el.style.transition = '';
+      });
+    }, 580);
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(clearId);
+    };
+  }, [settled, updateCoverflow, RENDER_AREAS]);
 
+  // Ya no hay "última tarjeta": con el carril infinito, las flechas
+  // simplemente avanzan/retroceden un paso desde donde esté parado el
+  // carril ahora mismo (closestRenderIndexRef, actualizado en cada
+  // frame de scroll) — sin clamp entre 0 y AREAS.length-1 como antes.
   const scrollByStep = useCallback(
     (dir) => {
-      const nextIdx = Math.min(AREAS.length - 1, Math.max(0, activeIndex + dir));
-      scrollToIndex(nextIdx);
+      const cur = closestRenderIndexRef.current ?? AREAS.length + DEFAULT_AREA_INDEX;
+      scrollToIndex(cur + dir);
     },
-    [activeIndex, scrollToIndex]
+    [scrollToIndex]
   );
 
-  // El botoncito de "reiniciar": vuelve el carril a la primera tarjeta
-  // Y repite la animación de reparto completa (pasa por 'hidden' un
-  // frame antes de 'stacked' para que el efecto se vea desde cero,
-  // igual que la primera vez que se entra a la sección).
-  const replay = useCallback(() => {
-    scrollToIndex(0);
-    setPhase('hidden');
-    requestAnimationFrame(() => {
-      setPhase('stacked');
-      setTimeout(() => setPhase('dealt'), 420);
-    });
-  }, [scrollToIndex]);
+  // Navegar las tarjetas con la rueda del mouse/trackpad, estando arriba
+  // del carril — Yocxany lo pidió porque el scroll VERTICAL de toda la
+  // vida (la rueda del mouse, sin nada especial) no mueve un contenedor
+  // que sólo scrollea en horizontal (`overflow-x-auto`): el navegador lo
+  // deja pasar de largo y scrollea la PÁGINA en su lugar. Acá se
+  // intercepta ese gesto vertical y se traduce en "siguiente/anterior"
+  // (mismo `scrollByStep` de las flechas). Un gesto YA horizontal
+  // (trackpad deslizando de lado, deltaX manda sobre deltaY) se deja
+  // pasar tal cual — el scroll nativo del carril ya lo resuelve solo,
+  // no hay que pisarlo con esto.
+  const lastWheelRef = useRef(0);
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return undefined;
+
+    const handleWheel = (e) => {
+      if (!settledRef.current) return;
+      const absY = Math.abs(e.deltaY);
+      const absX = Math.abs(e.deltaX);
+      if (absX > absY || absY < 12) return;
+      e.preventDefault();
+      // Throttle: un solo "paso" por gesto — sin esto, una rueda de
+      // mouse típica dispara varios eventos wheel seguidos por cada
+      // "click" físico de la ruedita, y saltaría varias tarjetas de una.
+      const now = Date.now();
+      if (now - lastWheelRef.current < 550) return;
+      lastWheelRef.current = now;
+      scrollByStep(e.deltaY > 0 ? 1 : -1);
+    };
+
+    track.addEventListener('wheel', handleWheel, { passive: false });
+    return () => track.removeEventListener('wheel', handleWheel);
+  }, [scrollByStep]);
 
   return (
     <section ref={sectionRef} className="py-10 sm:py-16 bg-[#D6E9F7] dark:bg-[#001F3D] relative overflow-hidden">
@@ -398,18 +579,39 @@ export default function SpecializationAreas() {
             ref={trackRef}
             className="flex items-stretch gap-5 sm:gap-6 overflow-x-auto snap-x snap-mandatory px-[calc((100%-min(80vw,360px))/2)] pb-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           >
-            {AREAS.map((area, idx) => {
+            {RENDER_AREAS.map((area) => {
               const Icon = area.icon;
               const areaT = t.specializationAreas.items[area.id];
-              const rotateStart = SHUFFLE_ROTATE[idx % SHUFFLE_ROTATE.length];
+              // El ángulo de entrada se repite por baseIndex (no por
+              // posición en RENDER_AREAS) para que la misma área se
+              // vea idéntica en sus 3 copias.
+              const rotateStart = SHUFFLE_ROTATE[area.baseIndex % SHUFFLE_ROTATE.length];
 
               return (
                 <div
-                  key={area.id}
+                  key={area.renderKey}
                   ref={(el) => {
-                    cardRefs.current[area.id] = el;
+                    cardRefs.current[area.renderKey] = el;
                   }}
-                  className="self-stretch shrink-0 snap-center w-[80vw] max-w-[360px] sm:w-[360px]"
+                  // Yocxany pidió poder tocar directo la tarjeta de un
+                  // lado (la que queda inclinada por el coverflow) para
+                  // que pase al centro, en vez de depender sólo del
+                  // scroll/swipe horizontal — en mobile eso se puede
+                  // confundir con el scroll VERTICAL de la página (uno
+                  // "baja" para seguir viendo el resto del sitio, y ese
+                  // gesto puede pisar el swipe horizontal). Se ignora en
+                  // la tarjeta ya centrada (no tendría nada que hacer) y
+                  // mientras el reparto de entrada todavía no terminó de
+                  // asentarse (`settledRef`), para no interrumpir esa
+                  // animación a mitad de camino.
+                  onClick={() => {
+                    if (!settledRef.current) return;
+                    if (area.renderIndex === closestRenderIndexRef.current) return;
+                    scrollToIndex(area.renderIndex);
+                  }}
+                  className={`self-stretch shrink-0 snap-center w-[80vw] max-w-[360px] sm:w-[360px] ${
+                    settled && area.baseIndex !== activeIndex ? 'cursor-pointer' : ''
+                  }`}
                   style={
                     settled
                       ? // A partir de acá el coverflow (updateCoverflow,
@@ -431,7 +633,7 @@ export default function SpecializationAreas() {
                           transitionProperty: 'opacity, transform',
                           transitionDuration: phase === 'dealt' ? '650ms' : '380ms',
                           transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                          transitionDelay: phase === 'dealt' ? `${idx * 70}ms` : '0ms'
+                          transitionDelay: phase === 'dealt' ? `${area.baseIndex * 70}ms` : '0ms'
                         }
                   }
                 >
@@ -524,11 +726,12 @@ export default function SpecializationAreas() {
           </div>
         </div>
 
-        {/* Controles del carrusel: flechas para ir de a una, puntitos
+        {/* Controles del carrusel: flechas para ir de a una y puntitos
             para saltar directo a cualquier área (el "menú" que pidió
-            Yocxany) y el botón de reiniciar — todo centrado bajo el
-            carril, dentro del ancho normal del contenido (no hace
-            falta que ESTO también sea 100vw). */}
+            Yocxany) — todo centrado bajo el carril, dentro del ancho
+            normal del contenido (no hace falta que ESTO también sea
+            100vw). Antes también iba acá un botón de "reiniciar la
+            animación" — Yocxany pidió sacarlo. */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-center gap-3 sm:gap-4 mt-5 sm:mt-6">
           <button
             type="button"
@@ -547,7 +750,7 @@ export default function SpecializationAreas() {
                 <button
                   key={area.id}
                   type="button"
-                  onClick={() => scrollToIndex(idx)}
+                  onClick={() => scrollToBaseIndex(idx)}
                   aria-label={ui.goTo(areaT.title)}
                   aria-current={isActive}
                   className={`h-2 rounded-full transition-all duration-300 ${
@@ -565,16 +768,6 @@ export default function SpecializationAreas() {
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/70 dark:bg-white/10 border border-[#0077C8]/25 dark:border-white/15 text-[#0077C8] dark:text-[#9FC6E8] flex items-center justify-center shrink-0 hover:bg-white dark:hover:bg-white/20 transition-colors"
           >
             <ChevronRight className="w-4.5 h-4.5" />
-          </button>
-
-          <button
-            type="button"
-            onClick={replay}
-            aria-label={ui.replay}
-            title={ui.replay}
-            className="ml-1 sm:ml-2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0077C8]/10 dark:bg-white/10 border border-[#4FB2F2]/45 text-[#0077C8] dark:text-[#9FC6E8] flex items-center justify-center shrink-0 hover:bg-[#0077C8]/20 dark:hover:bg-white/20 transition-colors"
-          >
-            <RotateCw className="w-4 h-4" />
           </button>
         </div>
       </div>

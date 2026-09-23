@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MapPin, Info, X } from 'lucide-react';
 import BottomSheet from '../../components/BottomSheet';
+import KickerBadge from './KickerBadge';
 import { getAreaMeta } from './areaMeta';
 import { useLanguage } from '../../i18n/LanguageContext';
 import sicaLogo from '../../assets/allies/sica.png';
@@ -240,10 +241,21 @@ export default function AlliesMarquee() {
   return (
     <section ref={sectionRef} className="py-12 bg-gradient-to-br from-[#003366] via-[#0B5A96] to-[#0077C8] text-white overflow-hidden border-y border-white/5 relative">
       <div className="max-w-4xl mx-auto px-6 mb-8 text-center">
-        <span className="text-xs font-bold tracking-widest uppercase text-[#EAF3FB] block mb-1 font-mono-code">
-          {t.allies.kicker}
-        </span>
-        <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-white tracking-tight">
+        {/* Antes era un kicker de texto plano, más chico que el resto
+            del sitio — Yocxany pidió el mismo formato de título que ya
+            llevan Formación/Impacto/Áreas (la píldora KickerBadge) acá
+            también. Como el fondo de esta sección es siempre este
+            degradado oscuro (no cambia con el tema claro/oscuro del
+            sitio), la píldora va con `onDark` para que sus colores no
+            dependan del tema — ver KickerBadge.jsx. El h2 también subió
+            de tamaño (text-xl/2xl → text-2xl/3xl) para igualar el peso
+            visual del resto de los títulos de sección. */}
+        <div className="mb-1.5 sm:mb-2 flex justify-center">
+          <KickerBadge variant="glow" onDark>
+            {t.allies.kicker}
+          </KickerBadge>
+        </div>
+        <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-white tracking-tight">
           {t.allies.title}
         </h2>
         <p className="text-[11px] sm:text-xs text-[#D6E9F7] mt-1.5">

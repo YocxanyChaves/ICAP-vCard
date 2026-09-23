@@ -18,13 +18,18 @@ import {
 // panel de accesos rápidos del Hero, para que ambos siempre muestren
 // exactamente las mismas secciones, en el mismo orden, sin tener que
 // mantener dos listas iguales por separado.
+// Autoridades y Contacto quedan juntas al final (a la derecha en el
+// menú) — Yocxany pidió que las dos secciones compartidas entre
+// departamentos queden agrupadas ahí, igual que ya estaban en
+// DOCENCIA_PAGES más abajo (antes acá "Autoridades" iba en medio,
+// separada de "Contacto" por Áreas y Presencia).
 export const PAGES = [
   { id: 'inicio', label: 'Inicio', icon: Home },
   { id: 'mision', label: 'Misión', icon: Compass },
   { id: 'valores', label: 'Valores', icon: Sparkles },
-  { id: 'autoridades', label: 'Autoridades', icon: Users },
   { id: 'areas', label: 'Áreas', icon: LayoutGrid },
   { id: 'presencia', label: 'Presencia', icon: MapPinned },
+  { id: 'autoridades', label: 'Autoridades', icon: Users },
   { id: 'contacto', label: 'Contacto', icon: Phone }
 ];
 

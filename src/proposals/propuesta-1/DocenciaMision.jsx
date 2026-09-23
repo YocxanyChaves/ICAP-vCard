@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Telescope, TrendingUp, FlaskConical, Cpu, Flag, Globe2, BookOpen } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import KickerBadge from './KickerBadge';
+import FormacionVisionHero from './FormacionVisionHero';
 
 // Mismos ids que t.docenciaMision.items en translations.js — nombre y
 // descripción de cada capacidad viven ahí; acá sólo quedan el id y el
@@ -69,6 +70,13 @@ const ENTER_MS = 850;
  * Por eso Propuesta1 renderiza esta misma sección dos veces con props
  * distintas: showCards={false} justo después del Hero, y
  * showIntro={false} en la página dedicada de "Formación".
+ *
+ * El caso showCards={false} (Inicio) YA NO se dibuja acá — Yocxany
+ * pidió rehacerlo como su propio momento de dos columnas con scroll,
+ * inspirado en white-desert.com, así que ese caso retorna temprano
+ * hacia FormacionVisionHero.jsx (ver el `if` justo antes del `return`
+ * principal, más abajo). El caso showIntro={false} (cards de la
+ * página "Formación") sigue exactamente igual que siempre.
  */
 
 /**
@@ -234,6 +242,27 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
   const activeGroup = groups[groupIndex];
   const isExiting = phase === 'exit';
 
+  // Uso en Inicio de Docencia (showCards=false, showIntro=true por
+  // default): antes esto era un simple kicker+título+párrafo
+  // centrado, acá mismo (ver el historial más abajo en git si hace
+  // falta). Yocxany pidió rehacerlo como su propio momento de dos
+  // columnas con scroll — ver FormacionVisionHero.jsx para todo el
+  // detalle de cómo funciona. Retorna ACÁ, antes que nada, porque ese
+  // nuevo diseño es plancha completa (dos paneles a lo ancho) y no
+  // encaja dentro del `max-w-4xl` centrado que usa el resto de este
+  // componente para la página dedicada "Formación" (showIntro=false)
+  // — son dos layouts demasiado distintos para compartir el mismo
+  // <section> envolvente.
+  //
+  // OJO: NO se le pasa `c.kicker` ("Formación con Visión de Futuro")
+  // — ese texto es el nombre de la página dedicada "Formación" del
+  // menú (es el mismo string que `c.cardsIntro.kicker`, ver arriba),
+  // no pertenece acá en el Inicio. Yocxany lo notó y pidió quitarlo:
+  // en Inicio va SOLO el título grande (`c.title`).
+  if (showIntro && !showCards) {
+    return <FormacionVisionHero title={c.title} text={c.subtitle} closing={c.closing} />;
+  }
+
   return (
     <section
       className={`px-4 sm:px-6 ${
@@ -247,36 +276,6 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
           !showIntro && showCards ? 'justify-evenly' : ''
         }`}
       >
-        {/* Entrada animada al llegar a la página — Yocxany pidió que se
-            sintiera "más fluida y lenta, como palabras que las trae el
-            viento" en vez del fade+subida rápido que usa el Hero, así
-            que acá se usa animate-breeze-in (desplazamiento lateral +
-            desenfoque que se aclara, 1.1s, definido en global.css) en
-            vez de animate-hero-rise, en cascada: kicker primero,
-            título/texto un poquito después. Como este bloque no cambia
-            de key entre los ciclos automáticos de las cards, la
-            animación corre una sola vez al montar la página, no se
-            repite solita. */}
-        {showIntro && (
-          <div className="mb-6 sm:mb-8 text-center shrink-0">
-            <div className="mb-3 animate-breeze-in" style={{ animationDelay: '0ms' }}>
-              <KickerBadge>{c.kicker}</KickerBadge>
-            </div>
-            <h2
-              className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-[#9FC6E8] tracking-tight animate-breeze-in"
-              style={{ animationDelay: '180ms' }}
-            >
-              {c.title}
-            </h2>
-            <p
-              className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1.5 max-w-xl mx-auto leading-relaxed animate-breeze-in"
-              style={{ animationDelay: '340ms' }}
-            >
-              {c.subtitle}
-            </p>
-          </div>
-        )}
-
         {/* En la página dedicada "Formación" (showIntro=false, showCards=
             true) no va el kicker/título/subtítulo de arriba — sólo el
             kicker propio + el texto de contexto (cardsIntro) + las

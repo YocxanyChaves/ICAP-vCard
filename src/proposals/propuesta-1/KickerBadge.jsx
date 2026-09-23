@@ -81,8 +81,18 @@ import React from 'react';
  *   flechitas en vez de un corte recto, con un celeste vivo (#4FB2F2 →
  *   #7dd3fc con un toque de blanco sólo en el pixel central, como un
  *   destello puntual, no un bloque blanco).
+ *
+ * `onDark`: para secciones cuyo FONDO es siempre oscuro (ej. la franja
+ * celeste-a-navy de AlliesMarquee), sin importar el tema claro/oscuro
+ * del sitio — Yocxany pidió la píldora "glow" también ahí (Red
+ * Institucional), pero sus colores normales (`text-[#0077C8]` en tema
+ * claro) están pensados para el fondo clarito de la página, no para un
+ * fondo azul oscuro fijo, así que en tema claro se leerían casi
+ * invisibles encima de ese degradado. `onDark` fuerza los mismos
+ * colores que ya usa la variante en tema oscuro (píldora traslúcida
+ * blanca + texto celeste claro), siempre, sin depender de `dark:`.
  */
-export default function KickerBadge({ children, variant = 'dot' }) {
+export default function KickerBadge({ children, variant = 'dot', onDark = false }) {
   if (variant === 'glow') {
     return (
       <div className="relative inline-flex">
@@ -94,7 +104,13 @@ export default function KickerBadge({ children, variant = 'dot' }) {
           aria-hidden="true"
           className="absolute -inset-1 rounded-full bg-[#4FB2F2]/42 blur-sm kicker-glow-halo pointer-events-none"
         />
-        <div className="relative inline-flex items-center justify-center px-5 py-1.5 sm:px-6 sm:py-2 rounded-full bg-[#0077C8]/10 dark:bg-white/10 border border-[#4FB2F2]/45 text-[#0077C8] dark:text-[#9FC6E8] text-[11px] sm:text-xs font-bold tracking-wide uppercase font-mono-code overflow-hidden">
+        <div
+          className={`relative inline-flex items-center justify-center px-5 py-1.5 sm:px-6 sm:py-2 rounded-full border text-[11px] sm:text-xs font-bold tracking-wide uppercase font-mono-code overflow-hidden ${
+            onDark
+              ? 'bg-white/10 border-[#4FB2F2]/45 text-[#9FC6E8]'
+              : 'bg-[#0077C8]/10 dark:bg-white/10 border-[#4FB2F2]/45 text-[#0077C8] dark:text-[#9FC6E8]'
+          }`}
+        >
           {/* Wrapper que viaja como una sola unidad (rayita + estela pegadas,
               nunca se desincronizan aunque tengan anchos distintos). */}
           <span

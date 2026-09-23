@@ -463,9 +463,15 @@ export const translations = {
 
     docenciaMision: {
       kicker: 'Formación con Visión de Futuro',
-      title: 'Capacidades para Comprender la Complejidad',
+      title: 'Conocimiento para Anticipar, Liderar y Transformar',
       subtitle:
-        'Conocimiento para anticipar, liderar y transformar. Las instituciones enfrentan escenarios cada vez más complejos: transformación digital, nuevas demandas ciudadanas, cambios demográficos, desafíos sanitarios, sostenibilidad, innovación tecnológica y evolución de los modelos de gobernanza. Frente a este entorno, el ICAP forma profesionales capaces de interpretar tendencias, anticipar escenarios y transformar conocimiento en decisiones estratégicas. El Departamento de Docencia e Investigación impulsa una formación de posgrado conectada con la realidad regional, la investigación aplicada, la innovación académica y la generación de conocimiento con impacto. Prepárese para liderar los desafíos del futuro.',
+        'Las instituciones enfrentan escenarios cada vez más complejos: transformación digital, nuevas demandas ciudadanas, cambios demográficos, desafíos sanitarios, sostenibilidad, innovación tecnológica y evolución de los modelos de gobernanza. Frente a este entorno, el ICAP forma profesionales capaces de interpretar tendencias, anticipar escenarios y transformar conocimiento en decisiones estratégicas. El Departamento de Docencia e Investigación impulsa una formación de posgrado conectada con la realidad regional, la investigación aplicada, la innovación académica y la generación de conocimiento con impacto.',
+      // Frase de cierre del bloque de Inicio (FormacionVisionHero.jsx)
+      // — antes era la última oración de `subtitle`, pero Yocxany
+      // pidió que se destacara aparte, grande, abajo a la derecha,
+      // como remate de la sección, en vez de perderse como una
+      // oración más dentro del párrafo.
+      closing: 'Prepárese para liderar los desafíos del futuro.',
       // Encabezado propio que va arriba del carrusel de cards, en la
       // página dedicada "Formación" del menú (no en el texto de Inicio,
       // que ya tiene su propio kicker/título/subtítulo arriba).
@@ -595,6 +601,11 @@ export const translations = {
       title: 'Áreas para los Desafíos del Presente y del Futuro',
       subtitle:
         'La oferta académica del ICAP evoluciona de acuerdo con las necesidades de las instituciones y las transformaciones del entorno.',
+      // Aviso bajo la tarjeta de adelante del mazo (DocenciaAreasWheel.jsx)
+      // — mismo espíritu que el "↩ Tap to explore" de la referencia de
+      // Miu Miu que pasó Yocxany, para avisar que la tarjeta se puede
+      // tocar y "pasar" a la siguiente.
+      tapHint: 'Tocá para explorar',
       items: {
         integracionRegional: {
           name: 'Integración Regional',
@@ -1208,9 +1219,14 @@ export const translations = {
 
     docenciaMision: {
       kicker: 'Education with a Vision for the Future',
-      title: 'Capacities to Understand Complexity',
+      title: 'Knowledge to Anticipate, Lead, and Transform',
       subtitle:
-        'Knowledge to anticipate, lead, and transform. Institutions face increasingly complex scenarios: digital transformation, new citizen demands, demographic shifts, health challenges, sustainability, technological innovation, and evolving governance models. In this environment, ICAP trains professionals capable of interpreting trends, anticipating scenarios, and turning knowledge into strategic decisions. The Department of Teaching and Research drives graduate-level education connected to regional realities, applied research, academic innovation, and the generation of knowledge with impact. Get ready to lead the challenges of the future.',
+        'Institutions face increasingly complex scenarios: digital transformation, new citizen demands, demographic shifts, health challenges, sustainability, technological innovation, and evolving governance models. In this environment, ICAP trains professionals capable of interpreting trends, anticipating scenarios, and turning knowledge into strategic decisions. The Department of Teaching and Research drives graduate-level education connected to regional realities, applied research, academic innovation, and the generation of knowledge with impact.',
+      // Closing line for the Inicio block (FormacionVisionHero.jsx) —
+      // used to be the last sentence of `subtitle`, split out so it
+      // can be shown large, bottom-right, as the section's closing
+      // statement instead of blending into the paragraph.
+      closing: 'Get ready to lead the challenges of the future.',
       // Heading shown above the cards carousel on the dedicated
       // "Formación" (Training) menu page — not on the Inicio text,
       // which already has its own kicker/title/subtitle above.
@@ -1340,6 +1356,7 @@ export const translations = {
       title: "Areas for Today's and Tomorrow's Challenges",
       subtitle:
         "ICAP's academic offering evolves alongside the needs of institutions and a changing environment.",
+      tapHint: 'Tap to explore',
       items: {
         integracionRegional: {
           name: 'Regional Integration',

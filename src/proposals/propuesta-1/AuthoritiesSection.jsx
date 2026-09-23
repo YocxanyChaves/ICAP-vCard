@@ -1,6 +1,7 @@
 import React from 'react';
 import { User, Info } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import KickerBadge from './KickerBadge';
 
 /**
  * Placeholder de autoridades / equipo directivo.
@@ -19,15 +20,23 @@ const AUTHORITIES = [
   { id: 6, name: '', title: '' }
 ];
 
-export default function AuthoritiesSection() {
+// Autoridades es una sección COMPARTIDA entre los dos departamentos
+// (mismo componente, mismo contenido — ver el comentario en
+// Propuesta1.jsx) — pero Yocxany pidió que el kicker sí lleve la
+// identidad visual del departamento donde se está viendo: el brillo
+// celeste "glow" de Asistencia Técnica, o el puntito "dot" de
+// Docencia, según `dept`. El texto (kicker/título/subtítulo) se queda
+// igual en los dos — es la MISMA info institucional, sólo cambia el
+// marco visual de la píldora.
+export default function AuthoritiesSection({ dept = 'at' }) {
   const { t } = useLanguage();
   return (
     <section className="px-4 sm:px-6 py-10 sm:py-16 bg-[#D6E9F7] dark:bg-[#001F3D] relative">
       <div className="max-w-4xl mx-auto">
         <div className="mb-5 sm:mb-6 text-center">
-          <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
-            {t.authorities.kicker}
-          </span>
+          <div className="mb-1.5 sm:mb-2 flex justify-center">
+            <KickerBadge variant={dept === 'docencia' ? 'dot' : 'glow'}>{t.authorities.kicker}</KickerBadge>
+          </div>
           <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
             {t.authorities.title}
           </h2>
