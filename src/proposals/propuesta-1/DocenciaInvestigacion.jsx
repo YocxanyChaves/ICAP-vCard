@@ -21,36 +21,29 @@ import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
  *    claro/oscuro, es un color de marca fijo) con la marca de agua del
  *    escudo del ICAP y letras blancas, en vez de la card blanca share
  *    de antes.
- * 3) Los campos de interés pasaron por DOS diseños: primero un "mundo"
- *    de anillos orbitando (FieldsWorld.jsx) — Yocxany lo probó y pidió
- *    cambiarlo ("quitemos los anillos") por un carrusel infinito estilo
- *    el de Áreas de Asistencia Técnica, con tarjetas de cristal
- *    rectangulares, efecto "cilindro" 3D y auto-avance pausado. Quedó
- *    en FieldsCarousel.jsx (FieldsWorld.jsx ya no se usa en ningún
- *    lado).
+ * 3) Los campos de interés pasaron por TRES diseños: primero un
+ *    "mundo" de anillos orbitando (FieldsWorld.jsx) — Yocxany lo probó
+ *    y pidió cambiarlo ("quitemos los anillos") por un carrusel
+ *    infinito estilo el de Áreas de Asistencia Técnica (scroll nativo +
+ *    efecto "coverflow" simulado). Ese funcionaba bien, pero Yocxany
+ *    subió su propio componente de referencia (un tambor 3D real que
+ *    gira solo, no por scroll) y preguntó si se podía implementar algo
+ *    así — quedó en la versión actual de FieldsCarousel.jsx: mismo
+ *    contenido, técnica nueva (ver el comentario grande al inicio de
+ *    ese archivo para el detalle). FieldsWorld.jsx ya no se usa en
+ *    ningún lado.
  *
- * OJO con la estructura de acá abajo: el kicker/título y la card de
- * texto SÍ van dentro del `max-w-3xl mx-auto` de siempre, pero
- * `<FieldsCarousel>` va AFUERA de ese wrapper, como hijo directo de
- * `<section>` — FieldsCarousel hace su propio "breakout" a 100vw por
- * dentro (mismo truco que el carrusel de Áreas de AT, ver
- * SpecializationAreas.jsx), y ese truco calcula el ancho relativo al
- * contenedor MÁS CERCANO sin límite de ancho propio. Si quedara
- * anidado adentro del `max-w-3xl`, el "100vw" terminaría midiéndose
- * relativo a esos 768px en vez del viewport real, y el carrusel
- * saldría mal alineado/cortado.
+ * `<FieldsCarousel>` vive adentro del `max-w-3xl mx-auto` de siempre —
+ * a diferencia de la versión de scroll infinito anterior, el tambor 3D
+ * gira sobre sí mismo (no hace scroll horizontal), así que ya no
+ * necesita el "breakout" a 100vw ni ser hijo directo de `<section>`.
  */
 export default function DocenciaInvestigacion() {
   const { t } = useLanguage();
   const c = t.docenciaInvestigacion;
 
   return (
-    // `overflow-x-hidden`: red de seguridad — tanto para el breakout a
-    // 100vw de FieldsCarousel (mismo motivo que en
-    // SpecializationAreas: nunca debe generar scroll horizontal de la
-    // página) como remanente útil de cuando los campos de interés eran
-    // el "mundo" de anillos.
-    <section className="px-4 sm:px-6 py-10 sm:py-16 bg-[#D6E9F7] dark:bg-[#001F3D] relative overflow-x-hidden">
+    <section className="px-4 sm:px-6 py-10 sm:py-16 bg-[#D6E9F7] dark:bg-[#001F3D] relative">
       <div className="max-w-3xl mx-auto">
         <div className="mb-6 sm:mb-8 text-center">
           <div className="mb-3 inline-block">
@@ -83,13 +76,9 @@ export default function DocenciaInvestigacion() {
         <span className="block text-center text-[10px] font-mono-code font-bold uppercase tracking-wider text-[#0077C8] dark:text-[#9FC6E8]/70 mt-8 sm:mt-10 mb-4">
           {c.fieldsLabel}
         </span>
-      </div>
 
-      {/* Ver el comentario grande de arriba: a propósito FUERA del
-          `max-w-3xl` de arriba/abajo. */}
-      <FieldsCarousel fields={c.fields} />
+        <FieldsCarousel fields={c.fields} />
 
-      <div className="max-w-3xl mx-auto">
         <p className="mt-6 sm:mt-8 text-center font-heading font-bold text-sm sm:text-base text-[#003366] dark:text-[#9FC6E8] tracking-tight px-4">
           {c.tagline}
         </p>

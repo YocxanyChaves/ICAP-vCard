@@ -1,352 +1,268 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import icapEscudoNavy from '../../assets/icap-escudo-navy.svg';
+import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
 
 /**
  * Carrusel de campos de interés de Investigación
- * (DocenciaInvestigacion.jsx). Reemplaza al "mundo" de anillos
- * orbitando (FieldsWorld.jsx, ya eliminado) — Yocxany lo probó y pidió
- * cambiarlo por esto, textual: "un carrusel bien bonito, que sea como
- * el de areas de AT (infinito, y con scroll integrado)... tarjetas con
- * fondo como si fueran tarjetas de cristal... rectangulares... una
- * animación como muy realista de que están en un carrusel de un
- * cilindro... si uno no scrollea se vayan pasando automáticamente...
- * que dé chance de leer la palabra".
+ * (DocenciaInvestigacion.jsx). Cuarta pasada sobre esta pieza, cada
+ * una por pedido explícito de Yocxany:
  *
- * "El de áreas de AT" es SpecializationAreas.jsx — el carrusel de las
- * 6 áreas de Asistencia Técnica. Acá se reusa la MISMA técnica
- * (probada, sin reinventar) para el scroll horizontal nativo +
- * infinito + el efecto "cilindro" 3D, adaptada a tarjetas mucho más
- * simples (una palabra, no una card con ícono/párrafo/lista) y con dos
- * cosas que AT no tiene: auto-avance cuando nadie toca el carrusel, y
- * cristal (glassmorphism) en vez del fondo celeste sólido de AT.
- *
- * Lo que se REUSA tal cual de SpecializationAreas (mismos nombres de
- * variable/comentarios recortados, para quien compare los dos
- * archivos):
- * - El truco del carrusel "infinito": las 12 palabras se repiten 3
- *   veces seguidas (LOOPS), el carril arranca en la copia del medio, y
- *   cuando el scroll se queda quieto y la tarjeta activa cayó en una
- *   copia de los extremos, se salta en silencio de vuelta al medio
- *   (recenterIfNeeded) — nunca se nota el salto porque las 3 copias
- *   son pixel-idénticas.
- * - El efecto "cilindro" (updateCoverflow): en cada frame de scroll,
- *   cada tarjeta se rota en 3D (`perspective(...) rotateY(...)
- *   scale(...)`) según qué tan lejos quede del centro del carril —
- *   la del centro queda plana y grande, las de los costados se
- *   inclinan como si la superficie fuera curva, más achicadas/
- *   transparentes cuanto más lejos. Es matemática pura sobre
- *   posiciones reales del DOM (getBoundingClientRect), no depende de
- *   ninguna librería — corre en cada frame de scroll y escribe el
- *   transform DIRECTO en el DOM (no por React/setState) para que
- *   responda pixel a pixel sin re-renderizar 36 tarjetas por scroll.
- * - Wheel del mouse traducido a "paso siguiente/anterior" (un
- *   `overflow-x-auto` no reacciona a la ruedita vertical de toda la
- *   vida) y snap nativo (`snap-x snap-mandatory`) para el "scroll
- *   integrado" que pidió.
- *
- * Lo NUEVO acá (no existe en SpecializationAreas):
- * - Auto-avance: si nadie tocó el carril (pointerdown/wheel/touch) en
- *   los últimos `IDLE_BEFORE_AUTOPLAY_MS`, y el mouse no está encima,
- *   pasa sola a la palabra siguiente cada `AUTOPLAY_INTERVAL_MS` — ese
- *   intervalo es a propósito pausado (no un carrusel "veloz"), para
- *   que alcance a leerse la palabra antes de que cambie, como pidió.
- *   Se pausa por completo con el mouse encima.
- * - Tarjetas de cristal: fondo blanco muy transparente + blur (no el
- *   degradé celeste sólido de AT) — se apoya en LO QUE HAY DETRÁS
- *   (la card navy del texto, el fondo celeste/navy de la sección) para
- *   dar el efecto vidrio, así que a propósito NO llevan su propio
- *   fondo opaco.
- * - Sin el "reparto tipo mazo de cartas" de entrada que sí tiene AT
- *   (fase hidden/stacked/dealt): acá son 12 tarjetas chiquitas de una
- *   sola palabra, ese despliegue coreografiado no aporta nada y sólo
- *   suma complejidad — el coverflow queda activo desde que se monta.
+ *   1. FieldsWorld.jsx — anillos orbitando ("quitemos los anillos").
+ *   2. FieldsCarousel.jsx v2 — carrusel de scroll infinito con efecto
+ *      "coverflow" simulado. Funcionaba, pero Yocxany subió su propio
+ *      componente (CarruselCilindrico.jsx) con un tambor 3D real y
+ *      preguntó si se podía adaptar.
+ *   3. FieldsCarousel.jsx v3 — adaptación de ese tambor: `rotateY` +
+ *      `translateZ` por tarjeta alrededor de un cilindro imaginario,
+ *      colores lisos alternados (blanco/celeste en claro, navy/celeste
+ *      en oscuro) y una marca de agua grande centrada detrás de todo
+ *      el tambor. Funcionalmente quedó bien (giro, arrastre, clic para
+ *      traer una tarjeta al frente, auto-avance), pero visualmente
+ *      "parecía trabajo de la u" — plano, sin elegancia.
+ *   4. ESTA versión — mismo tambor y misma interacción, pulido visual:
+ *      - La marca de agua grande de fondo se QUITÓ (Yocxany: "el fondo
+ *        de todo va vacío"); en su lugar cada tarjeta lleva su propio
+ *        escudo pequeño en una esquina, como ya hacen las demás cards
+ *        con marca de agua del sitio (MissionVision.jsx,
+ *        DocenciaPublicaciones, la card navy de acá arriba).
+ *      - Fondo de cada tarjeta pasó de color liso a degradado sutil
+ *        (más profundidad, menos "bloque de color plano").
+ *      - Línea de brillo arriba de cada tarjeta (mismo recurso que las
+ *        tarjetas de cristal de la versión de scroll anterior) para
+ *        una terminación más pulida/premium.
+ *      - La tarjeta que queda de frente ahora también CRECE un poco
+ *        (antes sólo se aclaraba de opacidad/brillo) — el escalado se
+ *        calcula en el mismo loop de animación que ya oscurecía las de
+ *        atrás, así que se sigue escribiendo el transform DIRECTO al
+ *        DOM en cada frame (no por React state).
+ *      - Sombra de "piso" debajo del tambor — un óvalo difuminado que
+ *        ancla visualmente el cilindro, como si flotara sobre una
+ *        superficie en vez de quedar pegado a la nada.
+ *      - Bordes del contenedor con degradado hacia el fondo de la
+ *        sección, para que el corte de las tarjetas laterales (el
+ *        tambor es más ancho que su ventana visible) se sienta suave
+ *        en vez de un corte duro.
  */
 
-const LOOPS = 3;
-const AUTOPLAY_INTERVAL_MS = 2600;
-const IDLE_BEFORE_AUTOPLAY_MS = 2200;
+// Tamaño de las tarjetas (ancho en px) — se ajusta un poco en pantallas
+// angostas via el listener de resize de abajo. La altura sale de una
+// proporción fija sobre el ancho (más alta que ancha sería raro para
+// una sola palabra/frase corta; esta relación deja espacio para que
+// "Integración centroamericana", la más larga de las 12, quepa en 2-3
+// líneas sin desbordar la tarjeta).
+const ANCHO_MAX = 180;
+const ANCHO_MIN = 128;
+const PROPORCION_ALTO = 1.6;
 
-// Centra una tarjeta en el carril sin animación — se usa sólo para el
-// centrado inicial (antes de que se vea nada moverse).
-function centerCardInstant(track, cardEl) {
-  if (!track || !cardEl) return;
-  const target = cardEl.offsetLeft - (track.clientWidth - cardEl.clientWidth) / 2;
-  track.scrollTo({ left: target, behavior: 'instant' });
-}
+// Grados por frame cuando el tambor gira solo (~60fps ⇒ una tarjeta de
+// las 12 tarda unos 5-6s en pasar por el frente, de sobra para leerla
+// antes de que siga girando, como pidió Yocxany).
+const VELOCIDAD = 0.1;
 
 export default function FieldsCarousel({ fields }) {
-  const trackRef = useRef(null);
-  const cardRefs = useRef({});
-  const closestRenderIndexRef = useRef(fields.length);
-  const stepRef = useRef(160);
-  const recenterTimeoutRef = useRef(null);
-  const lastInteractionRef = useRef(0);
-  const hoveringRef = useRef(false);
+  const n = fields.length;
+  const paso = 360 / n;
 
-  const RENDER_FIELDS = useMemo(
-    () =>
-      Array.from({ length: LOOPS * fields.length }, (_, i) => {
-        const baseIndex = i % fields.length;
-        return {
-          field: fields[baseIndex],
-          baseIndex,
-          renderIndex: i,
-          renderKey: `copy${Math.floor(i / fields.length)}-${baseIndex}`
-        };
-      }),
-    [fields]
-  );
-
-  const scrollToIndex = useCallback(
-    (idx, behavior = 'smooth') => {
-      const track = trackRef.current;
-      const clamped = Math.max(0, Math.min(RENDER_FIELDS.length - 1, idx));
-      const item = RENDER_FIELDS[clamped];
-      const cardEl = item && cardRefs.current[item.renderKey];
-      if (!track || !cardEl) return;
-      const target = cardEl.offsetLeft - (track.clientWidth - cardEl.clientWidth) / 2;
-      track.scrollTo({ left: target, behavior });
-    },
-    [RENDER_FIELDS]
-  );
-
-  const updateCoverflow = useCallback(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const trackRect = track.getBoundingClientRect();
-    const centerX = trackRect.left + trackRect.width / 2;
-
-    const firstEl = cardRefs.current[RENDER_FIELDS[0].renderKey];
-    const secondItem = RENDER_FIELDS[1];
-    const secondEl = secondItem && cardRefs.current[secondItem.renderKey];
-    let step = firstEl ? firstEl.getBoundingClientRect().width + 20 : stepRef.current;
-    if (firstEl && secondEl) {
-      const a = firstEl.getBoundingClientRect();
-      const b = secondEl.getBoundingClientRect();
-      step = b.left + b.width / 2 - (a.left + a.width / 2) || step;
-    }
-    stepRef.current = step;
-
-    let closestIdx = 0;
-    let closestDist = Infinity;
-
-    RENDER_FIELDS.forEach((item, idx) => {
-      const cardEl = cardRefs.current[item.renderKey];
-      if (!cardEl) return;
-      const r = cardEl.getBoundingClientRect();
-      const cardCenter = r.left + r.width / 2;
-      const dist = Math.abs(cardCenter - centerX);
-      if (dist < closestDist) {
-        closestDist = dist;
-        closestIdx = idx;
-      }
-
-      const d = (cardCenter - centerX) / step;
-      const clamped = Math.max(-2.4, Math.min(2.4, d));
-      const absClamped = Math.min(Math.abs(clamped), 1.3);
-      const isMain = Math.abs(clamped) < 0.12;
-      // Más marcado que el de AT (28deg): son tarjetitas de una sola
-      // palabra, aguantan un ángulo mayor sin volverse ilegibles, y
-      // así se nota más el efecto "cilindro" que pidió.
-      const rotateY = clamped * -42;
-      const scale = isMain ? 1.08 : 1 - absClamped * 0.22;
-      const opacity = 1 - Math.min(Math.abs(clamped), 1.8) * 0.32;
-
-      cardEl.style.transform = `perspective(900px) rotateY(${rotateY}deg) scale(${scale})`;
-      cardEl.style.opacity = String(Math.max(0.25, opacity));
-      cardEl.style.zIndex = String(Math.round(200 - Math.abs(d) * 20));
-    });
-
-    closestRenderIndexRef.current = closestIdx;
-  }, [RENDER_FIELDS]);
-
-  const recenterIfNeeded = useCallback(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const n = fields.length;
-    const idx = closestRenderIndexRef.current;
-    if (idx < n) {
-      track.scrollLeft += n * stepRef.current;
-      closestRenderIndexRef.current = idx + n;
-    } else if (idx >= n * 2) {
-      track.scrollLeft -= n * stepRef.current;
-      closestRenderIndexRef.current = idx - n;
-    }
-  }, [fields.length]);
-
-  // Centrado inicial (copia del medio, primera palabra) + primer
-  // cálculo del coverflow, ya con las 36 tarjetas en el DOM con su
-  // tamaño real.
+  const [ancho, setAncho] = useState(ANCHO_MAX);
   useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      const target = RENDER_FIELDS[fields.length];
-      centerCardInstant(trackRef.current, target && cardRefs.current[target.renderKey]);
-      updateCoverflow();
-    });
-    return () => cancelAnimationFrame(id);
-  }, [RENDER_FIELDS, fields.length, updateCoverflow]);
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return undefined;
-    let rafId = null;
-    const onScroll = () => {
-      if (rafId != null) return;
-      rafId = requestAnimationFrame(() => {
-        rafId = null;
-        updateCoverflow();
-      });
-      if (recenterTimeoutRef.current) clearTimeout(recenterTimeoutRef.current);
-      recenterTimeoutRef.current = setTimeout(recenterIfNeeded, 140);
-    };
-    track.addEventListener('scroll', onScroll, { passive: true });
-
-    const doc = track.ownerDocument;
-    const view = doc?.defaultView;
-    let ro;
-    if (typeof ResizeObserver !== 'undefined' && doc) {
-      ro = new ResizeObserver(onScroll);
-      ro.observe(doc.documentElement);
-    } else {
-      view?.addEventListener('resize', onScroll);
-    }
-
-    return () => {
-      track.removeEventListener('scroll', onScroll);
-      if (ro) ro.disconnect();
-      else view?.removeEventListener('resize', onScroll);
-      if (rafId != null) cancelAnimationFrame(rafId);
-      if (recenterTimeoutRef.current) clearTimeout(recenterTimeoutRef.current);
-    };
-  }, [updateCoverflow, recenterIfNeeded]);
-
-  const scrollByStep = useCallback(
-    (dir) => {
-      const cur = closestRenderIndexRef.current ?? fields.length;
-      scrollToIndex(cur + dir);
-    },
-    [scrollToIndex, fields.length]
-  );
-
-  const markInteraction = useCallback(() => {
-    lastInteractionRef.current = Date.now();
+    const ajustar = () => setAncho(Math.max(ANCHO_MIN, Math.min(ANCHO_MAX, window.innerWidth * 0.42)));
+    ajustar();
+    window.addEventListener('resize', ajustar);
+    return () => window.removeEventListener('resize', ajustar);
   }, []);
+  const alto = Math.round(ancho / PROPORCION_ALTO);
+
+  // Radio del cilindro: el que hace que las `n` tarjetas, paradas una
+  // al lado de la otra en su borde, cierren el círculo exactamente.
+  const radio = Math.round(ancho / 2 / Math.tan(Math.PI / n)) + 34;
+
+  const drumRef = useRef(null);
+  const cardRefs = useRef([]);
+  const angleRef = useRef(0);
+  const targetRef = useRef(null);
+  const pausedRef = useRef(false);
+  const dragRef = useRef(null);
 
   useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return undefined;
-    const events = ['pointerdown', 'wheel', 'touchstart'];
-    events.forEach((ev) => track.addEventListener(ev, markInteraction, { passive: true }));
-    return () => events.forEach((ev) => track.removeEventListener(ev, markInteraction));
-  }, [markInteraction]);
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let rafId;
 
-  // Wheel vertical -> paso horizontal (mismo motivo que en
-  // SpecializationAreas: `overflow-x-auto` no reacciona solo a la
-  // ruedita vertical de siempre).
-  const lastWheelRef = useRef(0);
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return undefined;
-    const handleWheel = (e) => {
-      const absY = Math.abs(e.deltaY);
-      const absX = Math.abs(e.deltaX);
-      if (absX > absY || absY < 12) return;
-      e.preventDefault();
-      const now = Date.now();
-      if (now - lastWheelRef.current < 450) return;
-      lastWheelRef.current = now;
-      scrollByStep(e.deltaY > 0 ? 1 : -1);
+    const draw = () => {
+      if (drumRef.current) {
+        drumRef.current.style.transform = `translateZ(${-radio}px) rotateY(${angleRef.current}deg)`;
+      }
+      // Las tarjetas que van quedando de canto/atrás se apagan y
+      // oscurecen, y la que queda de frente crece un poco — así se
+      // siente el volumen del cilindro (y cuál tarjeta es "la
+      // activa") en vez de verse 12 tarjetas planas superpuestas.
+      cardRefs.current.forEach((el, i) => {
+        if (!el) return;
+        const a = (((i * paso + angleRef.current) % 360) + 540) % 360 - 180;
+        const facing = (Math.cos((a * Math.PI) / 180) + 1) / 2; // 1 = de frente, 0 = de espaldas
+        const scale = 0.92 + facing * 0.16;
+        el.style.opacity = String(0.15 + facing * 0.85);
+        el.style.filter = `brightness(${0.55 + facing * 0.45})`;
+        el.style.pointerEvents = facing > 0.5 ? 'auto' : 'none';
+        el.style.transform = `rotateY(${i * paso}deg) translateZ(${radio}px) scale(${scale})`;
+      });
     };
-    track.addEventListener('wheel', handleWheel, { passive: false });
-    return () => track.removeEventListener('wheel', handleWheel);
-  }, [scrollByStep]);
 
-  // Auto-avance — pausado con el mouse encima o si hubo actividad
-  // reciente del usuario, para no pelearse con quien está scrolleando/
-  // arrastrando a mano.
-  useEffect(() => {
-    const id = setInterval(() => {
-      if (hoveringRef.current) return;
-      if (Date.now() - lastInteractionRef.current < IDLE_BEFORE_AUTOPLAY_MS) return;
-      scrollByStep(1);
-    }, AUTOPLAY_INTERVAL_MS);
-    return () => clearInterval(id);
-  }, [scrollByStep]);
+    const tick = () => {
+      if (targetRef.current !== null) {
+        angleRef.current += (targetRef.current - angleRef.current) * 0.1;
+        if (Math.abs(targetRef.current - angleRef.current) < 0.05) {
+          angleRef.current = targetRef.current;
+          targetRef.current = null;
+        }
+      } else if (!pausedRef.current && !dragRef.current && !reducedMotion) {
+        angleRef.current -= VELOCIDAD;
+      }
+      draw();
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [radio, paso]);
+
+  // Gira el tambor para dejar la tarjeta `i` al frente, siempre por el
+  // camino más corto (nunca da una vuelta de más solo por llegar al
+  // mismo resultado en módulo 360).
+  const goToIndex = useCallback(
+    (i) => {
+      const current = targetRef.current ?? angleRef.current;
+      const raw = -i * paso;
+      const diff = raw - current;
+      const shortest = diff - Math.round(diff / 360) * 360;
+      targetRef.current = current + shortest;
+    },
+    [paso]
+  );
+
+  const step = useCallback(
+    (dir) => {
+      const base = targetRef.current ?? angleRef.current;
+      targetRef.current = Math.round(base / paso) * paso - dir * paso;
+    },
+    [paso]
+  );
+
+  // Arrastrar con mouse o dedo para girar el tambor a mano.
+  const onPointerDown = (e) => {
+    dragRef.current = { x: e.clientX, start: angleRef.current };
+    targetRef.current = null;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onPointerMove = (e) => {
+    if (!dragRef.current) return;
+    angleRef.current = dragRef.current.start + (e.clientX - dragRef.current.x) * 0.35;
+  };
+  const onPointerUp = () => {
+    if (!dragRef.current) return;
+    dragRef.current = null;
+    // Imán a la tarjeta más cercana.
+    targetRef.current = Math.round(angleRef.current / paso) * paso;
+  };
 
   return (
     <div className="relative">
-      {/* Breakout a 100vw, mismo truco que el carrusel de Áreas de AT
-          (ver SpecializationAreas.jsx) — se sale del ancho normal del
-          contenido para sentirse como su propia vitrina. La sección
-          que lo contiene (DocenciaInvestigacion.jsx) ya tiene
-          `overflow-x-hidden` como red de seguridad. */}
-      <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen">
-        <div className="relative">
-          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-10 sm:w-24 bg-gradient-to-r from-[#D6E9F7] dark:from-[#001F3D] to-transparent z-10" />
-          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 sm:w-24 bg-gradient-to-l from-[#D6E9F7] dark:from-[#001F3D] to-transparent z-10" />
+      <div
+        className="relative w-full overflow-hidden select-none"
+        style={{ height: alto + 140 }}
+        onMouseEnter={() => {
+          pausedRef.current = true;
+        }}
+        onMouseLeave={() => {
+          pausedRef.current = false;
+        }}
+      >
+        {/* Sombra de "piso" — ancla el tambor a una superficie en vez
+            de dejarlo flotando sobre nada. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-7 w-[62%] h-5 rounded-full bg-[#003366]/15 dark:bg-black/50 blur-xl"
+        />
 
+        <div
+          className="absolute inset-0 flex items-center justify-center cursor-grab active:cursor-grabbing touch-pan-y"
+          style={{ perspective: '1100px' }}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+        >
           <div
-            ref={trackRef}
-            onMouseEnter={() => {
-              hoveringRef.current = true;
-            }}
-            onMouseLeave={() => {
-              hoveringRef.current = false;
-            }}
-            className="flex items-center gap-5 sm:gap-6 overflow-x-auto snap-x snap-mandatory select-none px-[calc((100%-9rem)/2)] sm:px-[calc((100%-11rem)/2)] py-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            ref={drumRef}
+            className="relative"
+            style={{ width: ancho, height: alto, transformStyle: 'preserve-3d' }}
           >
-            {RENDER_FIELDS.map((item) => (
+            {fields.map((field, i) => (
               <div
-                key={item.renderKey}
+                key={`${i}-${field}`}
                 ref={(el) => {
-                  cardRefs.current[item.renderKey] = el;
+                  cardRefs.current[i] = el;
                 }}
-                onClick={() => {
-                  markInteraction();
-                  if (item.renderIndex === closestRenderIndexRef.current) return;
-                  scrollToIndex(item.renderIndex);
-                }}
-                className="shrink-0 snap-center w-36 h-20 sm:w-44 sm:h-24 cursor-pointer will-change-transform"
+                onClick={() => goToIndex(i)}
+                className={`absolute inset-0 rounded-[20px] flex items-center justify-center text-center px-3 border cursor-pointer will-change-transform overflow-hidden ${
+                  i % 2 === 0
+                    ? 'bg-gradient-to-br from-white to-[#EAF3FB] dark:from-[#013A63] dark:to-[#001F3D] border-slate-100 dark:border-white/10 shadow-[0_16px_32px_-14px_rgba(0,51,102,0.45)] dark:shadow-[0_16px_32px_-14px_rgba(0,0,0,0.6)]'
+                    : 'bg-gradient-to-br from-[#CFE9FA] to-[#8FC9EA] dark:from-[#0077C8] dark:to-[#0068AE] border-white/70 dark:border-white/10 shadow-[0_16px_32px_-14px_rgba(0,51,102,0.5)] dark:shadow-[0_16px_32px_-14px_rgba(0,0,0,0.6)]'
+                }`}
               >
-                {/* Tarjeta de "cristal": fondo blanco casi transparente +
-                    blur, sin color propio — se apoya en lo que hay
-                    detrás (la card navy de arriba, el fondo de la
-                    sección) para el efecto vidrio esmerilado. */}
-                <div className="relative w-full h-full rounded-2xl flex items-center justify-center text-center px-3 bg-white/30 dark:bg-white/10 backdrop-blur-md border border-white/60 dark:border-white/15 shadow-[0_10px_28px_-10px_rgba(0,51,102,0.4)]">
-                  <span
-                    aria-hidden="true"
-                    className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-white/80 dark:via-white/40 to-transparent"
-                  />
-                  <span className="relative text-xs sm:text-sm font-semibold text-[#003366] dark:text-white leading-snug">
-                    {item.field}
-                  </span>
-                </div>
+                {/* Línea de brillo arriba — el mismo toque "de cristal"
+                    que llevaban las tarjetas de la versión de scroll
+                    anterior, para que no se sientan bloques de color
+                    lisos. */}
+                <span
+                  aria-hidden="true"
+                  className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-white/80 dark:via-white/40 to-transparent"
+                />
+                {/* Marca de agua propia de la tarjeta, no del fondo
+                    entero — navy en tema claro, blanca en oscuro. */}
+                <img
+                  src={icapEscudoNavy}
+                  alt=""
+                  aria-hidden="true"
+                  draggable={false}
+                  className="absolute -right-3 -bottom-3 w-12 sm:w-14 opacity-[0.14] rotate-[8deg] pointer-events-none select-none dark:hidden"
+                />
+                <img
+                  src={icapEscudoWhite}
+                  alt=""
+                  aria-hidden="true"
+                  draggable={false}
+                  className="hidden absolute -right-3 -bottom-3 w-12 sm:w-14 opacity-[0.16] rotate-[8deg] pointer-events-none select-none dark:block"
+                />
+                <span className="relative text-xs sm:text-sm font-semibold text-[#003366] dark:text-white leading-snug">
+                  {field}
+                </span>
               </div>
             ))}
           </div>
         </div>
+
+        {/* Degradado hacia el fondo de la sección en los bordes — para
+            que el corte de las tarjetas laterales (el tambor es más
+            ancho que esta ventana) se sienta suave. */}
+        <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-10 sm:w-16 bg-gradient-to-r from-[#D6E9F7] dark:from-[#001F3D] to-transparent" />
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 sm:w-16 bg-gradient-to-l from-[#D6E9F7] dark:from-[#001F3D] to-transparent" />
       </div>
 
       <div className="flex items-center justify-center gap-3 mt-4">
         <button
           type="button"
-          onClick={() => {
-            markInteraction();
-            scrollByStep(-1);
-          }}
+          onClick={() => step(-1)}
           aria-label="Anterior"
-          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/70 dark:bg-white/10 border border-[#0077C8]/25 dark:border-white/15 text-[#0077C8] dark:text-[#9FC6E8] flex items-center justify-center shrink-0 hover:bg-white dark:hover:bg-white/20 transition-colors"
+          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/70 dark:bg-white/10 border border-[#0077C8]/25 dark:border-white/15 text-[#0077C8] dark:text-[#9FC6E8] flex items-center justify-center shrink-0 shadow-sm hover:bg-white dark:hover:bg-white/20 transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
         <button
           type="button"
-          onClick={() => {
-            markInteraction();
-            scrollByStep(1);
-          }}
+          onClick={() => step(1)}
           aria-label="Siguiente"
-          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/70 dark:bg-white/10 border border-[#0077C8]/25 dark:border-white/15 text-[#0077C8] dark:text-[#9FC6E8] flex items-center justify-center shrink-0 hover:bg-white dark:hover:bg-white/20 transition-colors"
+          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/70 dark:bg-white/10 border border-[#0077C8]/25 dark:border-white/15 text-[#0077C8] dark:text-[#9FC6E8] flex items-center justify-center shrink-0 shadow-sm hover:bg-white dark:hover:bg-white/20 transition-colors"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
