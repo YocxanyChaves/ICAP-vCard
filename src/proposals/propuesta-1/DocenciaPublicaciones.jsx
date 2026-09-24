@@ -1,70 +1,67 @@
 import React from 'react';
 import { Newspaper, NotebookText, BookMarked, Archive } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import KickerBadge from './KickerBadge';
+import PublicationsShelf from './PublicationsShelf';
+import PublicacionesPiramide from './PublicacionesPiramide';
 
 // Mismos ids que t.docenciaPublicaciones.items en translations.js.
+// `accent`: color del lomo de cada libro en el estante (todos de la
+// paleta del sitio, lo bastante oscuros para que el nombre en blanco se
+// lea bien).
 const ITEMS = [
-  { id: 'rcap', icon: Newspaper },
-  { id: 'cuadernos', icon: NotebookText },
-  { id: 'editorial', icon: BookMarked },
-  { id: 'yaxche', icon: Archive }
+  { id: 'rcap', icon: Newspaper, accent: '#0077C8' },
+  { id: 'cuadernos', icon: NotebookText, accent: '#0B5A96' },
+  { id: 'editorial', icon: BookMarked, accent: '#003366' },
+  { id: 'yaxche', icon: Archive, accent: '#2D6798' }
 ];
 
 /**
  * "Publicaciones" de Docencia — bloque 5 del brochure ("Ecosistemas
  * regionales del conocimiento desde alianzas interactivas"): la RCAP,
  * Cuadernos Centroamericanos, Editorial ICAP y el Repositorio Yaxché.
- * Grid de 4 tarjetas (menos apretado que Visión/Impacto porque cada
- * descripción es más larga), más la frase destacada de cierre.
+ * Las 4 publicaciones como libros en un estante (PublicationsShelf.jsx) y,
+ * de cierre, la pirámide holográfica de las 7 palabras
+ * (PublicacionesPiramide.jsx), que se arma al scrollear.
  */
 export default function DocenciaPublicaciones() {
   const { t } = useLanguage();
   const c = t.docenciaPublicaciones;
 
   return (
-    <section className="px-4 sm:px-6 py-10 sm:py-16 bg-[#D6E9F7] dark:bg-[#001F3D] relative">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-8 sm:mb-10 text-center">
-          <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#0077C8] block mb-1 font-mono-code">
-            {c.kicker}
-          </span>
-          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
-            {c.title}
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1.5 max-w-xl mx-auto leading-relaxed">
-            {c.subtitle}
-          </p>
+    <>
+    <section className="px-4 sm:px-6 py-[var(--docencia-gap)] bg-[#D6E9F7] dark:bg-[#001F3D] relative">
+      {/* Misma distancia (--docencia-gap, global.css) del menú al
+          primer elemento y entre cada elemento que Formación, Impacto,
+          Investigación y Áreas. */}
+      <div className="max-w-5xl mx-auto flex flex-col gap-[var(--docencia-gap)]">
+        <div className="text-center">
+          {/* "Ecosistemas Regionales del Conocimiento" pasó a ser el
+              título de la sección de la pirámide; acá arriba va el
+              nombre de la subsección para no repetir la misma píldora. */}
+          <KickerBadge>{t.nav.docenciaPublicaciones}</KickerBadge>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 mb-8 sm:mb-10">
-          {ITEMS.map((item) => {
-            const Icon = item.icon;
-            const itemT = c.items[item.id];
-            return (
-              <div
-                key={item.id}
-                className="bg-white dark:bg-[#003366] rounded-3xl p-5 sm:p-6 border border-slate-100 dark:border-white/10 shadow-sm flex flex-col gap-3"
-              >
-                <div className="flex items-start gap-3.5">
-                  <div className="w-11 h-11 rounded-2xl bg-[#EAF3FB] dark:bg-white/10 text-[#0077C8] dark:text-[#4FB2F2] flex items-center justify-center shrink-0">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-heading font-bold text-sm sm:text-base text-[#003366] dark:text-[#9FC6E8] pt-1.5 leading-tight">
-                    {itemT.name}
-                  </h3>
-                </div>
-                <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {itemT.description}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-
-        <p className="text-center font-heading font-bold text-xs sm:text-sm text-[#003366] dark:text-[#9FC6E8] tracking-wide px-4">
-          {c.tagline}
+        <h2 className="text-center font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
+          {c.title}
+        </h2>
+        <p className="text-center text-xs sm:text-sm text-slate-700 dark:text-slate-300 max-w-xl mx-auto leading-relaxed">
+          {c.subtitle}
         </p>
+
+        <PublicationsShelf items={ITEMS.map((item) => ({ ...item, ...c.items[item.id] }))} />
       </div>
     </section>
+
+    {/* Las 7 palabras del cierre ("Investigar – … – Transformar") se
+        arman como pirámide holográfica al scrollear, en su PROPIA
+        sección de pantalla completa (fondo azul oscuro de borde a
+        borde), con "Ecosistemas Regionales del Conocimiento" como
+        título en su píldora — ver PublicacionesPiramide.jsx. */}
+    <PublicacionesPiramide
+      titulo={c.kicker}
+      palabras={c.tagline.split(/\s+[–-]\s+/)}
+      pista={c.pyramidHint}
+    />
+    </>
   );
 }

@@ -421,30 +421,35 @@ export default function DocenciaAreasWheel() {
 
   return (
     <>
-      <section ref={sectionRef} className="px-4 sm:px-6 py-10 sm:py-16 bg-[#D6E9F7] dark:bg-[#001F3D] relative">
-        <div className="max-w-5xl mx-auto flex flex-col items-center">
+      <section ref={sectionRef} className="px-4 sm:px-6 py-[var(--docencia-gap)] bg-[#D6E9F7] dark:bg-[#001F3D] relative">
+        {/* Misma distancia (--docencia-gap, global.css) del menú al
+            primer elemento y entre cada elemento que las demás
+            subsecciones de Docencia. */}
+        <div className="max-w-5xl mx-auto flex flex-col items-center gap-[var(--docencia-gap)]">
           <div
-            className="mb-8 sm:mb-10 text-center transition-all duration-700 ease-out"
+            className="flex flex-col items-center gap-[var(--docencia-gap)] text-center transition-all duration-700 ease-out"
             style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(16px)' }}
           >
-            <div className="mb-1.5 sm:mb-2 flex justify-center">
+            <div className="flex justify-center">
               <KickerBadge variant="dot">{c.kicker}</KickerBadge>
             </div>
             <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">{c.title}</h2>
-            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1.5 max-w-xl mx-auto leading-relaxed">{c.subtitle}</p>
+            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 max-w-xl mx-auto leading-relaxed">{c.subtitle}</p>
           </div>
 
           {/* El mazo — contenedor relativo del tamaño de una tarjeta;
               las que espían detrás (y, mientras cae, cualquiera de las
               12) se salen un poco de esa caja hacia arriba/derecha/
               abajo a propósito (nada alrededor tiene overflow-hidden,
-              así que no se recortan). mb- de sobra para que ese
-              excedente no quede pegado a los puntitos. Ya NO lleva su
+              así que no se recortan). El mb- extra compensa ese
+              excedente (~45px hacia abajo), para que la distancia que
+              SE VE hasta los puntitos sea la misma --docencia-gap que
+              entre los demás elementos. Ya NO lleva su
               propio fade/slide de entrada (antes sí): con cada
               tarjeta cayendo por su cuenta (ver fallStartTransform),
               ese fundido aparte quedaba doble/redundante encima de la
               caída. */}
-          <div className="relative w-64 h-80 sm:w-80 sm:h-96 mb-14 sm:mb-16">
+          <div className="relative w-64 h-80 sm:w-80 sm:h-96 mb-12">
             {DOCENCIA_AREAS.map((item, i) => {
               const itemT = c.items[item.id];
               const dist = distances[i];

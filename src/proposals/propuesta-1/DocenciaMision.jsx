@@ -266,17 +266,25 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
   return (
     <section
       className={`px-4 sm:px-6 ${
-        !showIntro && showCards ? 'pt-0 pb-10 sm:pb-16' : 'py-10 sm:py-16'
+        !showIntro && showCards ? 'py-[var(--docencia-gap)]' : 'py-10 sm:py-16'
       } bg-[#D6E9F7] dark:bg-[#001F3D] relative flex flex-col overflow-hidden ${
-        showCards ? 'min-h-[85vh] sm:min-h-[88vh]' : ''
+        showIntro && showCards ? 'min-h-[85vh] sm:min-h-[88vh]' : ''
       }`}
     >
       <div
         className={`max-w-4xl mx-auto w-full flex flex-col ${showCards ? 'flex-1' : ''} ${
-          !showIntro && showCards ? 'justify-evenly' : ''
+          !showIntro && showCards ? 'gap-[var(--docencia-gap)]' : ''
         }`}
       >
-        {/* En la página dedicada "Formación" (showIntro=false, showCards=
+        {/* ACTUALIZACIÓN: el justify-evenly que se describe abajo se
+            reemplazó por una distancia fija compartida
+            (--docencia-gap en global.css) — padding arriba/abajo y gap
+            entre bloques — para que Formación, Impacto e Investigación
+            tengan exactamente la misma distancia menú→primer elemento y
+            entre elementos (pedido de Yocxany). El historial de abajo
+            queda como contexto.
+
+            En la página dedicada "Formación" (showIntro=false, showCards=
             true) no va el kicker/título/subtítulo de arriba — sólo el
             kicker propio + el texto de contexto (cardsIntro) + las
             cards, como TRES puntos repartidos con la misma distancia
@@ -358,7 +366,7 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
                         <h3 className="font-heading font-bold text-lg sm:text-xl text-[#003366] dark:text-[#9FC6E8] mb-1.5">
                           {itemT.name}
                         </h3>
-                        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
                           {itemT.description}
                         </p>
                       </div>
@@ -378,7 +386,7 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
                         <h3 className="font-heading font-bold text-lg sm:text-xl text-[#003366] dark:text-[#9FC6E8] mb-1.5">
                           {itemT.name}
                         </h3>
-                        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
                           {itemT.description}
                         </p>
                       </div>

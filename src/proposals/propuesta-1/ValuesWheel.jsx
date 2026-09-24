@@ -318,7 +318,7 @@ export default function ValuesWheel({ items = DEFAULT_VALUES, content }) {
   const centerY = size / 2;
 
   return (
-    <section className="px-4 sm:px-6 py-14 sm:py-24 bg-[#D6E9F7] dark:bg-[#001F3D] text-slate-900 dark:text-white relative overflow-hidden">
+    <section className="px-4 sm:px-6 pt-[var(--docencia-gap)] pb-14 sm:pb-24 bg-[#D6E9F7] dark:bg-[#001F3D] text-slate-900 dark:text-white relative overflow-hidden">
       {/* Starfield */}
       <div className="absolute inset-0 pointer-events-none">
         {STARS.map((s, i) => (

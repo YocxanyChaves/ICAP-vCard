@@ -12,6 +12,13 @@
     --font-sans: 'Open Sans', system-ui, -apple-system, sans-serif;
     --font-heading: 'Raleway', system-ui, -apple-system, sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
+    /* Distancia única de las subsecciones de Docencia: menú superior →
+       primer elemento, y entre cada elemento de la subsección. Tomada
+       de lo que medía en Formación (que antes la calculaba con
+       justify-evenly sobre ~88vh), después bajada a pedido de Yocxany
+       ("está muy separado todo"). Crece con el alto de la pantalla,
+       con piso y techo para que no quede ni pegado ni exagerado. */
+    --docencia-gap: clamp(1.75rem, 6vh, 3.75rem);
   }
 }
 
@@ -614,14 +621,30 @@ h1, h2, h3, h4, h5, h6 {
    hace una pausa antes de repetir — un "brillo" que pasa de vez en
    cuando en vez de un escaneo constante, para que no distraiga del
    texto. */
+/* Más seguido a pedido de Yocxany: antes un ciclo de 3.4s (cruce de
+   ~2s + ~1.4s de pausa); ahora 2.4s con el cruce a la misma velocidad
+   (~2s) y una pausa cortita (~0.4s). */
 @keyframes kickerLightSweep {
   0% { transform: translateX(-140%); opacity: 0; }
-  10% { opacity: 1; }
-  45% { opacity: 1; }
-  60% { transform: translateX(340%); opacity: 0; }
+  14% { opacity: 1; }
+  64% { opacity: 1; }
+  85% { transform: translateX(340%); opacity: 0; }
   100% { transform: translateX(340%); opacity: 0; }
 }
 
 .kicker-light-sweep {
-  animation: kickerLightSweep 3.4s ease-in-out infinite;
+  animation: kickerLightSweep 2.4s ease-in-out infinite;
+}
+
+/* Ruedita del mouse de la pista "deslizá" de la pirámide de
+   Publicaciones (PublicacionesPiramide.jsx): baja, se desvanece y
+   vuelve a empezar. */
+@keyframes scrollWheel {
+  0% { transform: translateY(0); opacity: 1; }
+  70% { transform: translateY(9px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 0; }
+}
+
+.animate-scroll-wheel {
+  animation: scrollWheel 1.6s ease-in-out infinite;
 }

@@ -522,7 +522,7 @@ export default function SpecializationAreas() {
   }, [scrollByStep]);
 
   return (
-    <section ref={sectionRef} className="py-10 sm:py-16 bg-[#D6E9F7] dark:bg-[#001F3D] relative overflow-hidden">
+    <section ref={sectionRef} className="pt-[var(--docencia-gap)] pb-10 sm:pb-16 bg-[#D6E9F7] dark:bg-[#001F3D] relative overflow-hidden">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="mb-8 sm:mb-10 text-center">
           <div className="mb-1 sm:mb-1.5">

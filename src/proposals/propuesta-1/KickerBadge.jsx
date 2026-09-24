@@ -96,14 +96,11 @@ export default function KickerBadge({ children, variant = 'dot', onDark = false 
   if (variant === 'glow') {
     return (
       <div className="relative inline-flex">
-        <span
-          aria-hidden="true"
-          className="absolute -inset-2.5 rounded-full bg-[#4FB2F2]/32 blur-md kicker-glow-halo pointer-events-none"
-        />
-        <span
-          aria-hidden="true"
-          className="absolute -inset-1 rounded-full bg-[#4FB2F2]/42 blur-sm kicker-glow-halo pointer-events-none"
-        />
+        {/* Halo neón (dos capas .kicker-glow-halo difuminadas alrededor
+            de la píldora) QUITADO a modo de prueba — Yocxany quiso ver
+            cómo se ve sin él. Para volverlo a poner:
+            <span aria-hidden="true" className="absolute -inset-2.5 rounded-full bg-[#4FB2F2]/32 blur-md kicker-glow-halo pointer-events-none" />
+            <span aria-hidden="true" className="absolute -inset-1 rounded-full bg-[#4FB2F2]/42 blur-sm kicker-glow-halo pointer-events-none" /> */}
         <div
           className={`relative inline-flex items-center justify-center px-5 py-1.5 sm:px-6 sm:py-2 rounded-full border text-[11px] sm:text-xs font-bold tracking-wide uppercase font-mono-code overflow-hidden ${
             onDark
@@ -131,9 +128,22 @@ export default function KickerBadge({ children, variant = 'dot', onDark = false 
     );
   }
 
+  // `onDark` también aplica acá: para secciones que SIEMPRE van sobre
+  // fondo oscuro sin importar el tema (p. ej. el banner degradado de
+  // DocenciaComunidad), donde el celeste del tema claro no contrasta.
   return (
-    <div className="relative inline-flex items-center justify-center px-5 py-1.5 sm:px-6 sm:py-2 rounded-full bg-[#0077C8]/10 dark:bg-white/10 border border-[#0077C8]/25 dark:border-white/15 text-[#0077C8] dark:text-[#9FC6E8] text-[11px] sm:text-xs font-bold tracking-wide uppercase font-mono-code">
-      <span className="absolute left-2 sm:left-2.5 top-1/2 -translate-y-1/2 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#0077C8] dark:bg-[#4FB2F2] animate-ping" />
+    <div
+      className={`relative inline-flex items-center justify-center px-5 py-1.5 sm:px-6 sm:py-2 rounded-full border text-[11px] sm:text-xs font-bold tracking-wide uppercase font-mono-code ${
+        onDark
+          ? 'bg-white/10 border-white/25 text-[#D6E9F7]'
+          : 'bg-[#0077C8]/10 dark:bg-white/10 border-[#0077C8]/25 dark:border-white/15 text-[#0077C8] dark:text-[#9FC6E8]'
+      }`}
+    >
+      <span
+        className={`absolute left-2 sm:left-2.5 top-1/2 -translate-y-1/2 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full animate-ping ${
+          onDark ? 'bg-[#7dd3fc]' : 'bg-[#0077C8] dark:bg-[#4FB2F2]'
+        }`}
+      />
       {children}
     </div>
   );

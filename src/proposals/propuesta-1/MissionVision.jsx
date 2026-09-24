@@ -237,7 +237,7 @@ export default function MissionVision() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="px-4 sm:px-6 py-10 sm:py-20 bg-[#D6E9F7] dark:bg-[#001F3D] relative overflow-hidden">
+    <section ref={sectionRef} className="px-4 sm:px-6 pt-[var(--docencia-gap)] pb-10 sm:pb-20 bg-[#D6E9F7] dark:bg-[#001F3D] relative overflow-hidden">
       {/* Resplandores ambientales de fondo */}
       <div
         aria-hidden="true"
@@ -337,11 +337,11 @@ export default function MissionVision() {
               <article className="relative bg-white dark:bg-[#003366] rounded-[28px] sm:rounded-r-none p-6 sm:p-9 border border-slate-100 dark:border-white/10 overflow-hidden h-full flex flex-col mv-card-light">
                 <SealWatermark
                   src={icapEscudoNavy}
-                  className="w-52 sm:w-64 -left-12 -top-14 opacity-[0.07] dark:opacity-0 -rotate-[11deg]"
+                  className="w-52 sm:w-64 -right-12 -top-14 opacity-[0.07] dark:opacity-0 rotate-[11deg]"
                 />
                 <SealWatermark
                   src={icapEscudoWhite}
-                  className="w-52 sm:w-64 -left-12 -top-14 opacity-0 dark:opacity-[0.05] -rotate-[11deg]"
+                  className="w-52 sm:w-64 -right-12 -top-14 opacity-0 dark:opacity-[0.05] rotate-[11deg]"
                 />
 
                 <div className="relative flex flex-col h-full">
@@ -396,11 +396,11 @@ export default function MissionVision() {
                 />
                 <SealWatermark
                   src={icapEscudoNavy}
-                  className="w-56 sm:w-72 -left-12 -bottom-16 opacity-[0.08] dark:opacity-0 -rotate-[9deg]"
+                  className="w-56 sm:w-72 -right-12 -bottom-16 opacity-[0.08] dark:opacity-0 rotate-[9deg]"
                 />
                 <SealWatermark
                   src={icapEscudoWhite}
-                  className="w-56 sm:w-72 -left-12 -bottom-16 opacity-0 dark:opacity-[0.08] -rotate-[9deg]"
+                  className="w-56 sm:w-72 -right-12 -bottom-16 opacity-0 dark:opacity-[0.08] rotate-[9deg]"
                 />
 
                 <div className="relative flex flex-col h-full">

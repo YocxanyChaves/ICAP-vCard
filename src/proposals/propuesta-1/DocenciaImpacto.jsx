@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { GraduationCap, Wrench, Search, Network, Lightbulb, RotateCw } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import KickerBadge from './KickerBadge';
+import ClosingPhrase from './ClosingPhrase';
 // SVG vectorizado por Yocxany a partir del PNG original (Logo celeste.svg)
 // — reemplaza los .png de abajo porque soluciona de raíz el borroneo al
 // hacer zoom que preguntaba antes: un PNG rotado con CSS necesita
@@ -283,9 +284,21 @@ function ImpactFan({ items, c, phase }) {
   // no un scroll de página compitiendo al mismo tiempo. En sm+ no hay
   // overflow real (el abanico completo entra), así que esto no mueve
   // nada ahí — inofensivo.
+  //
+  // OJO: antes era `scrollIntoView({ inline: 'center', block: 'nearest' })`,
+  // pero scrollIntoView mueve TODOS los contenedores con scroll hacia
+  // arriba, incluido el <main> de la página — si la carta del medio no
+  // entraba completa en pantalla, la página abría scrolleada hasta la
+  // mitad de las cartas en vez de arriba, en el título. Ahora sólo se
+  // mueve el scroll horizontal del propio abanico.
   useEffect(() => {
     if (phase !== 'stacked') return;
-    midCardRef.current?.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+    const box = scrollRef.current;
+    const card = midCardRef.current;
+    if (!box || !card) return;
+    const boxRect = box.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    box.scrollLeft += cardRect.left + cardRect.width / 2 - (boxRect.left + boxRect.width / 2);
   }, [phase]);
 
   // La última carta en llegar a su lugar es la del índice más alto
@@ -480,8 +493,18 @@ export default function DocenciaImpacto() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="px-4 sm:px-6 py-10 sm:py-16 bg-[#D6E9F7] dark:bg-[#001F3D] relative overflow-hidden">
-      <div className="max-w-5xl mx-auto flex flex-col items-center text-center gap-5 sm:gap-7">
+    <section
+      ref={sectionRef}
+      className="px-4 sm:px-6 py-[var(--docencia-gap)] bg-[#D6E9F7] dark:bg-[#001F3D] relative overflow-hidden"
+    >
+      {/* Separación amplia y FIJA entre cada elemento (kicker, texto,
+          título, abanico, conclusión), igual arriba y abajo — para que
+          cada uno tenga su propio espacio como en Formación. Se probó
+          copiar el justify-evenly de Formación, pero acá el contenido
+          (sobre todo el abanico) ya ocupa casi toda la pantalla, así
+          que no sobraba espacio para repartir y todo seguía "apelotado"
+          (palabras de Yocxany). Un gap fijo no depende de eso. */}
+      <div className="max-w-5xl mx-auto flex flex-col items-center text-center gap-[var(--docencia-gap)]">
         <div
           className="transition-all duration-700 ease-out"
           style={{
@@ -493,7 +516,7 @@ export default function DocenciaImpacto() {
         </div>
 
         <p
-          className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 max-w-xl mx-auto leading-relaxed transition-all duration-700 ease-out"
+          className="text-sm sm:text-base text-slate-700 dark:text-slate-300 max-w-xl mx-auto leading-relaxed transition-all duration-700 ease-out"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? 'translateY(0)' : 'translateY(16px)',
@@ -518,16 +541,20 @@ export default function DocenciaImpacto() {
           <ImpactFan items={ITEMS} c={c} phase={fanPhase} />
         </div>
 
-        <p
-          className="font-heading font-bold text-sm sm:text-base text-[#003366] dark:text-[#9FC6E8] tracking-tight px-4 transition-all duration-700 ease-out"
+        {/* Igual que la frase de cierre del Hero de Formación (ver
+            ClosingPhrase.jsx). El boop espera a que termine el fade de
+            entrada (450ms de delay + 700ms de duración). */}
+        <ClosingPhrase
+          className="transition-all duration-700 ease-out"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? 'translateY(0)' : 'translateY(16px)',
             transitionDelay: visible ? '450ms' : '0ms'
           }}
+          boopDelay={1150}
         >
           {c.tagline}
-        </p>
+        </ClosingPhrase>
       </div>
     </section>
   );

@@ -31,7 +31,7 @@ const AUTHORITIES = [
 export default function AuthoritiesSection({ dept = 'at' }) {
   const { t } = useLanguage();
   return (
-    <section className="px-4 sm:px-6 py-10 sm:py-16 bg-[#D6E9F7] dark:bg-[#001F3D] relative">
+    <section className="px-4 sm:px-6 pt-[var(--docencia-gap)] pb-10 sm:pb-16 bg-[#D6E9F7] dark:bg-[#001F3D] relative">
       <div className="max-w-4xl mx-auto">
         <div className="mb-5 sm:mb-6 text-center">
           <div className="mb-1.5 sm:mb-2 flex justify-center">

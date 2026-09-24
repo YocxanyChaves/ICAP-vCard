@@ -51,8 +51,8 @@ import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
 // una sola palabra/frase corta; esta relación deja espacio para que
 // "Integración centroamericana", la más larga de las 12, quepa en 2-3
 // líneas sin desbordar la tarjeta).
-const ANCHO_MAX = 180;
-const ANCHO_MIN = 128;
+const ANCHO_MAX = 212;
+const ANCHO_MIN = 148;
 const PROPORCION_ALTO = 1.6;
 
 // Grados por frame cuando el tambor gira solo (~60fps ⇒ una tarjeta de
@@ -74,8 +74,10 @@ export default function FieldsCarousel({ fields }) {
   const alto = Math.round(ancho / PROPORCION_ALTO);
 
   // Radio del cilindro: el que hace que las `n` tarjetas, paradas una
-  // al lado de la otra en su borde, cierren el círculo exactamente.
-  const radio = Math.round(ancho / 2 / Math.tan(Math.PI / n)) + 34;
+  // al lado de la otra en su borde, cierren el círculo exactamente. El
+  // extra que se le suma es el aire entre tarjetas (Yocxany las pidió
+  // "un poquito más separadas").
+  const radio = Math.round(ancho / 2 / Math.tan(Math.PI / n)) + 64;
 
   const drumRef = useRef(null);
   const cardRefs = useRef([]);
@@ -169,7 +171,7 @@ export default function FieldsCarousel({ fields }) {
     <div className="relative">
       <div
         className="relative w-full overflow-hidden select-none"
-        style={{ height: alto + 140 }}
+        style={{ height: alto + 160 }}
         onMouseEnter={() => {
           pausedRef.current = true;
         }}
@@ -204,11 +206,11 @@ export default function FieldsCarousel({ fields }) {
                   cardRefs.current[i] = el;
                 }}
                 onClick={() => goToIndex(i)}
-                className={`absolute inset-0 rounded-[20px] flex items-center justify-center text-center px-3 border cursor-pointer will-change-transform overflow-hidden ${
+                className={`absolute inset-0 rounded-[22px] flex items-center justify-center text-center px-4 border cursor-pointer will-change-transform overflow-hidden backdrop-blur-xl backdrop-saturate-150 ${
                   i % 2 === 0
-                    ? 'bg-gradient-to-br from-white to-[#EAF3FB] dark:from-[#013A63] dark:to-[#001F3D] border-slate-100 dark:border-white/10 shadow-[0_16px_32px_-14px_rgba(0,51,102,0.45)] dark:shadow-[0_16px_32px_-14px_rgba(0,0,0,0.6)]'
-                    : 'bg-gradient-to-br from-[#CFE9FA] to-[#8FC9EA] dark:from-[#0077C8] dark:to-[#0068AE] border-white/70 dark:border-white/10 shadow-[0_16px_32px_-14px_rgba(0,51,102,0.5)] dark:shadow-[0_16px_32px_-14px_rgba(0,0,0,0.6)]'
-                }`}
+                    ? 'bg-gradient-to-br from-white/85 via-white/60 to-[#EAF3FB]/55 dark:from-white/[0.14] dark:via-white/[0.07] dark:to-[#013A63]/60 border-white/80 dark:border-white/20'
+                    : 'bg-gradient-to-br from-[#E4F3FD]/85 via-[#CFE9FA]/65 to-[#8FC9EA]/60 dark:from-[#0077C8]/60 dark:via-[#0068AE]/45 dark:to-[#003366]/55 border-white/75 dark:border-white/20'
+                } shadow-[inset_0_1px_0_rgba(255,255,255,0.95),inset_0_-1px_0_rgba(255,255,255,0.35),inset_0_0_24px_rgba(255,255,255,0.35),0_18px_36px_-14px_rgba(0,51,102,0.45)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.35),inset_0_-1px_0_rgba(255,255,255,0.08),inset_0_0_24px_rgba(255,255,255,0.06),0_18px_36px_-14px_rgba(0,0,0,0.65)]`}
               >
                 {/* Línea de brillo arriba — el mismo toque "de cristal"
                     que llevaban las tarjetas de la versión de scroll
@@ -218,23 +220,38 @@ export default function FieldsCarousel({ fields }) {
                   aria-hidden="true"
                   className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-white/80 dark:via-white/40 to-transparent"
                 />
+                {/* Retoque "liquid glass": un reflejo especular suave
+                    arriba a la izquierda (la luz pegándole al vidrio) y
+                    una franja diagonal de brillo muy tenue cruzando la
+                    tarjeta. Ambos detrás del texto. */}
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -top-1/2 -left-1/4 w-[90%] h-[110%] rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.7),transparent)] dark:bg-[radial-gradient(closest-side,rgba(255,255,255,0.18),transparent)]"
+                />
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_38%,rgba(255,255,255,0.35)_48%,transparent_58%)] dark:bg-[linear-gradient(115deg,transparent_38%,rgba(255,255,255,0.08)_48%,transparent_58%)]"
+                />
                 {/* Marca de agua propia de la tarjeta, no del fondo
-                    entero — navy en tema claro, blanca en oscuro. */}
+                    entero — navy en tema claro, blanca en oscuro.
+                    Centrada y grande (Yocxany la pidió "en el centro y
+                    bien grandecito"), pero muy tenue y DETRÁS del texto
+                    (z-0 vs. z-10) para no taparlo. */}
                 <img
                   src={icapEscudoNavy}
                   alt=""
                   aria-hidden="true"
                   draggable={false}
-                  className="absolute -right-3 -bottom-3 w-12 sm:w-14 opacity-[0.14] rotate-[8deg] pointer-events-none select-none dark:hidden"
+                  className="absolute z-0 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[88%] w-auto max-w-none opacity-[0.09] pointer-events-none select-none dark:hidden"
                 />
                 <img
                   src={icapEscudoWhite}
                   alt=""
                   aria-hidden="true"
                   draggable={false}
-                  className="hidden absolute -right-3 -bottom-3 w-12 sm:w-14 opacity-[0.16] rotate-[8deg] pointer-events-none select-none dark:block"
+                  className="hidden absolute z-0 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[88%] w-auto max-w-none opacity-[0.11] pointer-events-none select-none dark:block"
                 />
-                <span className="relative text-xs sm:text-sm font-semibold text-[#003366] dark:text-white leading-snug">
+                <span className="relative z-10 text-sm sm:text-base font-semibold text-[#003366] dark:text-white leading-snug">
                   {field}
                 </span>
               </div>

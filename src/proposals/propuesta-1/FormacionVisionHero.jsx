@@ -432,16 +432,28 @@ export default function FormacionVisionHero({ title, text, closing }) {
             probado con Playwright, funciona así. El boop usa
             `animate-closing-boop` (keyframe propio en global.css, más
             sutil que `animate-stat-pop`). */}
+        {/* 10) Alineada a la IZQUIERDA, pegada al mismo borde que el
+            párrafo de arriba (mismo left que el padding del panel y
+            max-w que el texto) — Yocxany: "era lo que había pedido
+            originalmente". Después pidió que quedara "a lo largo, no
+            por renglones": de md en adelante va en UNA sola línea
+            (whitespace-nowrap), con el tamaño atado al ancho de la
+            pantalla (1.8vw, tope 2.25rem) para que siempre quepa en el
+            panel derecho sin salirse. En mobile (apilado, angosto) sí
+            se parte en renglones — en una línea no cabría a un tamaño
+            legible. `origin-left` en el <p> (boop) y en
+            el <span> (hover) para que al crecer no se despegue de ese
+            borde. */}
         {closing && (
           <p
             className={
-              'relative w-full md:w-auto mt-8 md:mt-0 md:absolute md:left-10 md:right-10 lg:left-12 lg:right-12 md:bottom-16 lg:bottom-20 z-10 text-center font-heading font-extrabold text-[#003366] text-2xl sm:text-3xl md:text-3xl lg:text-4xl leading-tight will-change-transform' +
+              'relative w-full md:w-auto mt-8 md:mt-0 md:absolute md:left-10 md:right-10 lg:left-12 lg:right-12 md:bottom-16 lg:bottom-20 z-10 text-left origin-left font-heading font-extrabold text-[#003366] text-2xl sm:text-3xl md:text-[min(1.8vw,2.25rem)] md:whitespace-nowrap leading-tight will-change-transform' +
               (booping ? ' animate-closing-boop' : '')
             }
             style={textStyle}
             onAnimationEnd={stopBoop}
           >
-            <span className="inline-block transition-transform duration-300 ease-out hover:scale-105 cursor-default">
+            <span className="inline-block origin-left transition-transform duration-300 ease-out hover:scale-105 cursor-default">
               {closing}
             </span>
           </p>

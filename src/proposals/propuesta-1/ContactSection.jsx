@@ -61,7 +61,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
   }, []);
 
   return (
-    <section id={id} className="px-4 sm:px-6 py-14 sm:py-24 bg-[#D6E9F7] dark:bg-[#001F3D] relative overflow-hidden">
+    <section id={id} className="px-4 sm:px-6 pt-[var(--docencia-gap)] pb-14 sm:pb-24 bg-[#D6E9F7] dark:bg-[#001F3D] relative overflow-hidden">
       {/* Escudo grande y apenas insinuado de fondo, como el que ya
           "marca de agua" a Misión — el mismo gesto para cerrar el
           brochure con esa firma institucional. */}

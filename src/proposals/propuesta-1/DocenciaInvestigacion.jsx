@@ -2,6 +2,7 @@ import React from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import KickerBadge from './KickerBadge';
 import FieldsCarousel from './FieldsCarousel';
+import ClosingPhrase from './ClosingPhrase';
 import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
 
 /**
@@ -43,16 +44,17 @@ export default function DocenciaInvestigacion() {
   const c = t.docenciaInvestigacion;
 
   return (
-    <section className="px-4 sm:px-6 py-10 sm:py-16 bg-[#D6E9F7] dark:bg-[#001F3D] relative">
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-6 sm:mb-8 text-center">
-          <div className="mb-3 inline-block">
-            <KickerBadge>{c.kicker}</KickerBadge>
-          </div>
-          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
-            {c.title}
-          </h2>
+    <section className="px-4 sm:px-6 py-[var(--docencia-gap)] bg-[#D6E9F7] dark:bg-[#001F3D] relative">
+      {/* Misma distancia (--docencia-gap, global.css) del menú al
+          primer elemento y entre cada elemento, igual que Formación e
+          Impacto. */}
+      <div className="max-w-3xl mx-auto flex flex-col gap-[var(--docencia-gap)]">
+        <div className="text-center">
+          <KickerBadge>{c.kicker}</KickerBadge>
         </div>
+        <h2 className="text-center font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
+          {c.title}
+        </h2>
 
         {/* Card del texto — SIEMPRE navy (no sigue el tema, igual que
             el panel izquierdo de FormacionVisionHero), con el escudo
@@ -66,22 +68,21 @@ export default function DocenciaInvestigacion() {
             className="absolute -right-[10%] -top-[15%] w-[65%] max-w-none opacity-[0.07] pointer-events-none select-none"
           />
           {c.paragraphs.map((p, i) => (
-            <p key={i} className="relative text-xs sm:text-sm text-white/90 leading-relaxed">
+            <p key={i} className="relative text-sm sm:text-base text-white/90 leading-relaxed">
               {p}
             </p>
           ))}
-          <p className="relative text-xs sm:text-sm text-white/90 leading-relaxed">{c.closing}</p>
+          <p className="relative text-sm sm:text-base text-white/90 leading-relaxed">{c.closing}</p>
         </div>
 
-        <span className="block text-center text-[10px] font-mono-code font-bold uppercase tracking-wider text-[#0077C8] dark:text-[#9FC6E8]/70 mt-8 sm:mt-10 mb-4">
+        {/* Mismo estilo que el título de arriba de la sección. */}
+        <h3 className="text-center font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
           {c.fieldsLabel}
-        </span>
+        </h3>
 
         <FieldsCarousel fields={c.fields} />
 
-        <p className="mt-6 sm:mt-8 text-center font-heading font-bold text-sm sm:text-base text-[#003366] dark:text-[#9FC6E8] tracking-tight px-4">
-          {c.tagline}
-        </p>
+        <ClosingPhrase>{c.tagline}</ClosingPhrase>
       </div>
     </section>
   );
