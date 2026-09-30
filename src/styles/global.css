@@ -259,6 +259,76 @@ h1, h2, h3, h4, h5, h6 {
   animation: cardContentOut 0.5s cubic-bezier(0.5, 0, 1, 1) both;
 }
 
+/* Versión "de regreso" de las 4 animaciones de arriba — mismas curvas,
+   duraciones, blur y escala, sólo con la dirección vertical invertida.
+   Se usan cuando en Formación se va al par ANTERIOR (scroll hacia
+   arriba o clic en un puntito anterior): el par actual se va hacia
+   ABAJO y el anterior baja desde ARRIBA, para dar la ilusión de que se
+   "devolvió" en vez de repetir el mismo movimiento de avanzar. */
+@keyframes cardWhooshInBack {
+  0% {
+    opacity: 0;
+    transform: translateY(-85%) scale(0.94);
+    filter: blur(8px);
+  }
+  45% {
+    opacity: 1;
+    filter: blur(3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes cardWhooshOutBack {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(60%) scale(0.94);
+    filter: blur(6px);
+  }
+}
+
+@keyframes cardContentInBack {
+  0% {
+    transform: translateY(-85%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardContentOutBack {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(60%);
+  }
+}
+
+.animate-card-whoosh-in-back {
+  animation: cardWhooshInBack 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-card-whoosh-out-back {
+  animation: cardWhooshOutBack 0.5s cubic-bezier(0.5, 0, 1, 1) both;
+}
+
+.animate-card-content-in-back {
+  animation: cardContentInBack 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-card-content-out-back {
+  animation: cardContentOutBack 0.5s cubic-bezier(0.5, 0, 1, 1) both;
+}
+
 @keyframes orbitSpin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -647,4 +717,36 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-scroll-wheel {
   animation: scrollWheel 1.6s ease-in-out infinite;
+}
+
+/* Contenido de la portada del libro abierto en Publicaciones
+   (PublicationsShelf.jsx): cada pieza (línea ICAP/Nº, ícono, título,
+   raya de color, descripción) aparece en cascada — sube un poquito y
+   se aclara — mientras la tapa termina de girar, en vez de estar ya
+   todo ahí de golpe. Arranca con ~350ms de espera para dejar que la
+   tapa gire primero. */
+@keyframes bookContentIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-book-content > * {
+  animation: bookContentIn 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-book-content > :nth-child(1) { animation-delay: 350ms; }
+.animate-book-content > :nth-child(2) { animation-delay: 430ms; }
+.animate-book-content > :nth-child(3) { animation-delay: 510ms; }
+.animate-book-content > :nth-child(4) { animation-delay: 590ms; }
+.animate-book-content > :nth-child(5) { animation-delay: 670ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-book-content > * {
+    animation: none;
+  }
 }

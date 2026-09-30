@@ -29,11 +29,27 @@ const ITEMS = [
   { id: 'innovacion', icon: Lightbulb }
 ];
 
-// Cuántos grados rota cada tarjeta respecto a la de al medio (índice 2 de
-// 5): -2,-1,0,1,2 pasos × este valor = -18°,-9°,0°,9°,18°. Mismo valor en
-// mobile y desktop a propósito — es un ángulo, no un px, así que se ve
-// bien en los dos tamaños sin tener que duplicar la lógica por breakpoint.
-const FAN_ROTATE_STEP = 9;
+// Entrada tipo "cinta transportadora": al llegar a la sección las cartas
+// entran deslizándose desde la izquierda (desde ENTRY_FROM, fuera de la
+// pantalla) y frenan suave en su lugar, durante ENTRY_DURATION ms. La de
+// más a la DERECHA arranca primero (es la que más lejos viaja) y cada
+// una de las que siguen sale ENTRY_STAGGER ms después — así viajan en
+// fila, casi pegadas, como sobre una cinta. Antes era un mazo apilado en
+// el medio que se repartía en abanico (demasiado "baraja de naipes") y
+// después un fade+subida desde abajo.
+const ENTRY_FROM = '-100vw';
+const ENTRY_DURATION = 1100;
+const ENTRY_STAGGER = 70;
+
+// Volteo automático: una vez que las cartas llegaron, se van volteando
+// solas de a una — primero la del CENTRO y después hacia la IZQUIERDA
+// (al llegar a la primera sigue por la de la punta derecha, y vuelve a
+// empezar). Cada una queda mostrando su descripción AUTO_FLIP_HOLD ms,
+// se cierra, y AUTO_FLIP_GAP ms después se voltea la siguiente. Se
+// pausa con el mouse encima de las cartas y se apaga del todo apenas
+// el usuario toca una (a partir de ahí manda él).
+const AUTO_FLIP_HOLD = 3200;
+const AUTO_FLIP_GAP = 700;
 
 // Nombres de 2 palabras (ej. "Redes Regionales") se parten SIEMPRE una
 // palabra por línea, en vez de dejar que el navegador decida dónde
@@ -47,7 +63,7 @@ function nameLines(name) {
 }
 
 /**
- * Cara de ADELANTE de la carta — número+ícono arriba, nombre debajo, y
+ * Cara de ADELANTE de la carta — ícono grande al centro, nombre debajo, y
  * el escudo del ICAP bien grande y notorio de fondo (antes era el mismo
  * ícono del pilar, chiquito y casi invisible al 10% de opacidad — ahora
  * es el escudo oficial, mucho más presente, para que la carta se sienta
@@ -55,7 +71,7 @@ function nameLines(name) {
  * invita a tocar la carta (antes no había ninguna señal de que las
  * cartas hacían algo).
  */
-function ImpactCardFront({ Icon, index, name }) {
+function ImpactCardFront({ Icon, name }) {
   return (
     <div className="absolute inset-0 [backface-visibility:hidden] rounded-2xl bg-white dark:bg-[#003366] border border-slate-100 dark:border-white/10 shadow-xl shadow-slate-900/15 dark:shadow-black/40 overflow-hidden flex flex-col p-3 sm:p-4">
       {/* Regla fija del escudo: fondo oscuro → escudo blanco, fondo
@@ -68,55 +84,51 @@ function ImpactCardFront({ Icon, index, name }) {
           opacidad en CSS. Ahora son los .svg (ver el comentario del
           import arriba): sin ese techo, así que opacity-100 acá sí es
           100% de verdad — y de paso se arregla el borroneo al hacer
-          zoom, porque ya no hay un PNG rotado que interpolar. */}
+          zoom, porque ya no hay un PNG rotado que interpolar.
+          Posición: esquina abajo-DERECHA, grande y recortado por el
+          borde de la carta — antes iba al centro, pero ahora el centro
+          es del ícono del pilar y chocaban (pedido de Yocxany). Abajo-
+          izquierda queda libre para el puntito de "voltear". */}
       <img
         src={icapEscudoCeleste}
         alt=""
         aria-hidden="true"
         draggable={false}
-        className="absolute left-1/2 top-[60%] w-[66%] -translate-x-1/2 -translate-y-1/2 rotate-[-6deg] opacity-100 dark:hidden pointer-events-none select-none"
+        className="absolute -right-[20%] -bottom-[12%] w-[62%] rotate-[-12deg] opacity-100 dark:hidden pointer-events-none select-none"
       />
       <img
         src={icapEscudoWhite}
         alt=""
         aria-hidden="true"
         draggable={false}
-        className="absolute left-1/2 top-[60%] w-[66%] -translate-x-1/2 -translate-y-1/2 rotate-[-6deg] opacity-0 dark:opacity-100 pointer-events-none select-none"
+        className="absolute -right-[20%] -bottom-[12%] w-[62%] rotate-[-12deg] opacity-0 dark:opacity-100 pointer-events-none select-none"
       />
 
-      {/* Índice arriba-DERECHA (ícono+número) y el nombre justo debajo —
-          la zona que se sigue viendo completa aunque la carta vecina se
-          monte encima un poco. Celeste/celeste-clarito a propósito
-          (Yocxany probó cambiarlo a navy/blanco y prefirió este color
-          original) — el que sí alterna navy/blanco con el tema es la
-          marca de agua del escudo, no este índice.
-          Antes había un segundo índice repetido abajo-izquierda (para
-          simular el índice doble de un naipe real) — Yocxany pidió
-          quitarlo porque saturaba la carta junto con el escudo y el
-          puntito de "voltear"; ahora abajo sólo queda ese puntito
-          (ver más abajo), sin competencia. */}
-      <div className="relative flex items-center justify-end gap-1.5 text-[#0077C8] dark:text-[#4FB2F2]">
-        <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
-        <span className="font-mono-code text-xs sm:text-sm font-bold">
-          {String(index + 1).padStart(2, '0')}
+      {/* Ícono del pilar al CENTRO de la carta, grande, en un círculo,
+          con el nombre justo debajo. Antes iba chiquito arriba-derecha
+          junto al número (01–05) como índice de naipe — Yocxany pidió
+          quitar el número y traer el ícono al centro. Celeste/celeste-
+          clarito a propósito (Yocxany prefirió este color original al
+          navy/blanco). */}
+      <div className="relative flex-1 flex flex-col items-center justify-center">
+        <span className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/90 dark:bg-[#003366]/90 border border-[#0077C8]/20 dark:border-white/15 shadow-lg shadow-[#0077C8]/15 dark:shadow-black/30 flex items-center justify-center text-[#0077C8] dark:text-[#4FB2F2]">
+          <Icon className="w-8 h-8 sm:w-10 sm:h-10" strokeWidth={1.7} />
         </span>
+        <h3 className="text-center font-heading font-bold text-lg xl:text-xl text-[#003366] dark:text-[#9FC6E8] leading-[1.25] mt-4">
+          {nameLines(name).map((line) => (
+            <span key={line} className="block whitespace-nowrap">
+              {line}
+            </span>
+          ))}
+        </h3>
       </div>
-
-      <h3 className="relative text-center font-heading font-bold text-base sm:text-xl text-[#003366] dark:text-[#9FC6E8] leading-[1.25] mt-2.5 sm:mt-3">
-        {nameLines(name).map((line) => (
-          <span key={line} className="block whitespace-nowrap">
-            {line}
-          </span>
-        ))}
-      </h3>
 
       {/* Puntito que invita a tocar — la descripción completa no entra
           en la carta, así que esto avisa que hay más al voltearla. El
           animate-ping de atrás es sutil (un solo puntito, opacidad
           baja) para que se note pero no distraiga del nombre. Abajo-
-          IZQUIERDA a propósito, en diagonal opuesta al índice de
-          arriba-derecha — así los dos elementos quedan balanceados en
-          esquinas contrarias en vez de amontonados del mismo lado. */}
+          IZQUIERDA, en la esquina, para no competir con el ícono y el
+          nombre del centro. */}
       <div className="absolute bottom-2.5 left-2.5 sm:bottom-3.5 sm:left-3.5 flex items-center justify-center" aria-hidden="true">
         <span className="absolute inline-flex h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-[#0077C8]/20 dark:bg-[#4FB2F2]/20 animate-ping" />
         <RotateCw className="relative w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#0077C8]/70 dark:text-[#4FB2F2]/70" />
@@ -151,9 +163,9 @@ function ImpactCardFront({ Icon, index, name }) {
  * como motivo, pero no le compite al texto que sí importa que se lea
  * fácil.
  */
-function ImpactCardBack({ Icon, index, name, description }) {
+function ImpactCardBack({ Icon, name, description }) {
   return (
-    <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-2xl bg-[#0077C8] dark:bg-[#001F3D] border border-[#0077C8] dark:border-white/15 shadow-xl shadow-slate-900/20 overflow-hidden flex flex-col items-center justify-center text-center p-3.5 sm:p-5 gap-2 sm:gap-2.5">
+    <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-2xl bg-[#0077C8] dark:bg-[#001F3D] border border-[#0077C8] dark:border-white/15 shadow-xl shadow-slate-900/20 overflow-hidden flex flex-col items-center justify-center text-center p-4 sm:p-5 gap-2.5 sm:gap-3">
       <img
         src={icapEscudoWhite}
         alt=""
@@ -162,53 +174,32 @@ function ImpactCardBack({ Icon, index, name, description }) {
         className="absolute left-1/2 top-1/2 w-[86%] -translate-x-1/2 -translate-y-1/2 rotate-[5deg] opacity-[0.12] pointer-events-none select-none"
       />
 
-      <Icon className="relative w-6 h-6 sm:w-7 sm:h-7 text-white/80 dark:text-[#4FB2F2] shrink-0" aria-hidden="true" />
-      <h3 className="relative font-heading font-bold text-sm sm:text-base text-white dark:text-[#9FC6E8] leading-tight">
+      <Icon className="relative w-7 h-7 sm:w-8 sm:h-8 text-white/80 dark:text-[#4FB2F2] shrink-0" aria-hidden="true" />
+      <h3 className="relative font-heading font-bold text-base sm:text-lg text-white dark:text-[#9FC6E8] leading-tight">
         {name}
       </h3>
-      <p className="relative text-[10.5px] sm:text-[13px] text-white/90 dark:text-slate-300 leading-snug">{description}</p>
-      <span className="relative font-mono-code text-[8px] sm:text-[9.5px] text-white/55 dark:text-white/30 mt-0.5">
-        {String(index + 1).padStart(2, '0')} · toca para cerrar
+      <p className="relative text-xs sm:text-sm text-white/90 dark:text-slate-300 leading-snug">{description}</p>
+      <span className="relative font-mono-code text-[9px] sm:text-[10px] text-white/55 dark:text-white/30 mt-0.5">
+        toca para cerrar
       </span>
     </div>
   );
 }
 
 /**
- * El "abanico" completo de 5 cartas. Se dibujan en fila (flex) con
- * márgenes negativos para que se superpongan, y cada una rota un poco
- * más que la anterior alrededor de su borde inferior (origin-bottom):
- * rotar así, en vez de mover manualmente cada carta en X/Y, es lo que
- * logra el efecto real de "mano de cartas" — al rotar sobre el punto
- * medio de abajo, las bases quedan casi alineadas y las puntas de
- * arriba se abren solas, sin tener que calcular esa curva a mano.
+ * Las 5 cartas, DERECHAS y SEPARADAS en fila, como tarjetas normales.
+ * Antes eran un "abanico" de naipes (encimadas con márgenes negativos y
+ * rotadas alrededor de su borde inferior), pero no gustó que pareciera
+ * una baraja — se quitaron la rotación y el overlap.
  *
- * La carta del medio queda más alta en z-index (como la carta "de
- * encima" en una mano real) y las de los costados progresivamente por
- * debajo, sin importar si ya se revelaron o todavía están juntas.
- *
- * Yocxany pidió las cartas mucho más grandes — en mobile ya no entran
- * las 5 completas de una en 390px de ancho sin quedar minúsculas, así
- * que ahí el abanico se puede desplazar horizontal (overflow-x-auto +
- * scroll-snap) en vez de achicar todo para que quepa. Como hay que
- * deslizar para ver las de los costados, apenas se abre el abanico se
- * centra el scroll en la carta del medio (ver el useEffect de
- * scrollIntoView más abajo) — así es la más visible de entrada, que es
- * justo lo que se pidió. Desde `sm:` el contenedor tiene espacio de
- * sobra y el abanico completo entra sin necesidad de scroll.
- *
- * Después Yocxany notó que en mobile la carta salía "cortada" — en
- * realidad no había clipping real (medido con el bounding box contra
- * el <section>), sino que la carta vecina la tapaba bastante por el
- * overlap del abanico, y de paso sobraba espacio vertical en la
- * pantalla para hacer la carta más grande. Se subió el tamaño mobile
- * de 160×240px a 192×288px (+20%, misma proporción que antes) y, para
- * que el abanico se siga viendo igual de "de mano de cartas" con la
- * carta más ancha, el overlap (-ml) y el --step (la distancia que
- * recorre cada carta en la fase 'stacked') se recalcularon a la misma
- * proporción de antes: --step = ancho de carta − overlap. El padding
- * lateral del scroll (px-20) también subió en la misma proporción para
- * que las cartas de la punta se sigan pudiendo centrar del todo.
+ * Layout: en mobile y tablet la fila se desliza horizontal
+ * (overflow-x-auto + scroll-snap) con cartas de 192×288px; el padding
+ * lateral de calc(50vw − media carta) deja que hasta las de las puntas
+ * se puedan centrar. Apenas entran se centra el scroll en la del medio
+ * (ver el useEffect más abajo). Desde `lg:` hay espacio de sobra y pasa
+ * a una grilla de 5 columnas fluidas (aspect 2/3), sin scroll. El py-6
+ * es para que el levante del hover/volteo no se recorte contra el
+ * overflow del scroll.
  *
  * Yocxany notó que las cartas no hacían nada al tocarlas y que la
  * descripción de cada pilar no cabía en el frente — dos problemas, una
@@ -216,13 +207,13 @@ function ImpactCardBack({ Icon, index, name, description }) {
  * una carta de verdad) al tocarla, mostrando la descripción completa
  * del otro lado. Tres capas de transform por carta, cada una en su
  * propio elemento para que no se pisen entre sí:
- *   1) este wrapper (abajo) — la posición en el abanico: rotate/
- *      translateY/scale según fanPhase, MÁS un "levante" (se endereza,
- *      sube y crece un poco, y pasa al frente de todas con z-index 50)
+ *   1) este wrapper (abajo) — la entrada (translateY/scale según
+ *      fanPhase), MÁS un "levante" (sube y crece un poco, y pasa al
+ *      frente de todas con z-index 50)
  *      cuando está volteada, para que se lea cómoda sin que la tape una
  *      vecina.
- *   2) el <button> — el hover/active: al pasar el mouse "boopea" (sube,
- *      crece y gira un poquito con una curva que rebota de más y
+ *   2) el <button> — el hover/active: al pasar el mouse "boopea" (sube
+ *      y crece un poquito con una curva que rebota de más y
  *      vuelve, tipo resorte) y al tocar/clickear se achica un toque,
  *      feedback bien notorio de que es clickeable.
  *   3) el div interno con perspective+preserve-3d — el volteo en sí
@@ -230,25 +221,14 @@ function ImpactCardBack({ Icon, index, name, description }) {
  *      backface-visibility:hidden para que cada una sólo se vea de su
  *      lado, como una carta de baraja real.
  *
- * `fanPhase` tiene 3 valores (ver el estado en DocenciaImpacto):
- *   'hidden'  — todavía no llegó, invisible.
- *   'stacked' — el mazo entero aparece YA, todo apilado en el mismo
- *               punto (el de la carta del medio) — el "todas salen del
- *               medio" que pidió Yocxany.
- *   'fanned'  — cada carta viaja desde ese punto central hasta su
- *               lugar en el abanico, girando mientras se mueve
- *               (transitionDelay escalonado sólo en esta fase, así que
- *               salen una después de otra, no todas a la vez).
- *
- * El "viaje desde el medio" se logra con un translateX que en la fase
- * 'stacked' cancela la posición natural de cada carta en el layout
- * (flex + márgenes negativos) para que quede exactamente encima de la
- * carta del medio, y en 'fanned' vuelve a 0 (su lugar natural). Esa
- * distancia depende del ancho real de la carta, que cambia entre mobile
- * y sm+ — por eso vive en la variable CSS --step (ver className del
- * wrapper), no como número fijo en JS: el navegador resuelve el valor
- * que le toca según el breakpoint activo, sin tener que duplicar la
- * cuenta acá.
+ * `fanPhase` tiene 2 valores (ver el estado en DocenciaImpacto):
+ *   'hidden' — todavía no llegó: invisible, fuera de pantalla a la
+ *              izquierda.
+ *   'fanned' — cada carta se desliza a su lugar tipo cinta
+ *              transportadora (ver ENTRY_* arriba).
+ * Antes había una fase intermedia 'stacked' (mazo apilado en el medio
+ * que después se repartía en abanico), pero se sentía demasiado "baraja
+ * de naipes" y se quitó — ahora entran como tarjetas normales.
  */
 function ImpactFan({ items, c, phase }) {
   const mid = (items.length - 1) / 2;
@@ -269,20 +249,24 @@ function ImpactFan({ items, c, phase }) {
   // para el porqué de aplicarlo sobre el <button> y no sobre este
   // wrapper.
   const [boop, setBoop] = useState(false);
+  // Carta que el volteo automático tiene abierta ahora (ver
+  // AUTO_FLIP_*). Separada de flippedId (la que eligió el usuario):
+  // apenas el usuario toca una carta, autoStopped apaga el automático.
+  const [autoFlipId, setAutoFlipId] = useState(null);
+  const [autoStopped, setAutoStopped] = useState(false);
+  const autoPausedRef = useRef(false);
   const scrollRef = useRef(null);
   const midCardRef = useRef(null);
 
   // En mobile hay que deslizar para ver las cartas de los costados —
   // Yocxany pidió que de entrada salgan centradas en la del medio (la
   // más visible), en vez de arrancar pegado al borde izquierdo. Se
-  // dispara apenas aparece el mazo (fase 'stacked', que es justo donde
-  // vive la carta del medio en su posición de layout real — el
-  // translateX de abajo es sólo visual, no mueve el scroll) para que ya
-  // esté centrado ANTES de que el abanico empiece a abrirse, sin
-  // "saltos" a mitad de la animación. `behavior: 'auto'` (instantáneo)
-  // a propósito: el protagonista del momento es el abanico abriéndose,
-  // no un scroll de página compitiendo al mismo tiempo. En sm+ no hay
-  // overflow real (el abanico completo entra), así que esto no mueve
+  // dispara apenas empiezan a entrar las cartas (los transforms son sólo
+  // visuales, no mueven el scroll) para que ya esté centrado desde el
+  // primer frame, sin "saltos" a mitad de la animación. `behavior:
+  // 'auto'` (instantáneo) a propósito: el protagonista del momento son
+  // las cartas entrando, no un scroll de página compitiendo al mismo
+  // tiempo. En lg+ no hay overflow real (la grilla entra), así que esto no mueve
   // nada ahí — inofensivo.
   //
   // OJO: antes era `scrollIntoView({ inline: 'center', block: 'nearest' })`,
@@ -292,7 +276,7 @@ function ImpactFan({ items, c, phase }) {
   // mitad de las cartas en vez de arriba, en el título. Ahora sólo se
   // mueve el scroll horizontal del propio abanico.
   useEffect(() => {
-    if (phase !== 'stacked') return;
+    if (phase !== 'fanned') return;
     const box = scrollRef.current;
     const card = midCardRef.current;
     if (!box || !card) return;
@@ -315,23 +299,64 @@ function ImpactFan({ items, c, phase }) {
       setBoop(false);
       return undefined;
     }
-    const settleMs = (items.length - 1) * 90 + 750 + 80;
+    const settleMs = (items.length - 1) * ENTRY_STAGGER + ENTRY_DURATION + 80;
     const boopTimeoutId = setTimeout(() => setBoop(true), settleMs);
     return () => clearTimeout(boopTimeoutId);
   }, [phase, items.length]);
 
+  // Volteo automático, en cadena de timeouts: espera a que las cartas
+  // terminen de llegar (+ el boop), y después voltea una, la deja
+  // AUTO_FLIP_HOLD, la cierra, espera AUTO_FLIP_GAP y sigue con la
+  // próxima del orden centro → izquierda → (vuelta por la derecha).
+  // Si el mouse está encima (autoPausedRef), no abre la siguiente
+  // hasta que se vaya.
+  useEffect(() => {
+    if (phase !== 'fanned' || autoStopped) {
+      setAutoFlipId(null);
+      return undefined;
+    }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+
+    const n = items.length;
+    const order = Array.from({ length: n }, (_, k) => (midIndex - k + n) % n);
+    let k = 0;
+    let timeoutId;
+
+    const flipNext = () => {
+      if (autoPausedRef.current) {
+        timeoutId = setTimeout(flipNext, 400);
+        return;
+      }
+      setAutoFlipId(items[order[k % n]].id);
+      timeoutId = setTimeout(() => {
+        setAutoFlipId(null);
+        k += 1;
+        timeoutId = setTimeout(flipNext, AUTO_FLIP_GAP);
+      }, AUTO_FLIP_HOLD);
+    };
+
+    const startMs = (n - 1) * ENTRY_STAGGER + ENTRY_DURATION + 900;
+    timeoutId = setTimeout(flipNext, startMs);
+    return () => clearTimeout(timeoutId);
+  }, [phase, autoStopped, items, midIndex]);
+
   return (
     <div
       ref={scrollRef}
-      className="flex items-end sm:justify-center overflow-x-auto sm:overflow-visible -mx-4 px-20 sm:mx-0 sm:px-0 pb-1 snap-x snap-proximity sm:snap-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      className="flex gap-4 overflow-x-auto -mx-4 sm:-mx-6 px-[calc(50vw-7rem)] py-6 snap-x snap-proximity lg:grid lg:grid-cols-5 lg:gap-5 lg:overflow-visible lg:mx-0 lg:px-0 lg:snap-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       role="list"
+      onMouseEnter={() => {
+        autoPausedRef.current = true;
+      }}
+      onMouseLeave={() => {
+        autoPausedRef.current = false;
+      }}
     >
       {items.map((item, i) => {
         const Icon = item.icon;
         const itemT = c.items[item.id];
         const offset = i - mid;
-        const rotate = offset * FAN_ROTATE_STEP;
-        const flipped = flippedId === item.id;
+        const flipped = flippedId === item.id || (flippedId === null && autoFlipId === item.id);
         const revealed = phase !== 'hidden';
 
         return (
@@ -339,36 +364,39 @@ function ImpactFan({ items, c, phase }) {
             key={item.id}
             ref={i === midIndex ? midCardRef : undefined}
             role="listitem"
-            className={`w-48 h-72 sm:w-56 sm:h-80 shrink-0 origin-bottom snap-center [--step:136px] sm:[--step:160px] ${i !== 0 ? '-ml-14 sm:-ml-16' : ''}`}
+            className="w-56 h-[21rem] shrink-0 snap-center lg:w-auto lg:h-auto lg:aspect-[2/3]"
             style={{
               zIndex: flipped ? 50 : hoveredId === item.id ? 40 : 10 - Math.abs(offset),
               pointerEvents: phase === 'fanned' ? 'auto' : 'none',
+              // Entrada tipo cinta transportadora — ver ENTRY_*.
               transform:
                 phase === 'hidden'
-                  ? 'translateX(0) rotate(0deg) translateY(28px) scale(0.86)'
-                  : phase === 'stacked'
-                    ? `translateX(calc(var(--step) * ${mid - i})) rotate(0deg) translateY(0) scale(0.92)`
-                    : flipped
-                      ? 'translateX(0) rotate(0deg) translateY(-20px) scale(1.12)'
-                      : `translateX(0) rotate(${rotate}deg) translateY(0) scale(1)`,
+                  ? `translateX(${ENTRY_FROM})`
+                  : flipped
+                    ? 'translateX(0) translateY(-12px) scale(1.06)'
+                    : 'translateX(0) translateY(0) scale(1)',
               opacity: revealed ? 1 : 0,
               transitionProperty: 'transform, opacity',
-              transitionDuration: phase === 'stacked' ? '450ms' : '750ms',
-              transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-              // Al pasar a 'stacked' TODAS entran juntas (delay 0) — el
-              // "salen juntas, del medio". Recién al pasar a 'fanned' se
-              // escalona por carta — el "y luego se abren".
-              transitionDelay: phase === 'fanned' ? `${i * 90}ms` : '0ms'
+              // El fade es más corto que el viaje para que la carta ya
+              // se vea entera mientras todavía se desliza.
+              transitionDuration: `${ENTRY_DURATION}ms, 500ms`,
+              // Arranca rápido y frena suave, como la cinta al detenerse.
+              transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
+              // La de más a la derecha primero, las demás detrás en fila.
+              transitionDelay: revealed ? `${(items.length - 1 - i) * ENTRY_STAGGER}ms` : '0ms'
             }}
           >
             <button
               type="button"
-              onClick={() => setFlippedId(flipped ? null : item.id)}
+              onClick={() => {
+                setAutoStopped(true);
+                setFlippedId(flipped ? null : item.id);
+              }}
               onMouseEnter={() => setHoveredId(item.id)}
               onMouseLeave={() => setHoveredId((current) => (current === item.id ? null : current))}
               aria-pressed={flipped}
               aria-label={`${itemT.name}: ${itemT.description}`}
-              className={`group relative block w-full h-full [perspective:1200px] cursor-pointer rounded-2xl transition-transform duration-[420ms] [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-4 hover:scale-[1.16] hover:rotate-[-2deg] active:scale-95 active:duration-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0077C8] focus-visible:ring-offset-2 ${boop ? 'animate-card-boop' : ''}`}
+              className={`group relative block w-full h-full [perspective:1200px] cursor-pointer rounded-2xl transition-transform duration-[420ms] [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-3 hover:scale-[1.06] active:scale-95 active:duration-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0077C8] focus-visible:ring-offset-2 ${boop ? 'animate-card-boop' : ''}`}
             >
               <div
                 className="relative w-full h-full [transform-style:preserve-3d] transition-transform duration-[650ms]"
@@ -377,8 +405,8 @@ function ImpactFan({ items, c, phase }) {
                   transitionTimingFunction: 'cubic-bezier(0.45, 0.05, 0.15, 1)'
                 }}
               >
-                <ImpactCardFront Icon={Icon} index={i} name={itemT.name} />
-                <ImpactCardBack Icon={Icon} index={i} name={itemT.name} description={itemT.description} />
+                <ImpactCardFront Icon={Icon} name={itemT.name} />
+                <ImpactCardBack Icon={Icon} name={itemT.name} description={itemT.description} />
               </div>
             </button>
           </div>
@@ -407,11 +435,10 @@ function ImpactFan({ items, c, phase }) {
  *    partes" se logra con un simple `gap` parejo en el contenedor flex,
  *    en vez del truco de justify-evenly (que sólo tiene sentido cuando
  *    hay una altura fija que repartir).
- * 4. Las cards ahora son un "abanico" tipo naipe (ver ImpactFan arriba),
- *    inspirado en la sección "What's up on socials" de landonorris.com,
- *    que se revela con scroll: llegan juntas/quietas y se abren en
- *    abanico con una leve espera entre una y otra, como si se repartiera
- *    una mano de cartas. El resto del bloque (kicker/texto/título)
+ * 4. Las cards son tarjetas derechas en fila (ver ImpactFan arriba) que
+ *    se revelan con scroll: entran deslizándose desde la izquierda como
+ *    sobre una cinta transportadora (ver ENTRY_*). (Antes eran un abanico tipo naipe inspirado en
+ *    landonorris.com, pero no gustó.) El resto del bloque (kicker/texto/título)
  *    también entra con un fade+subida sutil al llegar a la sección — el
  *    mismo patrón de IntersectionObserver que ya usa StatsSection.jsx —
  *    para que toda la sección se sienta como un solo momento de entrada,
@@ -422,11 +449,10 @@ function ImpactFan({ items, c, phase }) {
  *    no tenían ningún indicio de ser interactivas; ahora llevan un
  *    puntito con ícono de "voltear" (abajo-derecha) que lo avisa, más
  *    un levante/crecida sutil al tocarlas (ver ImpactFan).
- * 6. El "abanico" ahora entra en DOS tiempos en vez de uno: primero el
- *    mazo entero aparece junto (fase 'stacked'), y recién después de
- *    una pausa corta se abre en abanico (fase 'fanned') — antes las dos
- *    cosas pasaban a la vez con un solo fade+rotate, así que el "llegan
- *    juntas" nunca se alcanzaba a ver. El hover también "boopea" mucho
+ * 6. La entrada de las cartas ya NO es "repartir una mano de naipes"
+ *    (mazo apilado que se abre): no gustó, así que ahora cada carta sube
+ *    a su lugar deslizándose desde la izquierda, tipo cinta
+ *    transportadora (ver ENTRY_* arriba). El hover también "boopea" mucho
  *    más (sube, crece y gira un poco con una curva que rebota) y las
  *    cartas son más grandes todavía — en mobile, como hay que
  *    deslizarlas, apenas se abren se centra el scroll en la del medio
@@ -439,11 +465,8 @@ export default function DocenciaImpacto() {
 
   const sectionRef = useRef(null);
   const [visible, setVisible] = useState(false);
-  // Fase del abanico: 'hidden' (nada, esperando) -> 'stacked' (el mazo
-  // completo aparece YA junto, como si alguien lo pusiera sobre la mesa)
-  // -> 'fanned' (recién ahí se abre en abanico, una detrás de otra). Ver
-  // el comentario grande en ImpactFan para el detalle de cómo cada fase
-  // se traduce en transform por carta.
+  // Fase de las cartas: 'hidden' (esperando) -> 'fanned' (entran). Ver
+  // el comentario grande en ImpactFan para el detalle por carta.
   const [fanPhase, setFanPhase] = useState('hidden');
 
   useEffect(() => {
@@ -456,7 +479,6 @@ export default function DocenciaImpacto() {
     // documento, no del window global del módulo.
     const view = el.ownerDocument?.defaultView;
     const IO = view?.IntersectionObserver;
-    let fanTimeoutId;
 
     if (!IO) {
       setVisible(true);
@@ -469,15 +491,8 @@ export default function DocenciaImpacto() {
         entries.forEach((entry) => {
           setVisible(entry.isIntersecting);
           if (entry.isIntersecting) {
-            // Primero el mazo entero, junto — recién después de una
-            // pausa corta se abre. Si esto se dejara en manos de un solo
-            // transform (fade + rotate al mismo tiempo, como antes) el
-            // "junto" nunca se llegaba a ver porque coincidía con la
-            // carta todavía invisible (opacity 0).
-            setFanPhase('stacked');
-            fanTimeoutId = setTimeout(() => setFanPhase('fanned'), 420);
+            setFanPhase('fanned');
           } else {
-            if (fanTimeoutId) clearTimeout(fanTimeoutId);
             setFanPhase('hidden');
           }
         });
@@ -488,7 +503,6 @@ export default function DocenciaImpacto() {
     observer.observe(el);
     return () => {
       observer.disconnect();
-      if (fanTimeoutId) clearTimeout(fanTimeoutId);
     };
   }, []);
 
@@ -504,7 +518,10 @@ export default function DocenciaImpacto() {
           (sobre todo el abanico) ya ocupa casi toda la pantalla, así
           que no sobraba espacio para repartir y todo seguía "apelotado"
           (palabras de Yocxany). Un gap fijo no depende de eso. */}
-      <div className="max-w-5xl mx-auto flex flex-col items-center text-center gap-[var(--docencia-gap)]">
+      {/* max-w-6xl/7xl (antes 5xl) para que la grilla de 5 cartas en
+          desktop tenga más ancho y las cartas salgan más grandes — el
+          párrafo ya tiene su propio max-w-xl, así que no se estira. */}
+      <div className="max-w-6xl xl:max-w-7xl mx-auto flex flex-col items-center text-center gap-[var(--docencia-gap)]">
         <div
           className="transition-all duration-700 ease-out"
           style={{

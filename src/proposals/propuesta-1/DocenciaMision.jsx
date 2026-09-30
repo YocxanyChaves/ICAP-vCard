@@ -45,6 +45,9 @@ const ENTER_MS = 850;
  *   disuelve) -> se cambia el índice -> enter (ENTER_MS, el par nuevo
  *   sube desde abajo con estela) -> vuelve a idle.
  *
+ * Al ir hacia ATRÁS (scroll al par anterior o clic en un puntito
+ * anterior) el movimiento se invierte — ver el estado `direction`.
+ *
  * Con el texto de contexto de la página "Formación" (cardsIntro) justo
  * encima de las cards, esta salida hacia arriba pasaba POR ENCIMA del
  * texto y lo tapaba un instante. Yocxany aclaró que no quería cambiar
@@ -127,6 +130,16 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
   const [groupIndex, setGroupIndex] = useState(0);
   const [phase, setPhase] = useState('enter'); // 'enter' | 'idle' | 'exit'
   const [paused, setPaused] = useState(false);
+  // Dirección del cambio en curso: 'forward' (avance automático, scroll
+  // hacia el siguiente, clic en un puntito posterior) usa las
+  // animaciones de siempre — el par se va hacia arriba y el nuevo sube
+  // desde abajo. 'back' (scroll hacia el anterior, clic en un puntito
+  // anterior) usa las versiones *-back de global.css: el par se va hacia
+  // ABAJO y el anterior baja desde ARRIBA, para que se sienta que se
+  // devolvió. Es estado (no ref) porque decide qué clase se renderiza, y
+  // se mantiene durante 'exit' Y 'enter' para que las dos mitades del
+  // cambio vayan en la misma dirección.
+  const [direction, setDirection] = useState('forward');
   // Grupo destino cuando el cambio lo pide un clic en los puntitos, en
   // vez del avance automático (+1) — se lee recién al final de la fase
   // 'exit', así que vive en un ref y no en un dependency array.
@@ -153,7 +166,10 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
   // Fase 'idle': tras HOLD_MS (si no está en pausa) arranca la salida.
   useEffect(() => {
     if (!showCards || phase !== 'idle' || paused) return undefined;
-    const id = setTimeout(() => setPhase('exit'), HOLD_MS);
+    const id = setTimeout(() => {
+      setDirection('forward');
+      setPhase('exit');
+    }, HOLD_MS);
     return () => clearTimeout(id);
   }, [showCards, phase, paused, groupIndex]);
 
@@ -181,6 +197,7 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
   const handleDotClick = (targetIndex) => {
     if (phase !== 'idle' || targetIndex === groupIndex) return;
     pendingIndexRef.current = targetIndex;
+    setDirection(targetIndex < groupIndex ? 'back' : 'forward');
     setPhase('exit');
   };
 
@@ -201,6 +218,9 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
       if (phase !== 'idle' || now - lastWheelRef.current < 700) return false;
       lastWheelRef.current = now;
       pendingIndexRef.current = goingDown ? (groupIndex + 1) % groups.length : (groupIndex - 1 + groups.length) % groups.length;
+      // La dirección sigue al gesto, no al índice: al dar la vuelta
+      // (del último al primero bajando) sigue siendo "avanzar".
+      setDirection(goingDown ? 'forward' : 'back');
       setPhase('exit');
       return true;
     };
@@ -241,6 +261,9 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
 
   const activeGroup = groups[groupIndex];
   const isExiting = phase === 'exit';
+  const back = direction === 'back' ? '-back' : '';
+  const ghostAnim = `animate-card-whoosh-${isExiting ? 'out' : 'in'}${back}`;
+  const contentAnim = `animate-card-content-${isExiting ? 'out' : 'in'}${back}`;
 
   // Uso en Inicio de Docencia (showCards=false, showIntro=true por
   // default): antes esto era un simple kicker+título+párrafo
@@ -357,9 +380,7 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
                         sale; nunca es lo que se lee. */}
                     <div
                       aria-hidden="true"
-                      className={`absolute inset-0 p-7 sm:p-9 flex flex-col gap-4 pointer-events-none ${
-                        isExiting ? 'animate-card-whoosh-out' : 'animate-card-whoosh-in'
-                      }`}
+                      className={`absolute inset-0 p-7 sm:p-9 flex flex-col gap-4 pointer-events-none ${ghostAnim}`}
                     >
                       <CardIcon Icon={Icon} />
                       <div className="text-center">
@@ -377,9 +398,7 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
                         opacity) que la fantasma, pero SIN blur, así el
                         desenfoque de la estela nunca los afecta. */}
                     <div
-                      className={`relative p-7 sm:p-9 flex flex-col gap-4 ${
-                        isExiting ? 'animate-card-content-out' : 'animate-card-content-in'
-                      }`}
+                      className={`relative p-7 sm:p-9 flex flex-col gap-4 ${contentAnim}`}
                     >
                       <CardIcon Icon={Icon} />
                       <div className="text-center">

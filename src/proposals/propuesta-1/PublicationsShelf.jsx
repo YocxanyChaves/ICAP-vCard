@@ -22,9 +22,31 @@ import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
  *   elección del usuario (ya está leyendo lo que eligió).
  * - Con prefers-reduced-motion no hay auto-avance ni animaciones de
  *   ancho.
+ *
+ * Transición entre libros — Yocxany la sentía "tosca", así que se pulió:
+ * - Antes el ancho se animaba con flex-grow/flex-basis/max-width: el
+ *   libro que se cerraba y el que se abría no cambiaban al mismo ritmo
+ *   (y max-width no se puede animar, saltaba), así que el ancho TOTAL de
+ *   la fila variaba a mitad de camino y todo el estante "temblaba" hacia
+ *   los lados por el justify-center. Ahora cada libro tiene un `width`
+ *   explícito en px (lomo, o lomo + portada) — lo que uno gana el otro
+ *   lo pierde en el mismo frame, así la fila queda quieta.
+ * - Antes el alto del estante lo daba sólo el libro abierto, así que
+ *   saltaba de golpe al cambiar a una descripción más larga/corta. Ahora
+ *   TODOS los libros llevan su copia invisible del contenido, y el
+ *   estante toma siempre el alto del más largo: no cambia nunca.
+ * - La tapa que se cierra y la que se abre ahora se cruzan (la nueva
+ *   empieza a girar mientras la vieja termina), y el contenido de la
+ *   portada aparece en cascada (línea de arriba, ícono, título, raya,
+ *   texto) en vez de todo de golpe — ver .animate-book-content en
+ *   global.css.
  */
 
 const AUTO_MS = 7000;
+// Duración y curva del cambio de ancho — la misma curva "lenta al
+// empezar y al terminar" para el libro que abre y el que cierra.
+const ANCHO_MS = 750;
+const ANCHO_EASE = 'cubic-bezier(0.76, 0, 0.24, 1)';
 
 export default function PublicationsShelf({ items }) {
   const [abierto, setAbierto] = useState(0);
@@ -32,6 +54,7 @@ export default function PublicationsShelf({ items }) {
   const eligioRef = useRef(false);
   const filaRef = useRef(null);
   const [anchoPortada, setAnchoPortada] = useState(null);
+  const [anchoLomo, setAnchoLomo] = useState(null);
   const [sinMovimiento, setSinMovimiento] = useState(false);
 
   // Ancho final de la portada abierta = ancho de la fila − los lomos
@@ -48,6 +71,7 @@ export default function PublicationsShelf({ items }) {
       const padding = sm ? 32 : 8;
       const disponible = fila.clientWidth - padding - (items.length - 1) * (lomo + gap);
       setAnchoPortada(Math.max(0, Math.min(560, disponible) - lomo));
+      setAnchoLomo(lomo);
       setSinMovimiento(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     };
     const ro = new ResizeObserver(medir);
@@ -83,8 +107,9 @@ export default function PublicationsShelf({ items }) {
         {items.map((item, i) => {
           const Icon = item.icon;
           const esAbierto = i === abierto;
-          const contenido = (
-          <div className="relative h-full flex flex-col px-4 sm:px-7 py-5 sm:py-7">
+          const medido = anchoPortada !== null && anchoLomo !== null;
+          const contenido = (animado) => (
+          <div className={`relative h-full flex flex-col px-4 sm:px-7 py-5 sm:py-7 ${animado ? 'animate-book-content' : ''}`}>
             <div className="flex items-center justify-between pb-2.5 border-b border-[#003366]/15 dark:border-white/15 font-mono-code text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-[#0077C8] dark:text-[#9FC6E8]">
               <span>ICAP</span>
               <span>Nº {String(i + 1).padStart(2, '0')}</span>
@@ -100,11 +125,19 @@ export default function PublicationsShelf({ items }) {
           return (
             <div
               key={item.id}
-              className={`relative flex min-h-[420px] sm:min-h-[400px] rounded-t-md rounded-b-sm transition-[flex-grow,flex-basis,max-width,transform,box-shadow] duration-[800ms] ease-[cubic-bezier(0.65,0,0.35,1)] motion-reduce:transition-none ${
+              className={`relative flex min-h-[420px] sm:min-h-[400px] rounded-t-md rounded-b-sm ${
+                medido ? 'flex-none' : esAbierto ? 'flex-1 max-w-[560px]' : 'flex-none w-11 sm:w-16'
+              } ${
                 esAbierto
-                  ? 'flex-1 max-w-[560px] -translate-y-2 shadow-[0_26px_44px_-20px_rgba(0,31,61,0.6)]'
-                  : 'flex-none basis-11 sm:basis-16 hover:-translate-y-3 shadow-[0_14px_26px_-16px_rgba(0,31,61,0.55)]'
+                  ? '-translate-y-2 shadow-[0_26px_44px_-20px_rgba(0,31,61,0.6)]'
+                  : 'hover:-translate-y-3 shadow-[0_14px_26px_-16px_rgba(0,31,61,0.55)]'
               }`}
+              style={{
+                width: medido ? (esAbierto ? anchoLomo + anchoPortada : anchoLomo) : undefined,
+                transition: sinMovimiento
+                  ? 'none'
+                  : `width ${ANCHO_MS}ms ${ANCHO_EASE}, transform 500ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow ${ANCHO_MS}ms ease`
+              }}
             >
               {/* LOMO */}
               <button
@@ -148,16 +181,16 @@ export default function PublicationsShelf({ items }) {
                 style={{ perspective: '1400px' }}
                 aria-hidden={!esAbierto}
               >
-                {/* Copia invisible (en flujo) del contenido del libro
-                    abierto: la portada animada es `absolute`, así que sin
-                    esto el alto del estante no crecería si la descripción
-                    es larga (p. ej. RCAP o Yaxché en celular) y el texto
-                    quedaría cortado. */}
-                {esAbierto && (
-                  <div aria-hidden="true" className="invisible" style={{ width: anchoPortada ?? '100%' }}>
-                    {contenido}
-                  </div>
-                )}
+                {/* Copia invisible (en flujo) del contenido: la portada
+                    animada es `absolute`, así que sin esto el alto del
+                    estante no crecería si la descripción es larga (p. ej.
+                    RCAP o Yaxché en celular) y el texto quedaría cortado.
+                    Va en TODOS los libros (no sólo el abierto) para que
+                    el estante tome siempre el alto del más largo y no
+                    salte al cambiar de libro. */}
+                <div aria-hidden="true" className="invisible" style={{ width: anchoPortada ?? '100%' }}>
+                  {contenido(false)}
+                </div>
                 <div
                   className={`absolute inset-y-0 left-0 overflow-hidden rounded-r-md border-y border-r border-white/80 dark:border-white/15 bg-gradient-to-br from-white/90 via-white/70 to-[#EAF3FB]/70 dark:from-white/[0.12] dark:via-white/[0.06] dark:to-[#013A63]/60 backdrop-blur-xl ${
                     esAbierto ? '' : 'pointer-events-none'
@@ -170,8 +203,8 @@ export default function PublicationsShelf({ items }) {
                     transition: sinMovimiento
                       ? 'none'
                       : esAbierto
-                        ? 'transform 950ms cubic-bezier(0.22, 1, 0.36, 1) 150ms, opacity 600ms ease-out 150ms'
-                        : 'transform 450ms cubic-bezier(0.55, 0, 0.75, 0), opacity 300ms ease-in'
+                        ? 'transform 1000ms cubic-bezier(0.22, 1, 0.36, 1) 220ms, opacity 500ms ease-out 220ms'
+                        : 'transform 550ms cubic-bezier(0.45, 0, 0.55, 1), opacity 400ms ease-in-out 100ms'
                   }}
                 >
                   <span
@@ -194,7 +227,7 @@ export default function PublicationsShelf({ items }) {
                     draggable={false}
                     className="pointer-events-none select-none absolute -right-10 -bottom-12 w-48 sm:w-60 opacity-[0.08] rotate-[8deg] hidden dark:block"
                   />
-                  {contenido}
+                  {contenido(esAbierto && !sinMovimiento)}
                 </div>
               </div>
             </div>
