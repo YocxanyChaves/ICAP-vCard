@@ -104,17 +104,28 @@ function ImpactCardFront({ Icon, name }) {
         className="absolute -right-[20%] -bottom-[12%] w-[62%] rotate-[-12deg] opacity-0 dark:opacity-100 pointer-events-none select-none"
       />
 
-      {/* Ícono del pilar al CENTRO de la carta, grande, en un círculo,
-          con el nombre justo debajo. Antes iba chiquito arriba-derecha
-          junto al número (01–05) como índice de naipe — Yocxany pidió
-          quitar el número y traer el ícono al centro. Celeste/celeste-
-          clarito a propósito (Yocxany prefirió este color original al
-          navy/blanco). */}
-      <div className="relative flex-1 flex flex-col items-center justify-center">
-        <span className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/90 dark:bg-[#003366]/90 border border-[#0077C8]/20 dark:border-white/15 shadow-lg shadow-[#0077C8]/15 dark:shadow-black/30 flex items-center justify-center text-[#0077C8] dark:text-[#4FB2F2]">
-          <Icon className="w-8 h-8 sm:w-10 sm:h-10" strokeWidth={1.7} />
-        </span>
-        <h3 className="text-center font-heading font-bold text-lg xl:text-xl text-[#003366] dark:text-[#9FC6E8] leading-[1.25] mt-4">
+      {/* Ícono del pilar ARRIBA de la carta (centrado a lo ancho), con
+          el mismo estilo que el ícono de las tarjetas de Formación
+          (CardIcon en DocenciaMision.jsx): círculo celeste clarito con
+          un aro punteado que gira. El nombre queda centrado en el
+          espacio que sobra debajo. Historial: antes iba chiquito
+          arriba-derecha junto al número (01–05) como índice de naipe;
+          después se quitó el número y se probó el ícono al centro con
+          el nombre pegado debajo; Yocxany lo pidió así, arriba y con el
+          nombre centrado aparte. */}
+      <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mt-3 sm:mt-4 shrink-0">
+        <div
+          className="absolute -inset-1.5 rounded-full border border-dashed border-[#0077C8]/45 dark:border-white/25 pointer-events-none"
+          style={{ animation: 'orbitSpin 9s linear infinite' }}
+          aria-hidden="true"
+        />
+        <div className="relative w-full h-full rounded-full bg-[#EAF3FB] dark:bg-white/10 text-[#0077C8] dark:text-[#4FB2F2] flex items-center justify-center">
+          <Icon className="w-9 h-9 sm:w-11 sm:h-11" strokeWidth={1.7} />
+        </div>
+      </div>
+
+      <div className="relative flex-1 flex items-center justify-center pb-14">
+        <h3 className="text-center font-heading font-bold text-lg xl:text-xl text-[#003366] dark:text-[#9FC6E8] leading-[1.25]">
           {nameLines(name).map((line) => (
             <span key={line} className="block whitespace-nowrap">
               {line}

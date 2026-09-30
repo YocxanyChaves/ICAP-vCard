@@ -15,8 +15,6 @@ import {
   Leaf,
   Globe2
 } from 'lucide-react';
-import icapEscudoNavy from '../../assets/icap-escudo-navy.svg';
-import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
 
 /**
  * Carrusel de campos de interés de Investigación
@@ -61,14 +59,14 @@ import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
  *   5. Yocxany la seguía viendo "muy sencilla" (nada malo, sólo simple),
  *      así que se le sumó contenido visual sin tocar la mecánica:
  *      - Cada tarjeta lleva el ícono de su campo en un círculo (ver
- *        FIELD_ICONS) y su número (01–12) arriba a la izquierda, en vez
- *        de ser sólo una palabra.
- *      - La tarjeta que queda de frente se "enciende": un aro celeste
- *        con resplandor cuya opacidad se calcula en el mismo loop que
- *        ya escalaba/oscurecía las tarjetas (sólo se nota bien de
- *        frente, se apaga suave al girar).
- *      - Abajo, entre las flechas, un indicador del campo activo
- *        ("03 / 12" + nombre) y una fila de puntitos clickeables, uno
+ *        FIELD_ICONS), en vez de ser sólo una palabra. (Llevaba también
+ *        su número 01–12, y el indicador de abajo un "03 / 12" — Yocxany
+ *        pidió quitar los numeritos.)
+ *      - (Hubo también un aro celeste que "encendía" la tarjeta del
+ *        frente, pero se quitó junto con el borde y la marca de agua de
+ *        cada tarjeta — Yocxany las quería limpias.)
+ *      - Abajo, entre las flechas, el nombre del campo activo y una
+ *        fila de puntitos clickeables, uno
  *        por campo — ubica al usuario en el recorrido y deja saltar
  *        directo a cualquiera.
  */
@@ -107,7 +105,13 @@ const PROPORCION_ALTO = 1.3;
 // antes de que siga girando, como pidió Yocxany).
 const VELOCIDAD = 0.1;
 
-export default function FieldsCarousel({ fields }) {
+// `fadeClass`: color de los degradados de los bordes — tiene que ser el
+// mismo que el fondo detrás del carrusel. Por default el de la sección;
+// DocenciaInvestigacion pasa otro en desktop, donde el carrusel vive
+// dentro del panel claro del bloque texto+carrusel.
+const FADE_DEFAULT = 'from-[#D6E9F7] dark:from-[#001F3D]';
+
+export default function FieldsCarousel({ fields, fadeClass = FADE_DEFAULT }) {
   const n = fields.length;
   const paso = 360 / n;
 
@@ -128,7 +132,6 @@ export default function FieldsCarousel({ fields }) {
 
   const drumRef = useRef(null);
   const cardRefs = useRef([]);
-  const glowRefs = useRef([]);
   // Índice de la tarjeta que está de frente — para el indicador de
   // abajo. Se calcula en el loop de animación pero sólo se pasa a React
   // cuando CAMBIA (no en cada frame).
@@ -160,8 +163,6 @@ export default function FieldsCarousel({ fields }) {
         el.style.filter = `brightness(${0.55 + facing * 0.45})`;
         el.style.pointerEvents = facing > 0.5 ? 'auto' : 'none';
         el.style.transform = `rotateY(${i * paso}deg) translateZ(${radio}px) scale(${scale})`;
-        const glow = glowRefs.current[i];
-        if (glow) glow.style.opacity = String(Math.pow(facing, 14));
       });
 
       const front = ((Math.round(-angleRef.current / paso) % n) + n) % n;
@@ -269,67 +270,32 @@ export default function FieldsCarousel({ fields }) {
                   cardRefs.current[i] = el;
                 }}
                 onClick={() => goToIndex(i)}
-                className={`absolute inset-0 rounded-[22px] flex items-center justify-center text-center px-4 border cursor-pointer will-change-transform overflow-hidden backdrop-blur-xl backdrop-saturate-150 ${
-                  i % 2 === 0
-                    ? 'bg-gradient-to-br from-white/85 via-white/60 to-[#EAF3FB]/55 dark:from-white/[0.14] dark:via-white/[0.07] dark:to-[#013A63]/60 border-white/80 dark:border-white/20'
-                    : 'bg-gradient-to-br from-[#E4F3FD]/85 via-[#CFE9FA]/65 to-[#8FC9EA]/60 dark:from-[#0077C8]/60 dark:via-[#0068AE]/45 dark:to-[#003366]/55 border-white/75 dark:border-white/20'
-                } shadow-[inset_0_1px_0_rgba(255,255,255,0.95),inset_0_-1px_0_rgba(255,255,255,0.35),inset_0_0_24px_rgba(255,255,255,0.35),0_18px_36px_-14px_rgba(0,51,102,0.45)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.35),inset_0_-1px_0_rgba(255,255,255,0.08),inset_0_0_24px_rgba(255,255,255,0.06),0_18px_36px_-14px_rgba(0,0,0,0.65)]`}
+                // SIN fondo, SIN borde y SIN marca de agua: Yocxany fue
+                // pidiendo quitar primero el relleno "de vidrio"
+                // (degradados, blur, reflejos, sombras) y después el
+                // escudo de fondo y el marquito azul de cada tarjeta
+                // (y el aro que iluminaba la del frente). Quedan sólo el
+                // ícono y el nombre flotando; la del frente se distingue
+                // por tamaño y brillo (ver el loop de animación). Como
+                // no hay relleno que tape, las tarjetas de ATRÁS del
+                // tambor se verían al revés a través de las de adelante
+                // — backface-visibility:hidden las oculta cuando quedan
+                // de espaldas.
+                className="absolute inset-0 rounded-[22px] flex items-center justify-center text-center px-4 cursor-pointer will-change-transform overflow-hidden [backface-visibility:hidden]"
               >
-                {/* Línea de brillo arriba — el mismo toque "de cristal"
-                    que llevaban las tarjetas de la versión de scroll
-                    anterior, para que no se sientan bloques de color
-                    lisos. */}
-                <span
-                  aria-hidden="true"
-                  className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-white/80 dark:via-white/40 to-transparent"
-                />
-                {/* Retoque "liquid glass": un reflejo especular suave
-                    arriba a la izquierda (la luz pegándole al vidrio) y
-                    una franja diagonal de brillo muy tenue cruzando la
-                    tarjeta. Ambos detrás del texto. */}
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -top-1/2 -left-1/4 w-[90%] h-[110%] rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.7),transparent)] dark:bg-[radial-gradient(closest-side,rgba(255,255,255,0.18),transparent)]"
-                />
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_38%,rgba(255,255,255,0.35)_48%,transparent_58%)] dark:bg-[linear-gradient(115deg,transparent_38%,rgba(255,255,255,0.08)_48%,transparent_58%)]"
-                />
-                {/* Marca de agua propia de la tarjeta, no del fondo
-                    entero — navy en tema claro, blanca en oscuro.
-                    Centrada y grande (Yocxany la pidió "en el centro y
-                    bien grandecito"), pero muy tenue y DETRÁS del texto
-                    (z-0 vs. z-10) para no taparlo. */}
-                <img
-                  src={icapEscudoNavy}
-                  alt=""
-                  aria-hidden="true"
-                  draggable={false}
-                  className="absolute z-0 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[88%] w-auto max-w-none opacity-[0.09] pointer-events-none select-none dark:hidden"
-                />
-                <img
-                  src={icapEscudoWhite}
-                  alt=""
-                  aria-hidden="true"
-                  draggable={false}
-                  className="hidden absolute z-0 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[88%] w-auto max-w-none opacity-[0.11] pointer-events-none select-none dark:block"
-                />
-                {/* Aro + resplandor de la tarjeta activa — opacidad
-                    controlada por el loop de animación (glowRefs). */}
-                <span
-                  ref={(el) => {
-                    glowRefs.current[i] = el;
-                  }}
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 z-20 rounded-[22px] ring-2 ring-inset ring-[#0077C8]/70 dark:ring-[#4FB2F2]/70 shadow-[inset_0_0_28px_rgba(0,119,200,0.25)] dark:shadow-[inset_0_0_28px_rgba(79,178,242,0.3)]"
-                  style={{ opacity: 0 }}
-                />
-                <span className="absolute z-10 top-2.5 left-3.5 font-mono-code text-[10px] sm:text-[11px] font-bold text-[#0077C8]/80 dark:text-[#4FB2F2]/80">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <div className="relative z-10 flex flex-col items-center gap-2">
-                  <span className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/80 dark:bg-white/10 border border-[#0077C8]/20 dark:border-white/15 shadow-sm flex items-center justify-center text-[#0077C8] dark:text-[#4FB2F2]">
-                    <Icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
+                <div className="relative z-10 flex flex-col items-center gap-3">
+                  {/* Ícono con el aro punteado que gira alrededor — mismo
+                      recurso que los íconos de Formación e Impacto
+                      (orbitSpin en global.css). */}
+                  <span className="relative w-10 h-10 sm:w-12 sm:h-12 shrink-0">
+                    <span
+                      aria-hidden="true"
+                      className="absolute -inset-1.5 rounded-full border border-dashed border-[#0077C8]/45 dark:border-white/25 pointer-events-none"
+                      style={{ animation: 'orbitSpin 9s linear infinite' }}
+                    />
+                    <span className="relative w-full h-full rounded-full bg-white/80 dark:bg-white/10 border border-[#0077C8]/20 dark:border-white/15 shadow-sm flex items-center justify-center text-[#0077C8] dark:text-[#4FB2F2]">
+                      <Icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
+                    </span>
                   </span>
                   <span className="text-sm sm:text-base font-semibold text-[#003366] dark:text-white leading-snug">
                     {field}
@@ -344,8 +310,8 @@ export default function FieldsCarousel({ fields }) {
         {/* Degradado hacia el fondo de la sección en los bordes — para
             que el corte de las tarjetas laterales (el tambor es más
             ancho que esta ventana) se sienta suave. */}
-        <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-10 sm:w-16 bg-gradient-to-r from-[#D6E9F7] dark:from-[#001F3D] to-transparent" />
-        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 sm:w-16 bg-gradient-to-l from-[#D6E9F7] dark:from-[#001F3D] to-transparent" />
+        <div className={`pointer-events-none absolute left-0 top-0 bottom-0 w-10 sm:w-16 bg-gradient-to-r ${fadeClass} to-transparent`} />
+        <div className={`pointer-events-none absolute right-0 top-0 bottom-0 w-10 sm:w-16 bg-gradient-to-l ${fadeClass} to-transparent`} />
       </div>
 
       {/* Indicador del campo activo entre las flechas + puntitos, uno
@@ -361,10 +327,6 @@ export default function FieldsCarousel({ fields }) {
         </button>
 
         <div className="min-w-0 w-44 sm:w-56 text-center" aria-live="polite">
-          <div className="font-mono-code text-[11px] font-bold tracking-widest text-[#0077C8] dark:text-[#4FB2F2]">
-            {String(activeIndex + 1).padStart(2, '0')}
-            <span className="text-[#0077C8]/40 dark:text-[#4FB2F2]/40"> / {String(n).padStart(2, '0')}</span>
-          </div>
           <div key={activeIndex} className="font-heading font-bold text-sm sm:text-base text-[#003366] dark:text-[#9FC6E8] truncate animate-breeze-in">
             {fields[activeIndex]}
           </div>
