@@ -1,5 +1,6 @@
 import React, { memo, useEffect, useId, useRef, useState } from 'react';
 import KickerBadge from './KickerBadge';
+import icapLogoMark from '../../assets/icap-logo-mark.png';
 
 /**
  * Pirámide holográfica de las 7 palabras de Publicaciones ("Investigar –
@@ -21,6 +22,12 @@ import KickerBadge from './KickerBadge';
  *   probó 35vh y Yocxany lo sintió muy rápido).
  * - Indicación sutil de "deslizá" (mouse con ruedita animada) que se
  *   apaga apenas se empieza a construir.
+ * - El LOGO del ICAP (isotipo de icap-logo-mark.png, el de la figura con
+ *   los brazos abiertos — no el escudo de las marcas de agua) flota
+ *   ADENTRO de la pirámide como un holograma (ver <LogoHolograma>),
+ *   pedido de Yocxany: mismo celeste, líneas de escaneo, resplandor y
+ *   un parpadeo leve. Empieza a materializarse cuando cae la SEGUNDA
+ *   base y está completo un par de pisos después.
  */
 
 const mezcla = (color, pct) => `color-mix(in srgb, ${color} ${pct}%, transparent)`;
@@ -188,6 +195,70 @@ const Franja = memo(function Franja({ y0, y1, base, altoTotal, color, avance, br
     </div>
   );
 });
+
+// Logo (isotipo) del ICAP flotando dentro de la pirámide, con look de
+// holograma. Es un plano "cartel" (billboard): contra-rota el giro de la
+// escena (rotateY(-giro)) para quedar siempre de frente a la cámara
+// aunque la pirámide gire, y se ve a través de las caras translúcidas.
+// - La silueta sale del PNG del logo (tiene fondo transparente) usado
+//   como mask-image — por eso pierde sus dos tonos y queda toda del
+//   color del holograma —, pintada
+//   con un degradado del color de la pirámide + líneas de escaneo que
+//   se desplazan (holoScan en global.css).
+// - El resplandor va en un wrapper APARTE con drop-shadow: el filtro de
+//   un elemento se aplica antes que su propia máscara, así que en el
+//   mismo elemento la máscara se "comería" el brillo.
+// - Aparece de a poco (`visible`, 0→1, desde la segunda base) y flota/parpadea
+//   levemente (holoFloat / holoFlicker).
+function LogoHolograma({ y, ancho, color, visible }) {
+  const alto = ancho * (456 / 413); // proporción del PNG del logo
+  const mascara = {
+    maskImage: `url("${icapLogoMark}")`,
+    WebkitMaskImage: `url("${icapLogoMark}")`,
+    maskSize: 'contain',
+    WebkitMaskSize: 'contain',
+    maskRepeat: 'no-repeat',
+    WebkitMaskRepeat: 'no-repeat',
+    maskPosition: 'center',
+    WebkitMaskPosition: 'center'
+  };
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        width: ancho,
+        height: alto,
+        left: -ancho / 2,
+        top: -alto / 2,
+        transform: `translateY(${-y}px)`,
+        opacity: visible,
+        visibility: visible > 0 ? 'visible' : 'hidden'
+      }}
+    >
+      <div className="animate-holo-float" style={{ width: '100%', height: '100%' }}>
+        <div
+          className="animate-holo-flicker"
+          style={{
+            width: '100%',
+            height: '100%',
+            filter: `drop-shadow(0 0 4px ${color}) drop-shadow(0 0 14px ${mezcla(color, 70)})`
+          }}
+        >
+          <div
+            className="animate-holo-scan"
+            style={{
+              ...mascara,
+              width: '100%',
+              height: '100%',
+              backgroundImage: `repeating-linear-gradient(0deg, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 1px, transparent 1px, transparent 4px), linear-gradient(180deg, ${mezcla('white', 85)}, ${mezcla(color, 80)} 45%, ${mezcla(color, 30)})`,
+              backgroundSize: '100% 8px, 100% 100%'
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Rayo original (dos planos cruzados con degradado). Se probó un
 // "huso" de luz en punta y a Yocxany no le gustó — no volver a eso.
@@ -392,6 +463,20 @@ export default function PublicacionesPiramide({ titulo, palabras, objetivo, pist
                 avanceSiguiente={0}
                 brillo={0}
               />
+
+              {/* Billboard: contra-rota el giro de la escena para quedar
+                  siempre de frente. Centro a ~1/3 de la altura, donde la
+                  pirámide todavía es ancha y el escudo entra holgado. */}
+              <div style={{ position: 'absolute', transformStyle: 'preserve-3d', transform: `rotateY(${-giro}deg)` }}>
+                <LogoHolograma
+                  y={altoTotal * 0.34}
+                  ancho={base * 0.38}
+                  color={color}
+                  // pos = pisos caídos; 1 → empieza a caer la 2ª base,
+                  // 3 → ya cayeron tres pisos y el logo está completo.
+                  visible={redondear(limitar((pos - 1) / 2))}
+                />
+              </div>
 
               <Haz y={-altoTotal} color={color} avance={avance(n + 1)} />
             </div>
