@@ -4,7 +4,6 @@ import KickerBadge from './KickerBadge';
 import FieldsCarousel from './FieldsCarousel';
 import ClosingPhrase from './ClosingPhrase';
 import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
-import icapEscudoNavy from '../../assets/icap-escudo-navy.svg';
 
 /**
  * "Investigación" de Docencia — bloque 4 del brochure ("Investigación
@@ -38,13 +37,12 @@ import icapEscudoNavy from '../../assets/icap-escudo-navy.svg';
  * 4) En desktop (lg+) el texto y el carrusel ahora son UN SOLO BLOQUE
  *    (pedido de Yocxany): una tarjeta redondeada partida en dos (60/40,
  *    el texto con más espacio que el carrusel) — a la
- *    izquierda el panel navy con el texto, a la derecha un panel claro
- *    con "Campos de interés" + el carrusel. En mobile/tablet sigue todo
+ *    izquierda el texto, a la derecha "Campos de interés" + el
+ *    carrusel, todo sobre el mismo navy. En mobile/tablet sigue todo
  *    apilado como antes (card navy, título, carrusel), porque en dos
  *    columnas no entraría. Por eso el contenedor pasa de max-w-3xl a
- *    max-w-6xl en lg, y el carrusel recibe `fadeClass` para que sus
- *    degradados de borde se fundan con el panel claro en vez de con el
- *    fondo de la sección.
+ *    max-w-6xl en lg. El carrusel desvanece sus bordes con mask-image,
+ *    así que se funde con cualquier fondo sin tener que pasarle colores.
  *
  * `<FieldsCarousel>` vive adentro del `max-w-3xl mx-auto` de siempre —
  * a diferencia de la versión de scroll infinito anterior, el tambor 3D
@@ -74,19 +72,31 @@ export default function DocenciaInvestigacion() {
             que une todo (pedido de Yocxany) es el propio contenedor en
             lg+: padding + fondo navy #003366 (el MISMO del panel del
             texto, fijo en los dos temas — Yocxany lo pidió de ese color)
-            alrededor de los dos paneles — por eso los
-            paneles llevan esquinas propias (rounded-l / rounded-r). */}
-        <div className="flex flex-col gap-[var(--docencia-gap)] lg:grid lg:grid-cols-[60fr_40fr] lg:gap-0 lg:rounded-[30px] lg:overflow-hidden lg:p-2.5 lg:bg-[#003366] lg:shadow-[0_24px_48px_-24px_rgba(0,31,61,0.45)] lg:border lg:border-[#003366]">
+            alrededor de los dos paneles. En lg+ los paneles son
+            TRANSPARENTES (el navy lo pone este contenedor) y sin línea
+            divisoria — se lee como una sola pieza — y la marca de agua
+            es UNA sola, centrada en todo el bloque (la img de abajo), en
+            vez de una por panel. Se dimensiona por ALTO (h-[82%]) y no
+            por ancho: el escudo es más alto que ancho y por ancho se
+            salía por arriba y abajo del bloque (se veía cortado). */}
+        <div className="relative flex flex-col gap-[var(--docencia-gap)] lg:grid lg:grid-cols-[60fr_40fr] lg:gap-0 lg:rounded-[30px] lg:overflow-hidden lg:p-2.5 lg:bg-[#003366] lg:shadow-[0_24px_48px_-24px_rgba(0,31,61,0.45)] lg:border lg:border-[#003366]">
+        <img
+          src={icapEscudoWhite}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="hidden lg:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[82%] w-auto max-w-none opacity-[0.07] pointer-events-none select-none"
+        />
         {/* Card del texto — SIEMPRE navy (no sigue el tema, igual que
             el panel izquierdo de FormacionVisionHero), con el escudo
             como marca de agua apenas visible y letras blancas. */}
-        <div className="relative bg-[#003366] rounded-[28px] lg:rounded-r-none lg:rounded-l-[22px] p-6 sm:p-8 lg:p-12 shadow-sm lg:shadow-none space-y-4 overflow-hidden lg:flex lg:flex-col lg:justify-center">
+        <div className="relative bg-[#003366] lg:bg-transparent rounded-[28px] lg:rounded-none p-6 sm:p-8 lg:p-12 shadow-sm lg:shadow-none space-y-4 overflow-hidden lg:flex lg:flex-col lg:justify-center">
           <img
             src={icapEscudoWhite}
             alt=""
             aria-hidden="true"
             draggable={false}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[65%] max-w-none opacity-[0.07] pointer-events-none select-none"
+            className="lg:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[65%] max-w-none opacity-[0.07] pointer-events-none select-none"
           />
           {c.paragraphs.map((p, i) => (
             <p key={i} className="relative text-sm sm:text-base text-white/90 leading-relaxed">
@@ -97,39 +107,20 @@ export default function DocenciaInvestigacion() {
         </div>
 
         {/* Panel del carrusel — en lg+ es la mitad derecha del bloque,
-            con fondo claro propio; en pantallas chicas no tiene fondo y
-            se ve igual que antes. */}
-        <div className="flex flex-col gap-[var(--docencia-gap)] lg:gap-4 lg:justify-center lg:py-10 lg:px-2 lg:rounded-r-[22px] lg:bg-[#EAF3FB] dark:lg:bg-[#012A50] relative lg:overflow-hidden">
-          {/* Marca de agua MUY sutil del escudo detrás del panel de
-              "Campos de interés" — sólo en lg+, donde el panel tiene
-              fondo propio. Navy en claro, blanca en oscuro. IGUAL a la
-              del panel del texto (pedido de Yocxany): las dos CENTRADAS
-              en su panel, misma opacidad y mismo tamaño en px — por eso
-              los anchos en % son distintos (97% de un panel del 40% ≈
-              65% de uno del 60%). */}
-          <img
-            src={icapEscudoNavy}
-            alt=""
-            aria-hidden="true"
-            draggable={false}
-            className="hidden lg:block dark:lg:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[97%] max-w-none opacity-[0.07] pointer-events-none select-none"
-          />
-          <img
-            src={icapEscudoWhite}
-            alt=""
-            aria-hidden="true"
-            draggable={false}
-            className="hidden dark:lg:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[97%] max-w-none opacity-[0.07] pointer-events-none select-none"
-          />
+            sobre el mismo navy que el texto (Yocxany pidió el mismo color
+            en las dos mitades, sin línea que las divida; antes era
+            celeste clarito); en pantallas chicas no tiene fondo y se ve
+            igual que antes. */}
+        <div className="flex flex-col gap-[var(--docencia-gap)] lg:gap-4 lg:justify-center lg:py-10 lg:px-2 relative lg:overflow-hidden">
           {/* Mismo estilo que el título de arriba de la sección (un
               poco más chico en desktop, dentro del panel). */}
-          <h3 className="relative text-center font-heading font-extrabold text-2xl sm:text-3xl lg:text-2xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
+          <h3 className="relative text-center font-heading font-extrabold text-2xl sm:text-3xl lg:text-2xl text-[#003366] dark:text-[#9FC6E8] lg:text-white tracking-tight">
             {c.fieldsLabel}
           </h3>
 
           <FieldsCarousel
             fields={c.fields}
-            fadeClass="from-[#D6E9F7] dark:from-[#001F3D] lg:from-[#EAF3FB] dark:lg:from-[#012A50]"
+            navyLg
           />
         </div>
         </div>

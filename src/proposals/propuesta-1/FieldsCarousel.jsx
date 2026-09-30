@@ -105,13 +105,20 @@ const PROPORCION_ALTO = 1.3;
 // antes de que siga girando, como pidió Yocxany).
 const VELOCIDAD = 0.1;
 
-// `fadeClass`: color de los degradados de los bordes — tiene que ser el
-// mismo que el fondo detrás del carrusel. Por default el de la sección;
-// DocenciaInvestigacion pasa otro en desktop, donde el carrusel vive
-// dentro del panel claro del bloque texto+carrusel.
-const FADE_DEFAULT = 'from-[#D6E9F7] dark:from-[#001F3D]';
+// Desvanecido de los bordes del carrusel: se hace con mask-image (los
+// bordes se vuelven TRANSPARENTES) y no con degradados pintados encima
+// del color del fondo — esos degradados tapaban lo que hubiera detrás
+// (p. ej. la marca de agua del bloque de Investigación, que se veía
+// "cortada" justo donde pasaban) y además había que pasarles el color
+// exacto de cada fondo.
+const BORDE_MASK = 'linear-gradient(to right, transparent, #000 56px, #000 calc(100% - 56px), transparent)';
 
-export default function FieldsCarousel({ fields, fadeClass = FADE_DEFAULT }) {
+// `navyLg`: en lg+ el carrusel va sobre el panel NAVY del bloque de
+// Investigación (mismo fondo que el texto), así que ahí todo pasa a
+// colores claros — nombre blanco, ícono/flechas/puntitos en celeste
+// claro sobre blanco translúcido. En pantallas chicas no hay panel y
+// se ve como siempre sobre el fondo claro de la sección.
+export default function FieldsCarousel({ fields, navyLg = false }) {
   const n = fields.length;
   const paso = 360 / n;
 
@@ -233,7 +240,7 @@ export default function FieldsCarousel({ fields, fadeClass = FADE_DEFAULT }) {
     <div className="relative">
       <div
         className="relative w-full overflow-hidden select-none"
-        style={{ height: alto + 160 }}
+        style={{ height: alto + 160, maskImage: BORDE_MASK, WebkitMaskImage: BORDE_MASK }}
         onMouseEnter={() => {
           pausedRef.current = true;
         }}
@@ -245,7 +252,7 @@ export default function FieldsCarousel({ fields, fadeClass = FADE_DEFAULT }) {
             de dejarlo flotando sobre nada. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-7 w-[62%] h-5 rounded-full bg-[#003366]/15 dark:bg-black/50 blur-xl"
+          className={`pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-7 w-[62%] h-5 rounded-full bg-[#003366]/15 dark:bg-black/50 blur-xl ${navyLg ? 'lg:bg-black/40' : ''}`}
         />
 
         <div
@@ -290,14 +297,14 @@ export default function FieldsCarousel({ fields, fadeClass = FADE_DEFAULT }) {
                   <span className="relative w-10 h-10 sm:w-12 sm:h-12 shrink-0">
                     <span
                       aria-hidden="true"
-                      className="absolute -inset-1.5 rounded-full border border-dashed border-[#0077C8]/45 dark:border-white/25 pointer-events-none"
+                      className={`absolute -inset-1.5 rounded-full border border-dashed border-[#0077C8]/45 dark:border-white/25 pointer-events-none ${navyLg ? 'lg:border-white/30' : ''}`}
                       style={{ animation: 'orbitSpin 9s linear infinite' }}
                     />
-                    <span className="relative w-full h-full rounded-full bg-white/80 dark:bg-white/10 border border-[#0077C8]/20 dark:border-white/15 shadow-sm flex items-center justify-center text-[#0077C8] dark:text-[#4FB2F2]">
+                    <span className={`relative w-full h-full rounded-full bg-white/80 dark:bg-white/10 border border-[#0077C8]/20 dark:border-white/15 shadow-sm flex items-center justify-center text-[#0077C8] dark:text-[#4FB2F2] ${navyLg ? 'lg:bg-white/10 lg:border-white/15 lg:text-[#4FB2F2] lg:shadow-none' : ''}`}>
                       <Icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
                     </span>
                   </span>
-                  <span className="text-sm sm:text-base font-semibold text-[#003366] dark:text-white leading-snug">
+                  <span className={`text-sm sm:text-base font-semibold text-[#003366] dark:text-white leading-snug ${navyLg ? 'lg:text-white' : ''}`}>
                     {field}
                   </span>
                 </div>
@@ -307,11 +314,6 @@ export default function FieldsCarousel({ fields, fadeClass = FADE_DEFAULT }) {
           </div>
         </div>
 
-        {/* Degradado hacia el fondo de la sección en los bordes — para
-            que el corte de las tarjetas laterales (el tambor es más
-            ancho que esta ventana) se sienta suave. */}
-        <div className={`pointer-events-none absolute left-0 top-0 bottom-0 w-10 sm:w-16 bg-gradient-to-r ${fadeClass} to-transparent`} />
-        <div className={`pointer-events-none absolute right-0 top-0 bottom-0 w-10 sm:w-16 bg-gradient-to-l ${fadeClass} to-transparent`} />
       </div>
 
       {/* Indicador del campo activo entre las flechas + puntitos, uno
@@ -321,13 +323,15 @@ export default function FieldsCarousel({ fields, fadeClass = FADE_DEFAULT }) {
           type="button"
           onClick={() => step(-1)}
           aria-label="Anterior"
-          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/70 dark:bg-white/10 border border-[#0077C8]/25 dark:border-white/15 text-[#0077C8] dark:text-[#9FC6E8] flex items-center justify-center shrink-0 shadow-sm hover:bg-white hover:scale-105 dark:hover:bg-white/20 transition"
+          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/70 dark:bg-white/10 border border-[#0077C8]/25 dark:border-white/15 text-[#0077C8] dark:text-[#9FC6E8] flex items-center justify-center shrink-0 shadow-sm hover:bg-white hover:scale-105 dark:hover:bg-white/20 transition ${
+            navyLg ? 'lg:bg-white/10 lg:border-white/15 lg:text-[#9FC6E8] lg:shadow-none lg:hover:bg-white/20' : ''
+          }`}
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
 
         <div className="min-w-0 w-44 sm:w-56 text-center" aria-live="polite">
-          <div key={activeIndex} className="font-heading font-bold text-sm sm:text-base text-[#003366] dark:text-[#9FC6E8] truncate animate-breeze-in">
+          <div key={activeIndex} className={`font-heading font-bold text-sm sm:text-base text-[#003366] dark:text-[#9FC6E8] truncate animate-breeze-in ${navyLg ? 'lg:text-[#9FC6E8]' : ''}`}>
             {fields[activeIndex]}
           </div>
         </div>
@@ -336,7 +340,9 @@ export default function FieldsCarousel({ fields, fadeClass = FADE_DEFAULT }) {
           type="button"
           onClick={() => step(1)}
           aria-label="Siguiente"
-          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/70 dark:bg-white/10 border border-[#0077C8]/25 dark:border-white/15 text-[#0077C8] dark:text-[#9FC6E8] flex items-center justify-center shrink-0 shadow-sm hover:bg-white hover:scale-105 dark:hover:bg-white/20 transition"
+          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/70 dark:bg-white/10 border border-[#0077C8]/25 dark:border-white/15 text-[#0077C8] dark:text-[#9FC6E8] flex items-center justify-center shrink-0 shadow-sm hover:bg-white hover:scale-105 dark:hover:bg-white/20 transition ${
+            navyLg ? 'lg:bg-white/10 lg:border-white/15 lg:text-[#9FC6E8] lg:shadow-none lg:hover:bg-white/20' : ''
+          }`}
         >
           <ChevronRight className="w-4 h-4" />
         </button>
@@ -351,7 +357,9 @@ export default function FieldsCarousel({ fields, fadeClass = FADE_DEFAULT }) {
             aria-label={field}
             aria-current={i === activeIndex}
             className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === activeIndex ? 'w-6 bg-[#0077C8] dark:bg-[#4FB2F2]' : 'w-1.5 bg-[#0077C8]/25 dark:bg-white/20 hover:bg-[#0077C8]/50'
+              i === activeIndex
+                ? `w-6 bg-[#0077C8] dark:bg-[#4FB2F2] ${navyLg ? 'lg:bg-[#4FB2F2]' : ''}`
+                : `w-1.5 bg-[#0077C8]/25 dark:bg-white/20 hover:bg-[#0077C8]/50 ${navyLg ? 'lg:bg-white/25 lg:hover:bg-white/45' : ''}`
             }`}
           />
         ))}
