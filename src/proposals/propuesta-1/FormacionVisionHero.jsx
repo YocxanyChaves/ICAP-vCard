@@ -1,5 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
+import icapEscudoNavy from '../../assets/icap-escudo-navy.svg';
+import { useSerpienteDeColor } from './serpienteDeColor';
 
 /**
  * "Formación con Visión de Futuro" — el bloque que va debajo del Hero
@@ -127,6 +129,66 @@ import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
  *    arriba (`bottom-16 lg:bottom-20`) y el boop sutil
  *    (`animate-closing-boop`) — eso no lo criticó, sólo el cruce entre
  *    paneles.
+ * 10) La sección se sentía "muy simple para el inicio de una página tan
+ *    pichuda" (Yocxany). Ahora TODO el texto del panel derecho (párrafo
+ *    + frase de cierre) baja JUNTO, como un solo bloque, desde arriba
+ *    del borde de la sección, despacito y pegado al scroll, hasta su
+ *    lugar. Como el panel recorta lo que queda arriba de su borde, los
+ *    renglones se van ASOMANDO de a uno a medida que el bloque baja (el
+ *    de más abajo primero) — ver `useBajada`. Se probaron antes dos
+ *    variantes que NO eran (no volver a ellas): cada renglón saliendo
+ *    por su cuenta desde su propio borde, y cada renglón bajando por
+ *    separado desde arriba ("se pega una carrera", palabras de
+ *    Yocxany) — la idea es UN bloque que baja lento.
+ * 11) Más pedidos sobre el 10:
+ *    - Renglones del párrafo todos del MISMO largo: texto justificado
+ *      (con guiones automáticos para que no queden huecos grandes) y
+ *      el último renglón centrado; y el bloque CENTRADO en su panel.
+ *    - Marca de agua del escudo de vuelta en el panel derecho (en el
+ *      punto 6 se había quitado), centrada y muy tenue.
+ *    - La frase de cierre ya NO baja con el párrafo: SALE DEL TÍTULO —
+ *      se desliza desde el borde que comparte con el panel del título
+ *      (el panel la recorta, así que parece salir de ahí) en el último
+ *      tramo del scroll, y al llegar hace su boop. Ver `useSalidaCierre`.
+ *    - Título "más entretenido y super elegante": cada palabra sube
+ *      desde una ranura propia, una detrás de otra, al aparecer; debajo
+ *      se dibuja una línea celeste; y detrás flota una luz celeste muy
+ *      difuminada que se mueve lento (aurora, ver `animate-aurora` en
+ *      global.css).
+ * 12) Animación constante en el título: ahora aprovecha TODO su panel —
+ *    va en renglones (las palabras cortas como "para"/"y" se pegan a la
+ *    siguiente, ver `renglonesTitulo`) y el tamaño de letra se ajusta
+ *    solo para que el renglón más largo llene el ancho — y cada
+ *    CAMBIO_MS se "reacomoda": los renglones se deslizan a otra
+ *    composición (izquierda, escalera, alternado, centrado, escalera
+ *    inversa — ver COMPOSICIONES), uno detrás de otro. Ver
+ *    `useTituloQueSeAcomoda`.
+ * 13) Reparto 35% título / 65% texto (antes ~40/60). El celeste ya no
+ *    se pasa de renglón en renglón: una ONDA/GOTA de color celeste
+ *    atraviesa el título de forma fluida, en loop — es una copia
+ *    celeste del título encima del blanco, que sólo se ve dentro de
+ *    una mancha difuminada que viaja de izquierda a derecha (máscara
+ *    animada). Frase de cierre CENTRADA en su panel y el párrafo un
+ *    toque más grande.
+ * 14) Después de varias pruebas (serpiente con forma de cápsula, de
+ *    célula, en "S" por todo el bloque, letras desordenadas, renglones
+ *    que se reacomodaban), Yocxany definió el efecto final del título:
+ *    una SERPIENTE INVISIBLE que recorre las letras renglón por renglón
+ *    (al principio en zigzag; después pidió que cada renglón vaya
+ *    siempre de izquierda a derecha, con un salto sin pintar), ondulando
+ *    arriba/abajo dentro de cada renglón; al terminar espera y vuelve a
+ *    empezar. Lo ÚNICO que cambia es el COLOR de las letras (blanco →
+ *    celeste rápido donde pasa, y vuelve a blanco despacio, dejando
+ *    estela). La serpiente no mueve ni agranda las letras: sólo las
+ *    pinta. (Se probó quitar el desorden de entrada y el reacomodo de
+ *    renglones para que el título quedara quieto, pero Yocxany pidió
+ *    conservarlos — conviven con la serpiente, que recalcula el camino
+ *    en cada frame para seguir a las letras donde estén.) Ver
+ *    `useSerpienteDeColor`, `estiloLetra` y `useAjusteTitulo`. (Hubo
+ *    también una estela de color con el mouse y una línea celeste
+ *    debajo del título con un "fuash" en cada reacomodo — Yocxany pidió
+ *    quitar las dos: en el título quedan sólo la serpiente y el
+ *    acomodo de letras.)
  *
  * OJO: el scroll que se escucha acá NO es el de `window` — en este
  * brochure el que scrollea de verdad es el `<main
@@ -300,15 +362,72 @@ function useEnterOnceVisible(elRef, threshold = 0.35) {
   return visible;
 }
 
-// El párrafo "cae" desde arriba (arranca corrido bien hacia arriba y
-// casi invisible) y se va acomodando hacia abajo con el progreso ya
-// suavizado, hasta su posición natural en su panel. Sin blur — sólo
-// traslación + opacity, para que el texto nunca se vea
-// borroso/glitcheado mientras se lee.
-function dropSettleStyle(progress) {
-  return {
-    transform: `translateY(${(1 - progress) * -90}px)`,
-    opacity: Math.min(1, progress * 1.3)
+// Bajada del bloque de texto: mide cuánto tiene que subir el bloque
+// para quedar ENTERO arriba del borde superior del panel (escondido,
+// el panel tiene overflow-hidden) — o sea, desde el borde de arriba del
+// panel hasta el final del párrafo — y devuelve el `transform` para un
+// progreso dado: con 0 el bloque está todo arriba, escondido; con 1,
+// en su lugar. offsetTop/offsetHeight no los afectan los transform
+// animados, así que la medición no se contamina con el movimiento.
+// La bajada es casi lineal con el scroll (sólo frena un poquito al
+// final) para que se sienta lenta y pareja, no un tirón.
+const MARGEN_ARRIBA = 24;
+const frenarSuave = (t) => 1 - Math.pow(1 - t, 2);
+function useBajada(textRef) {
+  const [distancia, setDistancia] = useState(0);
+
+  useLayoutEffect(() => {
+    const medir = () => {
+      const fin = textRef.current;
+      if (!fin) return;
+      const d = fin.offsetTop + fin.offsetHeight + MARGEN_ARRIBA;
+      setDistancia((prev) => (prev === d ? prev : d));
+    };
+    medir();
+    const panel = textRef.current?.parentElement;
+    if (!panel || typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(medir);
+    ro.observe(panel);
+    panel.ownerDocument?.fonts?.ready?.then(medir);
+    return () => ro.disconnect();
+  }, [textRef]);
+
+  return (progress) => ({
+    transform: `translateY(${-(1 - frenarSuave(progress)) * distancia}px)`
+  });
+}
+
+// Salida de la frase de cierre "desde el título": arranca corrida hacia
+// la izquierda lo justo para quedar entera detrás del borde que el panel
+// derecho comparte con el del título (el panel la recorta), y se desliza
+// hasta su lugar en el último tramo del scroll [DESDE_CIERRE, 1] — o sea
+// después de que el párrafo ya bajó casi todo.
+const DESDE_CIERRE = 0.55;
+const frenar = (t) => 1 - Math.pow(1 - t, 3);
+function useSalidaCierre(closingRef) {
+  const [distancia, setDistancia] = useState(0);
+
+  useLayoutEffect(() => {
+    const el = closingRef.current;
+    if (!el) return undefined;
+    const medir = () => {
+      const d = el.offsetLeft + el.offsetWidth + 40;
+      setDistancia((prev) => (prev === d ? prev : d));
+    };
+    medir();
+    const panel = el.parentElement;
+    if (!panel || typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(medir);
+    ro.observe(panel);
+    return () => ro.disconnect();
+  }, [closingRef]);
+
+  return (progress) => {
+    const t = frenar(Math.min(1, Math.max(0, (progress - DESDE_CIERRE) / (1 - DESDE_CIERRE))));
+    return {
+      transform: `translateX(${-(1 - t) * distancia}px)`,
+      opacity: 0.2 + t * 0.8
+    };
   };
 }
 
@@ -339,6 +458,114 @@ function useBoopOnSettle(progress, threshold = 0.99, resetThreshold = 0.9) {
   return [booping, () => setBooping(false)];
 }
 
+// Arma los renglones del título: cada palabra en su renglón, pero las
+// cortas (≤ 4 letras, tipo "para", "y", "to", "and") se pegan a la
+// palabra siguiente para que no quede un renglón con una sola palabrita.
+function renglonesTitulo(titulo) {
+  const out = [];
+  let pendiente = '';
+  titulo.split(' ').forEach((w) => {
+    if (w.replace(/[^\p{L}]/gu, '').length <= 4) {
+      pendiente = pendiente ? `${pendiente} ${w}` : w;
+    } else {
+      out.push(pendiente ? `${pendiente} ${w}` : w);
+      pendiente = '';
+    }
+  });
+  if (pendiente) {
+    if (out.length) out[out.length - 1] = `${out[out.length - 1]} ${pendiente}`;
+    else out.push(pendiente);
+  }
+  return out;
+}
+
+// Composiciones por las que va pasando el título cada CAMBIO_MS. Cada
+// una dice, para el renglón k de n, en qué fracción del espacio libre
+// de su renglón queda (0 = pegado a la izquierda, 1 = a la derecha).
+const COMPOSICIONES = [
+  () => 0, // alineado a la izquierda
+  (k, n) => (n > 1 ? k / (n - 1) : 0), // escalera
+  (k) => (k % 2 === 0 ? 0 : 1), // alternado
+  () => 0.5, // centrado
+  (k, n) => (n > 1 ? 1 - k / (n - 1) : 0) // escalera inversa
+];
+const CAMBIO_MS = 5200;
+
+// Ajusta el tamaño de letra para que el renglón más largo llene el ancho
+// del título, mide cuánto espacio libre le queda a cada renglón, y va
+// cambiando de composición cada CAMBIO_MS (cuando `activo` es true).
+function useAjusteTitulo(cantidad, activo) {
+  const tituloRef = useRef(null);
+  const renglonRefs = useRef([]);
+  const [fontPx, setFontPx] = useState(null);
+  const [libres, setLibres] = useState([]);
+  const [composicion, setComposicion] = useState(0);
+
+  useLayoutEffect(() => {
+    const h2 = tituloRef.current;
+    if (!h2) return undefined;
+    const medir = () => {
+      const disponible = h2.clientWidth;
+      const anchos = renglonRefs.current.slice(0, cantidad).map((el) => el?.offsetWidth ?? 0);
+      const maximo = Math.max(...anchos, 1);
+      const actual = parseFloat(h2.ownerDocument.defaultView.getComputedStyle(h2).fontSize);
+      const ideal = Math.min(120, Math.max(30, (actual * disponible * 0.97) / maximo));
+      if (Math.abs(ideal - actual) > 0.5) {
+        setFontPx(ideal);
+        return; // se vuelve a medir con la letra nueva
+      }
+      const igual = (a, b) => a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 1);
+      const nuevos = anchos.map((w) => Math.max(0, disponible - w));
+      setLibres((prev) => (igual(prev, nuevos) ? prev : nuevos));
+    };
+    medir();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(medir);
+    ro.observe(h2);
+    h2.ownerDocument?.fonts?.ready?.then(medir);
+    return () => ro.disconnect();
+  }, [cantidad, fontPx]);
+
+  useEffect(() => {
+    if (!activo) return undefined;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    const id = setInterval(() => setComposicion((c) => c + 1), CAMBIO_MS);
+    return () => clearInterval(id);
+  }, [activo]);
+
+  const componer = COMPOSICIONES[composicion % COMPOSICIONES.length];
+  const desplazamiento = (k) => (libres[k] ?? 0) * componer(k, cantidad);
+  return { tituloRef, renglonRefs, fontPx, desplazamiento };
+}
+
+// Número "al azar" pero fijo para cada letra (siempre el mismo para el
+// mismo índice), para que el desorden de las letras no cambie en cada
+// render.
+const azar = (j, semilla) => {
+  const x = Math.sin(j * 12.9898 + semilla * 78.233) * 43758.5453;
+  return x - Math.floor(x);
+};
+
+// Entrada: letras desordenadas que se acomodan con el scroll. Cada letra
+// tiene su propio desorden (corrimiento en em — así escala con la letra
+// —, giro y transparencia) y su propio momento para acomodarse dentro
+// del tramo del scroll, así no llegan todas juntas.
+const ORDEN_HASTA = 0.7; // progreso de scroll en que ya están todas en su lugar
+function estiloLetra(j, progress, conMovimiento) {
+  if (!conMovimiento) return undefined;
+  const armado = Math.min(1, progress / ORDEN_HASTA);
+  const propio = Math.min(1, Math.max(0, armado * 1.5 - azar(j, 4) * 0.5));
+  const t = 1 - Math.pow(1 - propio, 3);
+  const d = 1 - t;
+  const dx = (azar(j, 1) * 2 - 1) * 1.2 * d;
+  const dy = (azar(j, 2) * 2 - 1) * 1.6 * d;
+  const giro = (azar(j, 3) * 2 - 1) * 40 * d;
+  return {
+    transform: `translate(${dx.toFixed(3)}em, ${dy.toFixed(3)}em) rotate(${giro.toFixed(2)}deg)`,
+    opacity: 0.25 + 0.75 * t
+  };
+}
+
 /** Un solo árbol responsive (stack en mobile vía `flex-col`, lado a
  * lado en escritorio vía `md:flex-row`) — ya no hace falta separarlo
  * en variantes, esa separación era sólo por el truco de `sticky` que
@@ -348,16 +575,37 @@ function useBoopOnSettle(progress, threshold = 0.99, resetThreshold = 0.9) {
 export default function FormacionVisionHero({ title, text, closing }) {
   const textRef = useRef(null);
   const progress = useScrollSettleProgress(textRef);
-  const textStyle = dropSettleStyle(progress);
   const [booping, stopBoop] = useBoopOnSettle(progress);
+
+  // El párrafo baja como un bloque (useBajada); la frase de cierre sale
+  // por su cuenta desde el lado del título (useSalidaCierre).
+  const estiloBajada = useBajada(textRef);
+  const textStyle = estiloBajada(progress);
+  const closingRef = useRef(null);
+  const estiloCierre = useSalidaCierre(closingRef)(progress);
 
   const titlePanelRef = useRef(null);
   const titleVisible = useEnterOnceVisible(titlePanelRef);
-  const titleStyle = {
-    transform: titleVisible ? 'translateX(0)' : 'translateX(-70px)',
-    opacity: titleVisible ? 1 : 0,
-    transition: 'transform 900ms cubic-bezier(0.16, 1, 0.3, 1), opacity 900ms cubic-bezier(0.16, 1, 0.3, 1)'
-  };
+  // Título en renglones, con el tamaño ajustado al ancho del panel y
+  // reacomodándose cada CAMBIO_MS (useAjusteTitulo); letras que entran
+  // desordenadas y se acomodan con el scroll (estiloLetra); y cada letra
+  // en su propio <span> para que la serpiente de color pueda pintarlas
+  // (useSerpienteDeColor).
+  const renglones = renglonesTitulo(title);
+  const finTituloMs = renglones.length * 120 + 500;
+  const [tituloListo, setTituloListo] = useState(false);
+  useEffect(() => {
+    if (!titleVisible) return undefined;
+    const id = setTimeout(() => setTituloListo(true), finTituloMs + 1200);
+    return () => clearTimeout(id);
+  }, [titleVisible, finTituloMs]);
+  const { tituloRef, renglonRefs, fontPx, desplazamiento } = useAjusteTitulo(renglones.length, tituloListo);
+  const conMovimiento = typeof window === 'undefined' || !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const letraRefs = useRef([]);
+  let contador = 0;
+  const letrasPorRenglon = renglones.map((renglon) => Array.from(renglon).map((ch) => ({ ch, j: contador++ })));
+  const totalLetras = contador;
+  useSerpienteDeColor(tituloRef, letraRefs, totalLetras, fontPx, titleVisible && conMovimiento);
 
   return (
     <div className="relative flex flex-col md:flex-row min-h-[70vh] md:min-h-[100vh] bg-[#D6E9F7] dark:bg-[#001F3D]">
@@ -377,8 +625,14 @@ export default function FormacionVisionHero({ title, text, closing }) {
           historial arriba). */}
       <div
         ref={titlePanelRef}
-        className="md:w-[38%] lg:w-[40%] shrink-0 bg-[#003366] flex flex-col justify-center px-6 sm:px-10 md:px-10 lg:px-14 py-14 md:py-20 relative overflow-hidden"
+        className="md:w-[35%] shrink-0 bg-[#003366] flex flex-col justify-center px-6 sm:px-10 md:px-10 lg:px-14 py-14 md:py-20 relative overflow-hidden"
       >
+        {/* Aurora: luz celeste muy difuminada que flota lento detrás
+            del título (animate-aurora en global.css). */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-[-10%] top-[20%] w-[80%] h-[55%] rounded-full bg-[#4FB2F2]/25 blur-3xl animate-aurora"
+        />
         <img
           src={icapEscudoWhite}
           alt=""
@@ -387,10 +641,45 @@ export default function FormacionVisionHero({ title, text, closing }) {
           className="absolute -right-[20%] top-1/2 -translate-y-1/2 w-[80%] max-w-none opacity-[0.06] pointer-events-none select-none"
         />
         <h2
-          className="relative font-heading font-extrabold text-white text-4xl sm:text-5xl md:text-4xl lg:text-5xl xl:text-6xl leading-[1.05] tracking-tight will-change-transform"
-          style={titleStyle}
+          ref={tituloRef}
+          aria-label={title}
+          className="relative w-full font-heading font-extrabold text-white text-4xl sm:text-5xl md:text-4xl lg:text-5xl xl:text-6xl leading-[1.02] tracking-tight"
+          style={fontPx ? { fontSize: `${fontPx}px` } : undefined}
         >
-          {title}
+          {letrasPorRenglon.map((letras, k) => (
+            // Renglón: se desliza en horizontal a su lugar en la
+            // composición actual (uno detrás de otro).
+            <span
+              key={k}
+              aria-hidden="true"
+              className="block whitespace-nowrap will-change-transform"
+              style={{
+                transform: `translateX(${desplazamiento(k)}px)`,
+                transition: `transform 1300ms cubic-bezier(0.65, 0, 0.35, 1) ${k * 90}ms`
+              }}
+            >
+              {/* Caja del renglón — la mide useAjusteTitulo. */}
+              <span
+                ref={(el) => {
+                  renglonRefs.current[k] = el;
+                }}
+                className="inline-block"
+              >
+                {letras.map(({ ch, j }) => (
+                  <span
+                    key={j}
+                    ref={(el) => {
+                      letraRefs.current[j] = el;
+                    }}
+                    className="inline-block will-change-transform"
+                    style={estiloLetra(j, progress, conMovimiento)}
+                  >
+                    {ch === ' ' ? '\u00A0' : ch}
+                  </span>
+                ))}
+              </span>
+            </span>
+          ))}
         </h2>
       </div>
 
@@ -404,14 +693,33 @@ export default function FormacionVisionHero({ title, text, closing }) {
           bastante arriba del borde de abajo, con hover y un boop bien
           sutil. */}
       <div className="flex-1 relative flex flex-col justify-center px-6 sm:px-10 md:px-10 lg:px-12 py-14 md:py-20 overflow-hidden">
+        {/* Marca de agua del escudo, centrada y muy tenue — navy en
+            tema claro, blanca en oscuro. */}
+        <img
+          src={icapEscudoNavy}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[70%] w-auto max-w-none opacity-[0.05] pointer-events-none select-none dark:hidden"
+        />
+        <img
+          src={icapEscudoWhite}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="hidden dark:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[70%] w-auto max-w-none opacity-[0.06] pointer-events-none select-none"
+        />
         {/* El `ref` para medir el scroll va en este div envolvente,
             SIN transform — no en el <p> de adentro, que es el que se
             anima. Si se midiera directo sobre el elemento animado, la
             medición quedaría contaminada por su propio movimiento
             (ver el comentario grande de `useRevealProgress`). */}
-        <div ref={textRef} className="relative z-10 max-w-md md:max-w-lg lg:max-w-2xl">
+        {/* Centrado en el panel, justificado (todos los renglones del
+            mismo largo, con guiones automáticos) y el último renglón
+            centrado. */}
+        <div ref={textRef} className="relative z-10 w-full max-w-lg md:max-w-xl lg:max-w-3xl mx-auto">
           <p
-            className="font-heading text-[#003366] dark:text-[#9FC6E8] text-base md:text-lg lg:text-xl leading-relaxed text-left [text-wrap:balance] will-change-transform"
+            className="font-heading text-[#003366] dark:text-[#9FC6E8] text-[17px] md:text-xl lg:text-[1.375rem] leading-relaxed text-justify [text-align-last:center] hyphens-auto will-change-transform"
             style={textStyle}
           >
             {text}
@@ -428,7 +736,8 @@ export default function FormacionVisionHero({ title, text, closing }) {
             borde de abajo que antes (`bottom-16 lg:bottom-20` — pidió
             subirla). El hover va en un <span> aparte adentro del <p>
             para no depender de cómo Tailwind 4 componga `scale` con el
-            `transform` en línea del efecto de caída (`textStyle`) —
+            `transform` en línea de la salida desde el título
+            (`estiloCierre`) —
             probado con Playwright, funciona así. El boop usa
             `animate-closing-boop` (keyframe propio en global.css, más
             sutil que `animate-stat-pop`). */}
@@ -446,14 +755,15 @@ export default function FormacionVisionHero({ title, text, closing }) {
             borde. */}
         {closing && (
           <p
+            ref={closingRef}
             className={
-              'relative w-full md:w-auto mt-8 md:mt-0 md:absolute md:left-10 md:right-10 lg:left-12 lg:right-12 md:bottom-16 lg:bottom-20 z-10 text-left origin-left font-heading font-extrabold text-[#003366] text-2xl sm:text-3xl md:text-[min(1.8vw,2.25rem)] md:whitespace-nowrap leading-tight will-change-transform' +
+              'relative w-full md:w-auto mt-8 md:mt-0 md:absolute md:left-10 md:right-10 lg:left-12 lg:right-12 md:bottom-16 lg:bottom-20 z-10 text-center origin-center font-heading font-extrabold text-[#003366] text-2xl sm:text-3xl md:text-[min(1.8vw,2.25rem)] md:whitespace-nowrap leading-tight will-change-transform' +
               (booping ? ' animate-closing-boop' : '')
             }
-            style={textStyle}
+            style={estiloCierre}
             onAnimationEnd={stopBoop}
           >
-            <span className="inline-block origin-left transition-transform duration-300 ease-out hover:scale-105 cursor-default">
+            <span className="inline-block origin-center transition-transform duration-300 ease-out hover:scale-105 cursor-default">
               {closing}
             </span>
           </p>

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import KickerBadge from './KickerBadge';
 import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
+import { useSerpienteDeColor } from './serpienteDeColor';
 
 /**
  * "Comunidad" de Docencia — bloque 7 del brochure ("Una comunidad
@@ -33,6 +34,14 @@ import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
  *   bastante opacidad para que contraste con el degradado (pidió que
  *   "se note mucho"); gira/sube un poco con el mismo progreso del
  *   scroll para que acompañe la lectura.
+ *
+ * - El título lleva además la misma "serpiente pintora" que el título de
+ *   Formación (ver serpienteDeColor.js): una serpiente invisible recorre
+ *   sus letras renglón por renglón, de izquierda a derecha y ondulando,
+ *   y las pinta de celeste clarito (#7dd3fc, el mismo del remate del
+ *   último párrafo) — rápido al pasar, y vuelven a blanco despacio. Las
+ *   letras no se mueven por esto, sólo cambian de color. Arranca cuando
+ *   el título ya entró y se apaga al salir de pantalla.
  *
  * OJO: el scroll que se escucha es el del `<main>` de Propuesta1.jsx,
  * no el de `window` (mismo motivo que en FormacionVisionHero.jsx).
@@ -129,6 +138,20 @@ export default function DocenciaComunidad() {
   const titleIn = useInView(titleRef);
   const progress = useScrollProgress(textRef);
 
+  // Letras del título (para la serpiente pintora), por palabra.
+  const letraRefs = useRef([]);
+  let contadorLetras = 0;
+  const palabrasTitulo = c.title.split(' ').map((word) => Array.from(word).map((ch) => ({ ch, j: contadorLetras++ })));
+  // Arranca cuando ya terminó de entrar el título la primera vez (palabra
+  // por palabra); corre mientras el título está en pantalla.
+  const [serpienteLista, setSerpienteLista] = useState(false);
+  useEffect(() => {
+    if (!titleIn || prefersReducedMotion()) return undefined;
+    const id = setTimeout(() => setSerpienteLista(true), palabrasTitulo.length * 90 + 700);
+    return () => clearTimeout(id);
+  }, [titleIn, palabrasTitulo.length]);
+  useSerpienteDeColor(titleRef, letraRefs, contadorLetras, c.title, titleIn && serpienteLista, { serpiente: [125, 211, 252] });
+
   const paragraphs = toWords(c.paragraphs);
   const total = paragraphs.reduce((n, words) => n + words.length, 0);
   // Cuántas palabras van encendidas. Se estira un poco (×1.08) para que
@@ -154,10 +177,11 @@ export default function DocenciaComunidad() {
       <div className="max-w-2xl mx-auto text-center relative flex flex-col items-center gap-[var(--docencia-gap)]">
         <KickerBadge onDark>{c.kicker}</KickerBadge>
 
-        <h2 ref={titleRef} className="font-heading font-extrabold text-2xl sm:text-3xl text-white tracking-tight">
-          {c.title.split(' ').map((word, i) => (
+        <h2 ref={titleRef} aria-label={c.title} className="relative font-heading font-extrabold text-2xl sm:text-3xl text-white tracking-tight">
+          {palabrasTitulo.map((letras, i) => (
             <React.Fragment key={i}>
             <span
+              aria-hidden="true"
               className="inline-block transition-[opacity,transform,filter] duration-700 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]"
               style={{
                 opacity: titleIn ? 1 : 0,
@@ -166,7 +190,16 @@ export default function DocenciaComunidad() {
                 transitionDelay: titleIn ? `${i * 90}ms` : '0ms'
               }}
             >
-              {word}
+              {letras.map(({ ch, j }) => (
+                <span
+                  key={j}
+                  ref={(el) => {
+                    letraRefs.current[j] = el;
+                  }}
+                >
+                  {ch}
+                </span>
+              ))}
             </span>{' '}
             </React.Fragment>
           ))}
