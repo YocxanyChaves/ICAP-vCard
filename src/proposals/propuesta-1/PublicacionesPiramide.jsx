@@ -1,264 +1,172 @@
 import React, { memo, useEffect, useId, useRef, useState } from 'react';
 import KickerBadge from './KickerBadge';
-import icapLogoMark from '../../assets/icap-logo-mark.png';
+import { LOGO_W, LOGO_H, TRIANGULO, IZQUIERDA, DERECHA, PUNTOS } from './icapLogoFormas';
 
 /**
- * Pirámide holográfica de las 7 palabras de Publicaciones ("Investigar –
- * Publicar – … – Transformar"), adaptada del componente que pasó
- * Yocxany (src/components/PiramideHolograma.jsx, que queda intacto).
- * Yocxany eligió "7 pisos + punta ICAP": cada palabra es un piso (la
- * primera abajo, la última arriba) y la punta brillante lleva "ICAP".
+ * LOGO holográfico del ICAP que se arma con el scroll, pieza por pieza,
+ * para las 7 palabras de Publicaciones ("Investigar – Publicar – … –
+ * Transformar"). (El archivo se sigue llamando "Piramide" porque antes
+ * era una pirámide de 7 pisos + punta, adaptada del componente que pasó
+ * Yocxany — src/components/PiramideHolograma.jsx, que queda intacto.
+ * Yocxany preguntó si en vez de la pirámide se podía formar el logo, y
+ * así quedó. La versión pirámide está en el historial de git.)
  *
- * Cambios respecto al original:
+ * - El logo se divide en 8 piezas (formas trazadas del PNG en
+ *   icapLogoFormas.js). Cada una de las 7 palabras es una pieza, de
+ *   abajo hacia arriba: triángulo del centro, pierna+brazo izquierdo,
+ *   pierna+brazo derecho, y los puntos de afuera hacia adentro. La 8ª
+ *   pieza — el punto grande del centro — es la "punta": cierra el logo
+ *   (brilla en blanco, como la punta de la pirámide) junto con el
+ *   `objetivo`, y después sale el rayo de luz (Haz).
+ * - Cada pieza CAE desde arriba a su lugar con el scroll y al llegar
+ *   brilla un momento, igual que los pisos de la pirámide.
+ * - Look de holograma como la pirámide: relleno celeste translúcido con
+ *   líneas de escaneo, bordes con resplandor, y "volumen" hecho con 3
+ *   capas de la misma pieza separadas en profundidad (translateZ) —
+ *   por eso al girar se ve como un objeto 3D de luz y no una lámina.
+ * - La escena gira un poco con el scroll (de -40° a 0°) y termina de
+ *   frente, para que el logo armado se lea bien.
+ * - Las PALABRAS tienen protagonismo (pedido de Yocxany): debajo del
+ *   logo aparece en grande, como holograma, la palabra del nivel que
+ *   está cayendo (con su "03 / 07"), y al terminar el `objetivo`; y en
+ *   la lista de al lado la palabra activa crece, brilla y se resalta
+ *   con una franja de luz.
  * - El scroll que se escucha es el del `<main>` de Propuesta1.jsx, no
- *   el de `window` (en este brochure el que scrollea es <main>), y el
- *   bloque sticky mide el alto VISIBLE de ese <main> (no 100vh, que
- *   incluye el header y el menú de abajo).
- * - Cada piso lleva su PALABRA escrita en las 4 caras (en vez del
- *   número), con el tamaño ajustado al ancho del piso.
- * - La escena va dentro de un panel navy redondeado (como el panel del
- *   mapa de Presencia): holograma oscuro en los dos temas.
- * - Recorrido de scroll: 48vh por pieza (el original usaba 55vh; se
- *   probó 35vh y Yocxany lo sintió muy rápido).
- * - Indicación sutil de "deslizá" (mouse con ruedita animada) que se
- *   apaga apenas se empieza a construir.
- * - El LOGO del ICAP (isotipo de icap-logo-mark.png, el de la figura con
- *   los brazos abiertos — no el escudo de las marcas de agua) flota
- *   ADENTRO de la pirámide como un holograma (ver <LogoHolograma>),
- *   pedido de Yocxany: mismo celeste, líneas de escaneo, resplandor y
- *   un parpadeo leve. Empieza a materializarse cuando cae la SEGUNDA
- *   base y está completo un par de pisos después.
+ *   el de `window`, y el bloque sticky mide el alto VISIBLE de ese
+ *   <main>. Recorrido: 48vh por pieza. Pista de "deslizá" (mouse con
+ *   ruedita) que se apaga apenas se empieza a construir.
  */
 
 const mezcla = (color, pct) => `color-mix(in srgb, ${color} ${pct}%, transparent)`;
 const limitar = (v) => Math.min(1, Math.max(0, v));
 
-// memo: sólo se vuelve a dibujar el piso cuyas props cambiaron (el que
-// está cayendo o brillando), no los 8 en cada frame del scroll.
-const Franja = memo(function Franja({ y0, y1, base, altoTotal, color, avance, brillo, palabra, esPunta, avanceSiguiente }) {
+// Alto del logo armado en la escena (px, antes de la escala responsive).
+const ALTO_LOGO = 360;
+const ESCALA_LOGO = ALTO_LOGO / LOGO_H;
+const ANCHO_LOGO = LOGO_W * ESCALA_LOGO;
+
+// Orden en que se arma: una pieza por palabra (de abajo hacia arriba) y
+// al final el punto grande del centro, que es la "punta".
+const PIEZAS = [
+  { tipo: 'path', d: TRIANGULO },
+  { tipo: 'path', d: IZQUIERDA },
+  { tipo: 'path', d: DERECHA },
+  { tipo: 'circle', ...PUNTOS[0] },
+  { tipo: 'circle', ...PUNTOS[4] },
+  { tipo: 'circle', ...PUNTOS[1] },
+  { tipo: 'circle', ...PUNTOS[3] }
+];
+const PUNTA = { tipo: 'circle', ...PUNTOS[2] };
+
+// Curva de la caída: rápida al principio y frena suave al aterrizar.
+const frenar = (t) => 1 - Math.pow(1 - t, 3);
+// Aparición suave (sin arranque ni final bruscos).
+const suave = (t) => t * t * (3 - 2 * t);
+
+// memo: sólo se vuelve a renderizar la pieza cuyas props cambiaron (la
+// que está cayendo o brillando), no las 8 en cada frame del scroll.
+//
+// Fluidez: el CONTENIDO de los SVG es fijo — nunca cambia con el scroll.
+// Antes el "brillo" al aterrizar se hacía cambiando opacidades DENTRO del
+// SVG (degradado, escaneo, resplandor con blur), lo que obligaba al
+// navegador a volver a pintar el desenfoque en cada frame. Ahora el
+// brillo es una capa aparte (más clara, con resplandor fuerte) a la que
+// sólo se le cambia la `opacity`, y la caída es sólo `transform` — las
+// dos cosas las resuelve la GPU sin repintar.
+//
+// 3 capas por pieza, separadas en profundidad (translateZ) para que al
+// girar se vea con volumen: atrás sólo el contorno tenue; adelante la
+// pieza (relleno + escaneo + resplandor suave) y, encima, la capa de
+// brillo.
+const PiezaLogo = memo(function PiezaLogo({ forma, color, avance, brillo, esPunta }) {
   const id = useId().replace(/:/g, '');
-  const mitad = (y) => (base / 2) * (1 - y / altoTotal);
-  const m0 = mitad(y0);
-  const m1 = mitad(y1);
-  const W = m0 * 2;
-  const angulo = Math.atan(base / 2 / altoTotal);
-  const cos = Math.cos(angulo);
-  const H = (y1 - y0) / cos + 0.6;
-  const rx = m0 - m1;
-  const g = brillo;
+  const trazo = esPunta ? 'white' : color;
+  const dibujar = (props) =>
+    forma.tipo === 'path' ? <path d={forma.d} {...props} /> : <circle cx={forma.cx} cy={forma.cy} r={forma.r} {...props} />;
 
-  const desde = H + y0 / cos;
-  const hasta = desde - altoTotal / cos;
-
-  const puntos = `${rx},0 ${W - rx},0 ${W},${H} 0,${H}`;
-  const aristas = [[0, H, rx, 0], [W, H, W - rx, 0], ...(y0 === 0 ? [[0, H, W, H]] : [])];
-  const luzCara = [1, 0.6, 0.8, 1.2];
-
-  // Tamaño de la palabra según el ancho del piso (el de arriba es mucho
-  // más angosto que la base).
-  const anchoUtil = (m0 + m1) * 0.82;
-  const fontSize = palabra ? Math.max(7, Math.min(13, anchoUtil / (palabra.length * 0.72))) : 11;
+  const caida = frenar(avance);
+  const aparicion = suave(avance);
+  const capa = (z, opacidad, contenido) => (
+    <svg
+      width={ANCHO_LOGO}
+      height={ALTO_LOGO}
+      viewBox={`0 0 ${LOGO_W} ${LOGO_H}`}
+      style={{
+        position: 'absolute',
+        left: -ANCHO_LOGO / 2,
+        top: -ALTO_LOGO,
+        overflow: 'visible',
+        transform: `translateZ(${z}px)`,
+        opacity: opacidad
+      }}
+    >
+      {contenido}
+    </svg>
+  );
 
   return (
     <div
       style={{
         position: 'absolute',
         transformStyle: 'preserve-3d',
-        transform: `translateY(${(1 - avance) * -420}px)`,
+        transform: `translateY(${(1 - caida) * -420}px)`,
         visibility: avance > 0 ? 'visible' : 'hidden'
       }}
     >
-      {[0, 90, 180, 270].map((giro, k) => (
-        <svg
-          key={giro}
-          width={W}
-          height={H}
-          style={{
-            position: 'absolute',
-            left: -W / 2,
-            top: -H,
-            overflow: 'visible',
-            transformOrigin: '50% 100%',
-            transform: `translateY(${-y0}px) rotateY(${giro}deg) translateZ(${m0}px) rotateX(${(angulo * 180) / Math.PI}deg)`,
-            opacity: avance
-          }}
-        >
+      {capa(-14, aparicion * 0.35, dibujar({ fill: 'none', stroke: trazo, strokeWidth: 1.6, strokeOpacity: 0.9 }))}
+
+      {capa(
+        14,
+        aparicion,
+        <>
           <defs>
-            <clipPath id={`c${id}${k}`}>
-              <polygon points={puntos} />
-            </clipPath>
-            <filter id={`f${id}${k}`} x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation={5} />
-            </filter>
-            <linearGradient id={`g${id}${k}`} gradientUnits="userSpaceOnUse" x1="0" y1={desde} x2="0" y2={hasta}>
+            <linearGradient id={`g${id}`} x1="0" y1="0" x2="0" y2="1">
               {esPunta ? (
                 <>
-                  <stop offset="0.75" stopColor={color} stopOpacity="0.6" />
-                  <stop offset="1" stopColor="white" stopOpacity="0.95" />
+                  <stop offset="0" stopColor="white" stopOpacity="0.95" />
+                  <stop offset="1" stopColor={color} stopOpacity="0.7" />
                 </>
               ) : (
                 <>
-                  <stop offset="0" stopColor={color} stopOpacity={(0.04 + g * 0.15) * luzCara[k]} />
-                  <stop offset="1" stopColor={color} stopOpacity={(0.2 + g * 0.2) * luzCara[k]} />
+                  <stop offset="0" stopColor={color} stopOpacity="0.4" />
+                  <stop offset="1" stopColor={color} stopOpacity="0.12" />
                 </>
               )}
             </linearGradient>
+            {/* Líneas de escaneo horizontales, como la imagen de un
+                proyector. */}
+            <pattern id={`p${id}`} width="5" height="5" patternUnits="userSpaceOnUse">
+              <rect width="5" height="1.2" fill="white" fillOpacity="0.16" />
+            </pattern>
+            <filter id={`f${id}`} x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation={6} />
+            </filter>
           </defs>
-
-          <polygon points={puntos} fill={`url(#g${id}${k})`} />
-
-          <g clipPath={`url(#c${id}${k})`}>
-            {aristas.map(([x1, ya, x2, yb], j) => (
-              <line
-                key={j}
-                x1={x1}
-                y1={ya}
-                x2={x2}
-                y2={yb}
-                stroke={esPunta ? 'white' : color}
-                strokeWidth="14"
-                strokeOpacity={0.35 + g * 0.4}
-                filter={`url(#f${id}${k})`}
-              />
-            ))}
-          </g>
-
-          {aristas.map(([x1, ya, x2, yb], j) => (
-            <g key={j}>
-              <line
-                x1={x1}
-                y1={ya}
-                x2={x2}
-                y2={yb}
-                stroke={esPunta ? 'white' : color}
-                strokeWidth="4"
-                strokeOpacity={0.5 + g * 0.5}
-                filter={`url(#f${id}${k})`}
-              />
-              <line x1={x1} y1={ya} x2={x2} y2={yb} stroke={esPunta ? 'white' : color} strokeWidth="1" strokeOpacity={0.9} />
-            </g>
-          ))}
-
-          {esPunta ? (
-            // "ICAP" en la parte baja de cada cara de la punta, donde el
-            // triángulo todavía es lo bastante ancho.
-            <text
-              x={W / 2}
-              y={H * 0.74}
-              dominantBaseline="middle"
-              textAnchor="middle"
-              fill="white"
-              fontSize="11"
-              fontWeight="800"
-              letterSpacing="1.5"
-              fontFamily="Raleway, sans-serif"
-              style={{ filter: `drop-shadow(0 0 5px ${color})` }}
-            >
-              ICAP
-            </text>
-          ) : (
-            <text
-              x={W / 2}
-              y={H / 2}
-              dominantBaseline="middle"
-              textAnchor="middle"
-              fill="white"
-              fillOpacity={0.75 + g * 0.25}
-              fontSize={fontSize}
-              fontWeight="700"
-              letterSpacing="1.2"
-              fontFamily="'IBM Plex Mono', monospace"
-              style={{ filter: `drop-shadow(0 0 4px ${color})`, textTransform: 'uppercase' }}
-            >
-              {palabra}
-            </text>
-          )}
-        </svg>
-      ))}
-
-      {!esPunta && (
-        <div
-          style={{
-            position: 'absolute',
-            width: m1 * 2,
-            height: m1 * 2,
-            left: -m1,
-            top: -m1,
-            transform: `translateY(${-y1}px) rotateX(90deg)`,
-            background: `radial-gradient(circle, ${mezcla(color, 25 + g * 30)}, ${mezcla(color, 6)})`,
-            border: `1px solid ${mezcla(color, 55 + g * 45)}`,
-            boxShadow: `0 0 ${6 + g * 28}px ${mezcla(color, 35 + g * 50)}, inset 0 0 ${12 + g * 24}px ${mezcla(color, 18 + g * 40)}`,
-            opacity: avance * (1 - avanceSiguiente)
-          }}
-        />
+          {dibujar({ fill: `url(#g${id})` })}
+          {dibujar({ fill: `url(#p${id})` })}
+          {/* Resplandor: el mismo contorno, grueso y difuminado. */}
+          {dibujar({ fill: 'none', stroke: trazo, strokeWidth: 12, strokeOpacity: 0.3, filter: `url(#f${id})` })}
+          {dibujar({ fill: 'none', stroke: trazo, strokeWidth: 2.2, strokeOpacity: 0.9 })}
+        </>
       )}
+
+      {!esPunta &&
+        capa(
+          14.5,
+          aparicion * brillo,
+          <>
+            <defs>
+              <filter id={`b${id}`} x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation={7} />
+              </filter>
+            </defs>
+            {dibujar({ fill: color, fillOpacity: 0.3 })}
+            {dibujar({ fill: 'none', stroke: color, strokeWidth: 14, strokeOpacity: 0.55, filter: `url(#b${id})` })}
+          </>
+        )}
     </div>
   );
 });
-
-// Logo (isotipo) del ICAP flotando dentro de la pirámide, con look de
-// holograma. Es un plano "cartel" (billboard): contra-rota el giro de la
-// escena (rotateY(-giro)) para quedar siempre de frente a la cámara
-// aunque la pirámide gire, y se ve a través de las caras translúcidas.
-// - La silueta sale del PNG del logo (tiene fondo transparente) usado
-//   como mask-image — por eso pierde sus dos tonos y queda toda del
-//   color del holograma —, pintada
-//   con un degradado del color de la pirámide + líneas de escaneo que
-//   se desplazan (holoScan en global.css).
-// - El resplandor va en un wrapper APARTE con drop-shadow: el filtro de
-//   un elemento se aplica antes que su propia máscara, así que en el
-//   mismo elemento la máscara se "comería" el brillo.
-// - Aparece de a poco (`visible`, 0→1, desde la segunda base) y flota/parpadea
-//   levemente (holoFloat / holoFlicker).
-function LogoHolograma({ y, ancho, color, visible }) {
-  const alto = ancho * (456 / 413); // proporción del PNG del logo
-  const mascara = {
-    maskImage: `url("${icapLogoMark}")`,
-    WebkitMaskImage: `url("${icapLogoMark}")`,
-    maskSize: 'contain',
-    WebkitMaskSize: 'contain',
-    maskRepeat: 'no-repeat',
-    WebkitMaskRepeat: 'no-repeat',
-    maskPosition: 'center',
-    WebkitMaskPosition: 'center'
-  };
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        width: ancho,
-        height: alto,
-        left: -ancho / 2,
-        top: -alto / 2,
-        transform: `translateY(${-y}px)`,
-        opacity: visible,
-        visibility: visible > 0 ? 'visible' : 'hidden'
-      }}
-    >
-      <div className="animate-holo-float" style={{ width: '100%', height: '100%' }}>
-        <div
-          className="animate-holo-flicker"
-          style={{
-            width: '100%',
-            height: '100%',
-            filter: `drop-shadow(0 0 4px ${color}) drop-shadow(0 0 14px ${mezcla(color, 70)})`
-          }}
-        >
-          <div
-            className="animate-holo-scan"
-            style={{
-              ...mascara,
-              width: '100%',
-              height: '100%',
-              backgroundImage: `repeating-linear-gradient(0deg, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 1px, transparent 1px, transparent 4px), linear-gradient(180deg, ${mezcla('white', 85)}, ${mezcla(color, 80)} 45%, ${mezcla(color, 30)})`,
-              backgroundSize: '100% 8px, 100% 100%'
-            }}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // Rayo original (dos planos cruzados con degradado). Se probó un
 // "huso" de luz en punta y a Yocxany no le gustó — no volver a eso.
@@ -295,10 +203,8 @@ export default function PublicacionesPiramide({ titulo, palabras, objetivo, pist
   const n = palabras.length;
   const piezas = n + 2; // pisos + punta + haz
 
-  const base = 300;
-  const altoFranja = 38;
-  const altoPunta = 80;
-  const altoTotal = n * altoFranja + altoPunta;
+  // `palabras` trae 7: una pieza del logo por palabra (ver PIEZAS).
+  const altoTotal = ALTO_LOGO;
 
   // Fluidez: antes cada evento de scroll escribía el progreso directo
   // (la ruedita del mouse avanza "a saltos", así que la pirámide también
@@ -308,7 +214,7 @@ export default function PublicacionesPiramide({ titulo, palabras, objetivo, pist
   //   objetivo con suavizado (lerp), así los saltos de la ruedita se
   //   convierten en un movimiento continuo;
   // - escala y alto visible se miden sólo al montar y en resize;
-  // - el progreso se redondea (1/2000) para no re-renderizar por
+  // - el progreso se redondea (1/5000) para no re-renderizar por
   //   cambios imperceptibles, y el loop se detiene solo cuando llega.
   const objetivoRef = useRef(0);
   const mostradoRef = useRef(0);
@@ -330,14 +236,29 @@ export default function PublicacionesPiramide({ titulo, palabras, objetivo, pist
       const r = seccion.getBoundingClientRect();
       objetivoRef.current = limitar(-(r.top - topVisible) / (r.height - H));
     };
-    const paso = () => {
+    // Suavizado según el TIEMPO real entre frames (no un % fijo por
+    // frame): así se siente igual de fluido en pantallas de 60, 120 o
+    // 144 Hz. SUAVIZADO_MS es cuánto tarda en recorrer ~63% de la
+    // distancia al objetivo — más alto = más "manteca", más bajo = más
+    // pegado al dedo/ruedita.
+    const SUAVIZADO_MS = 140;
+    let ultimoT = null;
+    const paso = (t) => {
+      const dt = ultimoT === null ? 16 : Math.min(64, t - ultimoT);
+      ultimoT = t;
       const objetivo = objetivoRef.current;
       const actual = mostradoRef.current;
       const diff = objetivo - actual;
-      const siguiente = Math.abs(diff) < 0.0005 ? objetivo : actual + diff * 0.14;
+      const k = 1 - Math.exp(-dt / SUAVIZADO_MS);
+      const siguiente = Math.abs(diff) < 0.0002 ? objetivo : actual + diff * k;
       mostradoRef.current = siguiente;
-      setProgreso(Math.round(siguiente * 2000) / 2000);
-      rafId = siguiente === objetivo ? null : requestAnimationFrame(paso);
+      setProgreso(Math.round(siguiente * 5000) / 5000);
+      if (siguiente === objetivo) {
+        rafId = null;
+        ultimoT = null;
+      } else {
+        rafId = requestAnimationFrame(paso);
+      }
     };
     const alMover = () => {
       leerObjetivo();
@@ -378,12 +299,28 @@ export default function PublicacionesPiramide({ titulo, palabras, objetivo, pist
   // sección se suelte (con el suavizado, antes se quedaba a medias).
   const armado = limitar(progreso / 0.82);
   const pos = armado * piezas;
-  const redondear = (v) => Math.round(v * 200) / 200;
+  const redondear = (v) => Math.round(v * 1000) / 1000;
   const avance = (i) => redondear(limitar(pos - i));
   const brillo = (i) => (avance(i) < 1 ? 0 : redondear(limitar(1 - (pos - i - 1) * 1.5)));
-  const activo = Math.min(n - 1, Math.floor(pos));
-  const giro = -40 + armado * 120;
+  // Las palabras se sincronizan con la LLEGADA de cada pieza, no con
+  // el momento en que empieza a caer: cada pieza tarda ~2 gestos de
+  // scroll en acomodarse, y antes la palabra cambiaba apenas arrancaba
+  // la caída (a mitad de camino del gesto), así que iba desfasada.
+  // Ahora la palabra `i` se resalta cuando la pieza `i` ya recorrió
+  // LLEGADA de su caída y queda resaltada hasta que llega la siguiente
+  // — cambia UNA vez por pieza. Mismo umbral para la lista, el rótulo
+  // grande y el objetivo final.
+  const LLEGADA = 0.75;
+  const llego = (i) => avance(i) >= LLEGADA;
+  const activo = Math.max(0, Math.min(n - 1, Math.floor(pos - LLEGADA)));
+  // Gira de -40° a 0°: termina DE FRENTE, con el logo legible.
+  const giro = -40 + armado * 40;
   const mostrarPista = progreso < 0.04;
+  // Rótulo grande debajo del logo: la palabra del nivel que está
+  // cayendo y, cuando ya cayó la punta, el objetivo final.
+  const completo = llego(n);
+  const rotulo = completo ? objetivo : palabras[activo];
+  const mostrarRotulo = llego(0) && Boolean(rotulo);
 
   return (
     // Sección completa de borde a borde (ya no un panel redondeado
@@ -404,10 +341,11 @@ export default function PublicacionesPiramide({ titulo, palabras, objetivo, pist
           </div>
         )}
         <div className="relative flex-1 min-h-0 w-full max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-16 px-5 sm:px-8">
+          <div className="w-full max-w-[460px] shrink-0 flex flex-col items-center md:max-h-full">
           <div
             ref={escenaRef}
             aria-hidden="true"
-            className="relative w-full max-w-[460px] h-[38vh] md:h-[520px] md:max-h-[80%] flex items-center justify-center shrink-0"
+            className="relative w-full h-[34vh] md:h-[440px] md:max-h-[70vh] flex items-center justify-center shrink-0"
             style={{ perspective: '1400px' }}
           >
             <div
@@ -417,7 +355,7 @@ export default function PublicacionesPiramide({ titulo, palabras, objetivo, pist
                 height: 0,
                 transformStyle: 'preserve-3d',
                 willChange: 'transform',
-                transform: `translateY(${(altoTotal / 2) * escala}px) scale(${escala}) rotateX(-18deg) rotateY(${giro}deg)`
+                transform: `translateY(${(altoTotal / 2) * escala}px) scale(${escala}) rotateX(-12deg) rotateY(${giro}deg)`
               }}
             >
               <div
@@ -438,70 +376,78 @@ export default function PublicacionesPiramide({ titulo, palabras, objetivo, pist
               />
 
               {palabras.map((palabra, i) => (
-                <Franja
+                <PiezaLogo
                   key={i}
-                  palabra={palabra}
-                  y0={i * altoFranja}
-                  y1={(i + 1) * altoFranja}
-                  base={base}
-                  altoTotal={altoTotal}
+                  forma={PIEZAS[Math.min(i, PIEZAS.length - 1)]}
                   color={color}
                   avance={avance(i)}
-                  avanceSiguiente={avance(i + 1)}
                   brillo={brillo(i)}
                 />
               ))}
 
-              <Franja
-                esPunta
-                y0={n * altoFranja}
-                y1={altoTotal}
-                base={base}
-                altoTotal={altoTotal}
-                color={color}
-                avance={avance(n)}
-                avanceSiguiente={0}
-                brillo={0}
-              />
+              <PiezaLogo esPunta forma={PUNTA} color={color} avance={avance(n)} brillo={0} />
 
-              {/* Billboard: contra-rota el giro de la escena para quedar
-                  siempre de frente. Centro a ~1/3 de la altura, donde la
-                  pirámide todavía es ancha y el escudo entra holgado. */}
-              <div style={{ position: 'absolute', transformStyle: 'preserve-3d', transform: `rotateY(${-giro}deg)` }}>
-                <LogoHolograma
-                  y={altoTotal * 0.34}
-                  ancho={base * 0.38}
-                  color={color}
-                  // pos = pisos caídos; 1 → empieza a caer la 2ª base,
-                  // 3 → ya cayeron tres pisos y el logo está completo.
-                  visible={redondear(limitar((pos - 1) / 2))}
-                />
-              </div>
-
-              <Haz y={-altoTotal} color={color} avance={avance(n + 1)} />
+              {/* El rayo sale desde arriba del punto grande del centro. */}
+              <Haz y={-(ALTO_LOGO - (PUNTA.cy - PUNTA.r) * ESCALA_LOGO)} color={color} avance={avance(n + 1)} />
             </div>
           </div>
 
+          {/* Rótulo holográfico de la palabra del nivel actual. `key`
+              cambia con cada palabra para que la animación de entrada
+              (holoWordIn en global.css) se repita en cada nivel. */}
+          <div className="h-16 sm:h-20 flex flex-col items-center justify-center text-center transition-opacity duration-500" style={{ opacity: mostrarRotulo ? 1 : 0 }}>
+            <span
+              key={completo ? 'objetivo' : activo}
+              className="animate-holo-word flex flex-col items-center"
+            >
+              {!completo && (
+                <span className="font-mono-code text-[10px] sm:text-xs tracking-[0.3em]" style={{ color }}>
+                  {String(activo + 1).padStart(2, '0')} / {String(n).padStart(2, '0')}
+                </span>
+              )}
+              <span
+                className="font-heading font-extrabold uppercase tracking-[0.12em] text-2xl sm:text-3xl md:text-4xl text-white leading-tight"
+                style={{ textShadow: `0 0 6px ${color}, 0 0 22px ${color}, 0 0 44px ${mezcla(color, 60)}` }}
+              >
+                {rotulo}
+              </span>
+            </span>
+          </div>
+          </div>
+
           {/* Lista de las 7 palabras, de la base (01) a la cima (07) —
-              se enciende a medida que cae cada piso. */}
+              se enciende a medida que cae cada pieza del logo. */}
+          {/* La palabra activa crece, brilla y lleva una franja de luz
+              detrás; las que ya cayeron quedan encendidas a media luz y
+              las que faltan, casi apagadas. */}
           <ol className="w-full max-w-xs md:max-w-sm">
             {palabras.map((palabra, i) => {
-              const visible = avance(i) > 0.5;
-              const esActivo = i === activo && armado < 1;
+              const visible = llego(i);
+              const esActivo = i === activo && !completo;
               return (
                 <li
                   key={i}
-                  className="flex items-baseline gap-3 sm:gap-4 py-1 sm:py-1.5 pl-4 border-l transition-all duration-300"
+                  className="flex items-center gap-3 sm:gap-4 py-0.5 sm:py-1 md:py-1.5 pl-4 pr-3 border-l-2 rounded-r-lg transition-all duration-500"
                   style={{
-                    opacity: visible ? (esActivo ? 1 : 0.55) : 0.12,
-                    borderColor: esActivo ? color : 'rgba(255,255,255,.12)',
-                    boxShadow: esActivo ? `-6px 0 14px -8px ${color}` : 'none'
+                    opacity: visible ? (esActivo ? 1 : 0.6) : 0.15,
+                    borderColor: esActivo ? color : visible ? mezcla(color, 35) : 'rgba(255,255,255,.12)',
+                    background: esActivo ? `linear-gradient(90deg, ${mezcla(color, 22)}, transparent)` : 'transparent',
+                    boxShadow: esActivo ? `-8px 0 18px -8px ${color}` : 'none',
+                    transform: esActivo ? 'translateX(6px)' : 'none'
                   }}
                 >
-                  <span className="text-xs sm:text-sm tabular-nums font-mono-code" style={{ color }}>
+                  <span
+                    className={`tabular-nums font-mono-code transition-all duration-500 ${esActivo ? 'text-sm sm:text-base font-bold' : 'text-xs sm:text-sm'}`}
+                    style={{ color }}
+                  >
                     {String(i + 1).padStart(2, '0')}
                   </span>
-                  <span className={`font-heading text-sm sm:text-base ${esActivo ? 'font-extrabold' : 'font-semibold'}`}>
+                  <span
+                    className={`font-heading transition-all duration-500 ${
+                      esActivo ? 'text-lg sm:text-xl md:text-2xl font-extrabold' : 'text-sm sm:text-base md:text-lg font-semibold'
+                    }`}
+                    style={{ textShadow: esActivo ? `0 0 4px ${color}, 0 0 16px ${color}` : 'none' }}
+                  >
                     {palabra}
                   </span>
                 </li>
@@ -509,10 +455,10 @@ export default function PublicacionesPiramide({ titulo, palabras, objetivo, pist
             })}
             {objetivo && (
               <li
-                className="mt-3 sm:mt-4 pl-4 font-heading text-base sm:text-lg font-extrabold transition-opacity duration-500"
+                className="mt-3 sm:mt-4 pl-4 font-heading text-base sm:text-lg md:text-xl font-extrabold transition-opacity duration-500"
                 style={{
-                  opacity: avance(n) > 0.5 ? 1 : 0.12,
-                  textShadow: avance(n) > 0.5 ? `0 0 18px ${color}` : 'none'
+                  opacity: completo ? 1 : 0.15,
+                  textShadow: completo ? `0 0 18px ${color}` : 'none'
                 }}
               >
                 {objetivo}

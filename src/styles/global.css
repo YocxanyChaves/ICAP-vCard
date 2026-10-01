@@ -751,49 +751,31 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Logo holograma dentro de la pirámide de Publicaciones
-   (PublicacionesPiramide.jsx → LogoHolograma):
-   - holoScan: las líneas de escaneo (la primera capa del background)
-     bajan en loop, como un proyector refrescando la imagen.
-   - holoFlicker: parpadeo leve e irregular de opacidad, como una
-     proyección con interferencia — sutil para no distraer.
-   - holoFloat: el logo sube y baja un poquito, flotando. */
-@keyframes holoScan {
-  from { background-position: 0 0, 0 0; }
-  to { background-position: 0 8px, 0 0; }
+/* Rótulo grande de la palabra de cada nivel debajo del logo holográfico
+   de Publicaciones (PublicacionesPiramide.jsx): entra como una
+   proyección que se enfoca — desde desenfocada, más espaciada y un poco
+   más abajo, hasta nítida en su lugar. */
+@keyframes holoWordIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(8px);
+    letter-spacing: 0.35em;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+    letter-spacing: normal;
+  }
 }
 
-@keyframes holoFlicker {
-  0%, 100% { opacity: 0.85; }
-  8% { opacity: 0.7; }
-  10% { opacity: 0.9; }
-  46% { opacity: 0.8; }
-  48% { opacity: 0.55; }
-  50% { opacity: 0.88; }
-  80% { opacity: 0.78; }
-}
-
-@keyframes holoFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
-.animate-holo-scan {
-  animation: holoScan 0.9s linear infinite;
-}
-
-.animate-holo-flicker {
-  animation: holoFlicker 3.2s steps(1, end) infinite;
-}
-
-.animate-holo-float {
-  animation: holoFloat 4s ease-in-out infinite;
+.animate-holo-word {
+  animation: holoWordIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-holo-scan,
-  .animate-holo-flicker,
-  .animate-holo-float {
+  .animate-holo-word {
     animation: none;
   }
 }
