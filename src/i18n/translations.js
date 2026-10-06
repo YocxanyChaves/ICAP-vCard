@@ -201,12 +201,28 @@ export const translations = {
     authorities: {
       kicker: 'Liderazgo Institucional',
       title: 'Autoridades',
-      subtitle: 'Equipo directivo y autoridades del ICAP.',
-      notice:
-        'Sección en construcción · los espacios de abajo se completarán con nombres, cargos y fotografías oficiales una vez definidos.',
-      namePending: 'Nombre pendiente',
-      titlePending: 'Cargo pendiente',
-      tbd: 'Por definir'
+      subtitle:
+        'Quienes conducen el ICAP: la Dirección General y las direcciones de sus dos departamentos. Volteá cada ficha para leer su mensaje.',
+      roles: {
+        director: 'Director del ICAP',
+        at: 'Director de Asistencia Técnica',
+        docencia: 'Director de Docencia'
+      },
+      tags: {
+        director: 'Dirección General',
+        at: 'Asistencia Técnica',
+        docencia: 'Docencia'
+      },
+      currentDept: 'Departamento actual',
+      flipFront: 'Ver su mensaje',
+      flipBack: 'Volver a la ficha',
+      quotePending: 'Mensaje pendiente · pronto se agregará una frase de su autoría.',
+      linkedin: 'LinkedIn',
+      whatsapp: 'WhatsApp',
+      email: 'Correo',
+      saveContact: 'Guardar contacto',
+      pending: 'Dato pendiente',
+      whatsappMessage: (name) => `Hola ${name}, te contacto desde el brochure ICAP.`
     },
 
     missionVision: {
@@ -713,25 +729,33 @@ export const translations = {
 
     contact: {
       kicker: 'Hablemos',
-      title: 'Ficha de Contacto',
-      subtitle: 'Punto de contacto oficial para proyectos, posgrados y cooperación institucional.',
-      sampleTag: 'Dato de ejemplo',
-      repTag: 'Representante ICAP',
-      hqLine: 'ICAP · Sede Central',
-      whatsapp: 'WhatsApp Directo',
-      email: 'Enviar Correo',
-      linkedin: 'Perfil LinkedIn',
-      schedule: 'Agendar una Cita',
-      saveHint: 'Descarga la tarjeta digital (.vcf) directamente en tu agenda de contactos.',
+      title: 'Contactá al ICAP',
+      subtitle: 'Canal oficial del Instituto para proyectos, posgrados y cooperación institucional.',
+      institutionTag: 'Contacto Institucional',
+      orgName: 'Instituto Centroamericano de Administración Pública',
+      hqLine: 'Organismo del SICA · Fundado en 1954',
+      topicLabel: 'Consulta sobre',
+      infoAddress: 'Sede Central',
+      infoPhone: 'Teléfono',
+      infoWeb: 'Sitio web',
+      directions: 'Cómo llegar',
+      whatsapp: 'WhatsApp Institucional',
+      email: 'Correo Institucional',
+      linkedin: 'ICAP en LinkedIn',
+      schedule: 'Agendar una Reunión',
+      saveHint: 'Descargá la tarjeta institucional del ICAP (.vcf) directo a tus contactos.',
       footerLine: 'ICAP · San José, Costa Rica · SICA',
-      whatsappMessage: (name) => `Hola ${name}, te contacto desde el brochure ICAP.`,
+      whatsappMessage: (topic) =>
+        `Hola ICAP, los contacto desde el brochure institucional. Me interesa información sobre ${topic}.`,
+      emailSubject: (topic) => `Consulta institucional · ${topic}`,
       scheduleModalTitle: 'Agendar Reunión',
       scheduleModalSubtitle: 'Coordinación Institucional',
       scheduleModalText:
-        'Selecciona el canal que prefieras para coordinar una sesión presencial o virtual con el representante de ICAP.',
+        'Elegí el canal que prefieras para coordinar una sesión presencial o virtual con el equipo del ICAP.',
       viaWhatsapp: 'Coordinar vía WhatsApp',
       viaEmail: 'Solicitar por Correo Electrónico',
-      scheduleWhatsappMessage: 'Hola, me gustaría agendar una reunión con el ICAP.'
+      scheduleWhatsappMessage: (topic) => `Hola ICAP, me gustaría agendar una reunión sobre ${topic}.`,
+      scheduleEmailSubject: (topic) => `Solicitud de reunión · ${topic}`
     },
 
     aboutModal: {
@@ -960,12 +984,28 @@ export const translations = {
     authorities: {
       kicker: 'Institutional Leadership',
       title: 'Leadership',
-      subtitle: "ICAP's executive team and authorities.",
-      notice:
-        'Section under construction · the spaces below will be filled in with names, titles, and official photos once confirmed.',
-      namePending: 'Name pending',
-      titlePending: 'Title pending',
-      tbd: 'To be defined'
+      subtitle:
+        "The people who lead ICAP: the Executive Office and the heads of its two departments. Flip each card to read their message.",
+      roles: {
+        director: 'Director of ICAP',
+        at: 'Director of Technical Assistance',
+        docencia: 'Director of Teaching'
+      },
+      tags: {
+        director: 'Executive Office',
+        at: 'Technical Assistance',
+        docencia: 'Teaching'
+      },
+      currentDept: 'Current department',
+      flipFront: 'Read their message',
+      flipBack: 'Back to profile',
+      quotePending: 'Message pending · a short quote of their own will be added soon.',
+      linkedin: 'LinkedIn',
+      whatsapp: 'WhatsApp',
+      email: 'Email',
+      saveContact: 'Save contact',
+      pending: 'Pending',
+      whatsappMessage: (name) => `Hi ${name}, I'm reaching out from the ICAP brochure.`
     },
 
     missionVision: {
@@ -1470,25 +1510,33 @@ export const translations = {
 
     contact: {
       kicker: 'Get in Touch',
-      title: 'Contact Card',
-      subtitle: 'Official point of contact for projects, graduate programs, and institutional cooperation.',
-      sampleTag: 'Sample data',
-      repTag: 'ICAP Representative',
-      hqLine: 'ICAP · Headquarters',
-      whatsapp: 'WhatsApp Direct',
-      email: 'Send Email',
-      linkedin: 'LinkedIn Profile',
+      title: 'Contact ICAP',
+      subtitle: "The Institute's official channel for projects, graduate programs, and institutional cooperation.",
+      institutionTag: 'Institutional Contact',
+      orgName: 'Central American Institute of Public Administration',
+      hqLine: 'SICA body · Founded in 1954',
+      topicLabel: 'Inquiry about',
+      infoAddress: 'Headquarters',
+      infoPhone: 'Phone',
+      infoWeb: 'Website',
+      directions: 'Get directions',
+      whatsapp: 'Institutional WhatsApp',
+      email: 'Institutional Email',
+      linkedin: 'ICAP on LinkedIn',
       schedule: 'Schedule a Meeting',
-      saveHint: 'Download the digital business card (.vcf) straight to your contacts.',
+      saveHint: "Download ICAP's institutional card (.vcf) straight to your contacts.",
       footerLine: 'ICAP · San José, Costa Rica · SICA',
-      whatsappMessage: (name) => `Hi ${name}, I'm reaching out from the ICAP brochure.`,
+      whatsappMessage: (topic) =>
+        `Hi ICAP, I'm reaching out from the institutional brochure. I'd like information about ${topic}.`,
+      emailSubject: (topic) => `Institutional inquiry · ${topic}`,
       scheduleModalTitle: 'Schedule a Meeting',
       scheduleModalSubtitle: 'Institutional Coordination',
       scheduleModalText:
-        'Choose the channel you prefer to coordinate an in-person or virtual session with the ICAP representative.',
+        'Choose the channel you prefer to coordinate an in-person or virtual session with the ICAP team.',
       viaWhatsapp: 'Coordinate via WhatsApp',
       viaEmail: 'Request by Email',
-      scheduleWhatsappMessage: "Hi, I'd like to schedule a meeting with ICAP."
+      scheduleWhatsappMessage: (topic) => `Hi ICAP, I'd like to schedule a meeting about ${topic}.`,
+      scheduleEmailSubject: (topic) => `Meeting request · ${topic}`
     },
 
     aboutModal: {

@@ -55,7 +55,9 @@ export function downloadVCard(contact = defaultContact) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.setAttribute('download', `${contact.fullName.replace(/\s+/g, '_')}_ICAP.vcf`);
+  // `fileName` opcional: la ficha institucional de Contacto lo usa para
+  // bajar "ICAP.vcf" en vez de "<nombre>_ICAP.vcf".
+  link.setAttribute('download', contact.fileName || `${contact.fullName.replace(/\s+/g, '_')}_ICAP.vcf`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

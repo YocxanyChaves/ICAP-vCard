@@ -808,3 +808,80 @@ h1, h2, h3, h4, h5, h6 {
     animation: none;
   }
 }
+
+/* Autoridades (AuthoritiesSection.jsx): anillo de luz que gira sin
+   parar alrededor de cada retrato — misma paleta que el destello del
+   logo en Valores (.value-light-ring), pero en vuelta continua en vez
+   de una sola pasada, para que los tres retratos se sientan "vivos". */
+@keyframes authorityRingSpin {
+  to { transform: rotate(360deg); }
+}
+
+.authority-ring {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 190deg,
+    rgba(143, 211, 255, 0.18) 240deg,
+    #bfe6ff 300deg,
+    #ffffff 324deg,
+    #8fd3ff 340deg,
+    transparent 360deg
+  );
+  -webkit-mask-image: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  mask-image: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  animation: authorityRingSpin 4.5s linear infinite;
+}
+
+/* Organigrama de Autoridades: un pulso de luz baja desde la Dirección
+   General y se reparte hacia los dos departamentos. Cada tramo de la
+   línea tiene una "chispa" adentro (span con overflow recortado) que
+   lo cruza en el primer tercio del ciclo y después descansa; los
+   tramos se encadenan con animation-delay (ver CONNECTOR_DELAYS en el
+   componente) para que se lea como un solo pulso que viaja. */
+@keyframes authorityPulseY {
+  0% { transform: translateY(-100%); opacity: 0; }
+  6% { opacity: 1; }
+  30% { opacity: 1; }
+  36% { transform: translateY(170%); opacity: 0; }
+  100% { transform: translateY(170%); opacity: 0; }
+}
+
+@keyframes authorityPulseX {
+  0% { transform: translateX(-100%); opacity: 0; }
+  6% { opacity: 1; }
+  30% { opacity: 1; }
+  36% { transform: translateX(170%); opacity: 0; }
+  100% { transform: translateX(170%); opacity: 0; }
+}
+
+.authority-pulse-y {
+  animation: authorityPulseY 2.6s ease-in-out infinite;
+}
+
+.authority-pulse-x {
+  animation: authorityPulseX 2.6s ease-in-out infinite;
+}
+
+/* Entrada en cascada de las fichas de Autoridades al cargar la página. */
+@keyframes authorityRise {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-authority-rise {
+  animation: authorityRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .authority-ring,
+  .authority-pulse-y,
+  .authority-pulse-x,
+  .animate-authority-rise {
+    animation: none;
+  }
+  .authority-pulse-y,
+  .authority-pulse-x {
+    opacity: 0;
+  }
+}

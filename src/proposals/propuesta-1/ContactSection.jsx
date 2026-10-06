@@ -1,5 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { User, MessageCircle, Mail, Calendar, ExternalLink, Sparkles } from 'lucide-react';
+import {
+  MessageCircle,
+  Mail,
+  Calendar,
+  ExternalLink,
+  BadgeCheck,
+  MapPin,
+  Navigation,
+  Phone,
+  Globe,
+  Handshake,
+  GraduationCap
+} from 'lucide-react';
 import { LinkedinIcon } from '../../components/Icons';
 import VCardDownload, { defaultContact, whatsappDigits } from '../../components/VCardDownload';
 import BottomSheet from '../../components/BottomSheet';
@@ -7,6 +19,7 @@ import KickerBadge from './KickerBadge';
 import { useLanguage } from '../../i18n/LanguageContext';
 import icapEscudoNavy from '../../assets/icap-escudo-navy.png';
 import icapEscudoWhite from '../../assets/icap-escudo-white.png';
+import icapLogoMark from '../../assets/icap-logo-mark.png';
 
 // Mismo degradado celeste (con su brillo radial arriba-izquierda) que
 // las fichas de "Áreas de Especialización" — se reutiliza tal cual acá
@@ -17,13 +30,39 @@ const PROFILE_BACKGROUND =
   'radial-gradient(65% 70% at 14% -8%, rgba(255,255,255,0.4), transparent 42%), ' +
   'linear-gradient(160deg, #0090DD 0%, #0068AE 48%, #013A63 100%)';
 
+const MAPS_URL =
+  'https://www.google.com/maps/search/?api=1&query=' +
+  encodeURIComponent('Instituto Centroamericano de Administración Pública ICAP, Curridabat, San José, Costa Rica');
+
 // Mismo caso que AuthoritiesSection: Contacto es compartido entre AT y
-// Docencia (mismo componente/contenido), pero el kicker sí toma la
-// identidad visual del departamento activo (glow de AT / dot de
-// Docencia) vía `dept` — el texto se queda igual en los dos.
+// Docencia (mismo componente), con el kicker en el estilo del
+// departamento activo (glow de AT / dot de Docencia) vía `dept`.
+// Yocxany pidió que la ficha fuera de la INSTITUCIÓN y no de una
+// persona, así que `dept` además define el tema de la consulta: se
+// muestra en la ficha y viaja prellenado en los mensajes de WhatsApp y
+// correo, para que el ICAP sepa de entrada a qué departamento derivar.
 export default function ContactSection({ contact = defaultContact, id = 'contacto', dept = 'at' }) {
   const { t } = useLanguage();
   const [scheduleModal, setScheduleModal] = useState(false);
+  const topic = dept === 'docencia' ? t.header.deptDocencia : t.header.deptAT;
+  const DeptIcon = dept === 'docencia' ? GraduationCap : Handshake;
+
+  // Tarjeta .vcf de la institución (no de una persona): mismos teléfono,
+  // correo, sitio y dirección del contacto, con el ICAP como nombre.
+  const institutionalCard = {
+    firstName: 'ICAP',
+    lastName: '',
+    fullName: 'ICAP',
+    title: t.contact.orgName,
+    org: 'Instituto Centroamericano de Administración Pública (ICAP)',
+    phone: contact.phone,
+    cellPhone: contact.cellPhone,
+    email: contact.email,
+    url: contact.url,
+    address: contact.address,
+    notes: t.vcard.notes,
+    fileName: 'ICAP.vcf'
+  };
 
   // Misma entrada suave que ya usan Cifras y la ficha de Valores
   // (fundido + alzado, con la animación que ya vive en global.css) —
@@ -87,13 +126,14 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
           </p>
         </div>
 
-        {/* Executive Card */}
+        {/* Institutional Card */}
         <div className={visible ? 'animate-value-card-in' : 'opacity-0'}>
           <div className="mv-card-light bg-white dark:bg-[#003366] rounded-[28px] overflow-hidden">
-            {/* Franja de perfil en el mismo celeste 3D de Áreas — sella
-                el "carné" con la misma ilusión de volumen del resto del
-                brochure, en vez de la barra plana de antes. */}
-            <div className="relative px-5 pt-6 pb-7 sm:px-8 sm:pt-8 sm:pb-8 overflow-hidden" style={{ background: PROFILE_BACKGROUND }}>
+            {/* Franja de perfil en el mismo celeste 3D de Áreas. Ya no es
+                la ficha de una persona sino la del ICAP como institución:
+                isotipo en vez de avatar, nombre oficial y, abajo, el tema
+                de la consulta según el departamento que se está viendo. */}
+            <div className="relative px-5 pt-6 pb-6 sm:px-8 sm:pt-8 sm:pb-7 overflow-hidden" style={{ background: PROFILE_BACKGROUND }}>
               <span
                 aria-hidden="true"
                 className="absolute top-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"
@@ -108,38 +148,89 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
 
               <div className="relative flex items-center gap-3.5 sm:gap-5">
                 <div className="relative shrink-0">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-white shadow-md">
-                    <User className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white flex items-center justify-center shadow-lg ring-4 ring-white/20">
+                    <img src={icapLogoMark} alt="ICAP" draggable={false} className="w-[70%] h-[70%] object-contain" />
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white text-[#0077C8] border-2 border-[#0068AE] flex items-center justify-center shadow-sm">
-                    <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#0077C8] text-white border-2 border-white flex items-center justify-center shadow-sm">
+                    <BadgeCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   </div>
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="inline-block px-2.5 py-0.5 rounded-md bg-white/15 border border-white/20 text-white text-[9px] sm:text-[10px] font-mono-code font-bold tracking-wider uppercase mb-1">
-                    {contact.isSample ? t.contact.sampleTag : t.contact.repTag}
+                    {t.contact.institutionTag}
                   </div>
-                  <h3 className="font-heading font-extrabold text-base sm:text-xl text-white truncate">
-                    {contact.isSample ? t.vcard.fullName : contact.fullName}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-white/85 font-medium truncate">
-                    {contact.isSample ? t.vcard.title : contact.title}
-                  </p>
-                  <p className="text-[10px] sm:text-[11px] text-white/60 font-mono-code mt-0.5 truncate">
-                    {t.contact.hqLine}
-                  </p>
+                  <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-white tracking-wider leading-none">ICAP</h3>
+                  <p className="text-xs sm:text-sm text-white/90 font-medium leading-snug mt-1">{t.contact.orgName}</p>
+                  <p className="text-[10px] sm:text-[11px] text-white/65 font-mono-code mt-0.5 truncate">{t.contact.hqLine}</p>
                 </div>
+              </div>
+
+              <div className="relative mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 border border-white/15 text-[10px] sm:text-[11px] font-heading font-semibold text-white/85">
+                <DeptIcon className="w-3.5 h-3.5 text-[#bfe6ff]" />
+                <span>
+                  {t.contact.topicLabel} <span className="font-extrabold text-white">{topic}</span>
+                </span>
               </div>
             </div>
 
-            {/* Cuerpo: acciones rápidas + guardar contacto */}
+            {/* Cuerpo: datos de la sede + acciones rápidas + guardar contacto */}
             <div className="p-5 sm:p-8 flex flex-col gap-5 sm:gap-6">
+              {/* Datos institucionales */}
+              <div className="rounded-2xl border border-slate-100 dark:border-white/10 divide-y divide-slate-100 dark:divide-white/10 overflow-hidden">
+                <div className="flex items-start gap-3 p-3.5">
+                  <MapPin className="w-4 h-4 text-[#0077C8] dark:text-[#4FB2F2] shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-mono-code font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      {t.contact.infoAddress}
+                    </p>
+                    <p className="text-xs text-slate-800 dark:text-slate-100 leading-relaxed">{contact.address}</p>
+                    <a
+                      href={MAPS_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 mt-1 text-[11px] font-heading font-bold text-[#0077C8] dark:text-[#4FB2F2] hover:underline"
+                    >
+                      <Navigation className="w-3 h-3" />
+                      {t.contact.directions}
+                    </a>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 divide-x divide-slate-100 dark:divide-white/10">
+                  <a
+                    href={`tel:+${whatsappDigits(contact.phone)}`}
+                    className="flex items-start gap-3 p-3.5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors min-w-0"
+                  >
+                    <Phone className="w-4 h-4 text-[#0077C8] dark:text-[#4FB2F2] shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-mono-code font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {t.contact.infoPhone}
+                      </p>
+                      <p className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate">{contact.phone}</p>
+                    </div>
+                  </a>
+                  <a
+                    href={contact.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start gap-3 p-3.5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors min-w-0"
+                  >
+                    <Globe className="w-4 h-4 text-[#0077C8] dark:text-[#4FB2F2] shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-mono-code font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {t.contact.infoWeb}
+                      </p>
+                      <p className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate">icap.ac.cr</p>
+                    </div>
+                  </a>
+                </div>
+              </div>
+
               {/* Quick Action Buttons */}
               <div className="flex flex-col gap-2.5">
                 {/* WhatsApp */}
                 <a
-                  href={`https://wa.me/${whatsappDigits(contact.cellPhone)}?text=${encodeURIComponent(t.contact.whatsappMessage(contact.fullName))}`}
+                  href={`https://wa.me/${whatsappDigits(contact.cellPhone)}?text=${encodeURIComponent(t.contact.whatsappMessage(topic))}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-between h-13 px-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-heading font-bold text-xs tracking-wider uppercase border border-emerald-200/60 dark:border-emerald-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99] active:translate-y-0"
@@ -155,7 +246,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
 
                 {/* Email */}
                 <a
-                  href={`mailto:${contact.email}?subject=Contacto%20Institucional%20ICAP`}
+                  href={`mailto:${contact.email}?subject=${encodeURIComponent(t.contact.emailSubject(topic))}`}
                   className="flex items-center justify-between h-13 px-4 rounded-2xl bg-[#EAF3FB] dark:bg-white/5 hover:bg-[#D5E9F8] dark:hover:bg-white/10 text-[#003366] dark:text-white font-heading font-bold text-xs tracking-wider uppercase border border-[#0077C8]/20 dark:border-white/10 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99] active:translate-y-0"
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -198,10 +289,10 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
                 </button>
               </div>
 
-              {/* Primary Action: Guardar Contacto (.vcf download) */}
+              {/* Primary Action: Guardar Contacto (.vcf institucional) */}
               <div className="pt-2 border-t border-slate-100 dark:border-white/10">
                 <VCardDownload
-                  contact={contact}
+                  contact={institutionalCard}
                   className="w-full text-white hover:brightness-110"
                   style={{ background: 'linear-gradient(135deg, #0090DD 0%, #0068AE 55%, #013A63 100%)' }}
                 />
@@ -244,7 +335,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
 
           <div className="flex flex-col gap-2.5 pt-2">
             <a
-              href={`https://wa.me/${whatsappDigits(contact.cellPhone)}?text=${encodeURIComponent(t.contact.scheduleWhatsappMessage)}`}
+              href={`https://wa.me/${whatsappDigits(contact.cellPhone)}?text=${encodeURIComponent(t.contact.scheduleWhatsappMessage(topic))}`}
               target="_blank"
               rel="noopener noreferrer"
               className="py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors block text-center shadow-md"
@@ -252,7 +343,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
               {t.contact.viaWhatsapp}
             </a>
             <a
-              href={`mailto:${contact.email}?subject=Solicitud%20de%20Reunión%20con%20ICAP`}
+              href={`mailto:${contact.email}?subject=${encodeURIComponent(t.contact.scheduleEmailSubject(topic))}`}
               className="py-3.5 px-4 rounded-2xl bg-[#0077C8] hover:bg-[#005A96] text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors block text-center shadow-md"
             >
               {t.contact.viaEmail}

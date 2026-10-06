@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   Compass,
   Eye,
@@ -66,14 +66,15 @@ function FlipButton({ onClick, icon: Icon, label, tone = 'light' }) {
 }
 
 /** Fila numerada (frente). */
-function NumberTile({ tone, index, children }) {
+function NumberTile({ tone, index, eq, children }) {
   const isDark = tone === 'dark';
   return (
     <div
+      data-eq={eq}
       className={
         isDark
           ? 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-white/[0.06] border border-white/5 text-xs sm:text-sm leading-relaxed text-[#C9D9E8]'
-          : 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-white/[0.06] dark:border dark:border-white/5 text-xs sm:text-sm leading-relaxed text-slate-900 dark:text-[#C9D9E8]'
+          : 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-[#0077C8]/[0.04] dark:bg-white/[0.06] dark:border dark:border-white/5 text-xs sm:text-sm leading-relaxed text-slate-900 dark:text-[#C9D9E8]'
       }
     >
       <span
@@ -98,7 +99,7 @@ function IconTile({ tone, icon: Icon, children }) {
       className={
         isDark
           ? 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-white/[0.06] border border-white/5 text-xs sm:text-sm leading-relaxed text-[#C9D9E8]'
-          : 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-white/[0.06] dark:border dark:border-white/5 text-xs sm:text-sm leading-relaxed text-slate-900 dark:text-[#C9D9E8]'
+          : 'flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-[#0077C8]/[0.04] dark:bg-white/[0.06] dark:border dark:border-white/5 text-xs sm:text-sm leading-relaxed text-slate-900 dark:text-[#C9D9E8]'
       }
     >
       <span
@@ -169,7 +170,7 @@ function FlipCard({ flipped, hint, tone = 'light', front, back }) {
 }
 
 export default function MissionVision() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [misionFlipped, setMisionFlipped] = useState(false);
   const [visionFlipped, setVisionFlipped] = useState(false);
   const [misionHint, setMisionHint] = useState(false);
@@ -182,6 +183,39 @@ export default function MissionVision() {
   const misionFlippedRef = useRef(false);
   const visionFlippedRef = useRef(false);
   const sectionRef = useRef(null);
+
+  // Las 3 filas numeradas de Misión y Visión quedan al MISMO nivel (a
+  // pedido de Yocxany): cuando las fichas están lado a lado (sm+), cada
+  // par de piezas con el mismo `data-eq` (la frase y cada fila) toma el
+  // alto de la más alta de las dos. Así la lista arranca a la misma
+  // altura en ambas y cada fila queda alineada con su pareja aunque los
+  // textos sean de largo distinto. En móvil (apiladas) no se toca nada.
+  useLayoutEffect(() => {
+    const el = sectionRef.current;
+    const view = el?.ownerDocument?.defaultView;
+    if (!el || !view) return undefined;
+    const equalize = () => {
+      const nodes = Array.from(el.querySelectorAll('[data-eq]'));
+      nodes.forEach((node) => {
+        node.style.minHeight = '';
+      });
+      if (!view.matchMedia('(min-width: 640px)').matches) return;
+      const groups = {};
+      nodes.forEach((node) => {
+        (groups[node.dataset.eq] ||= []).push(node);
+      });
+      Object.values(groups).forEach((group) => {
+        const max = Math.max(...group.map((node) => node.getBoundingClientRect().height));
+        group.forEach((node) => {
+          node.style.minHeight = `${max}px`;
+        });
+      });
+    };
+    equalize();
+    view.addEventListener('resize', equalize);
+    el.ownerDocument.fonts?.ready.then(equalize);
+    return () => view.removeEventListener('resize', equalize);
+  }, [lang]);
 
   const toggleMision = (value) => {
     misionFlippedRef.current = value;
@@ -304,7 +338,7 @@ export default function MissionVision() {
                     </div>
                   </div>
 
-                  <blockquote className="border-l-[3px] border-[#0077C8]/30 dark:border-white/20 pl-4 sm:pl-5 mb-7">
+                  <blockquote data-eq="quote" className="border-l-[3px] border-[#0077C8]/30 dark:border-white/20 pl-4 sm:pl-5 mb-7">
                     <p className="font-heading text-base sm:text-xl font-semibold text-[#003366] dark:text-[#EAF3FB] leading-snug">
                       {t.missionVision.mission.quote}
                     </p>
@@ -312,7 +346,7 @@ export default function MissionVision() {
 
                   <div className="space-y-2 sm:space-y-2.5">
                     {t.missionVision.mission.pilares.map((item, i) => (
-                      <NumberTile key={i} tone="light" index={i}>
+                      <NumberTile key={i} tone="light" index={i} eq={`pilar-${i}`}>
                         {item}
                       </NumberTile>
                     ))}
@@ -418,7 +452,7 @@ export default function MissionVision() {
                     </div>
                   </div>
 
-                  <blockquote className="border-l-[3px] border-[#0077C8]/30 dark:border-white/20 pl-4 sm:pl-5 mb-7">
+                  <blockquote data-eq="quote" className="border-l-[3px] border-[#0077C8]/30 dark:border-white/20 pl-4 sm:pl-5 mb-7">
                     <p className="font-heading text-base sm:text-xl font-semibold text-[#003366] dark:text-[#EAF3FB] leading-snug">
                       {t.missionVision.vision.quote}
                     </p>
@@ -426,7 +460,7 @@ export default function MissionVision() {
 
                   <div className="space-y-2 sm:space-y-2.5">
                     {t.missionVision.vision.pilares.map((item, i) => (
-                      <NumberTile key={i} tone="light" index={i}>
+                      <NumberTile key={i} tone="light" index={i} eq={`pilar-${i}`}>
                         {item}
                       </NumberTile>
                     ))}
