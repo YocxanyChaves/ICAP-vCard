@@ -8,12 +8,6 @@
  * vez de mantener dos arreglos completos por separado — así el
  * componente conserva su única fuente de verdad para íconos, colores y
  * estructura, y sólo el texto visible cambia según el idioma.
- *
- * `areaLabels` es un caso especial: las "Áreas de Proyecto" (Gobernanza,
- * Salud, etc.) se usan a la vez como TEXTO visible y como LLAVE para
- * buscar color/ícono en areaMeta.js — así que esa llave se queda fija
- * en español siempre (es el "id" interno), y sólo se traduce lo que se
- * muestra en pantalla a través de este mapa.
  */
 
 export const translations = {
@@ -69,26 +63,28 @@ export const translations = {
       searchPlaceholder: 'Buscar por proyecto, cliente o tema…',
       clearSearch: 'Borrar búsqueda',
       allClients: 'Todos',
-      allAreas: 'Todas las áreas',
+      allTags: 'Todas las áreas',
+      tagsLabel: 'Áreas de especialización',
       clientTypes: {
         nacional: 'Institución nacional',
         sica: 'Organismo SICA',
         internacional: 'Cooperación internacional'
       },
-      areas: {},
-      scopes: {},
+      partnerFilter: 'Socio',
+      countryFilter: 'País',
+      removeFilter: 'Quitar filtro',
       showing: 'Mostrando',
       of: 'de',
       projectsWord: 'proyectos',
+      tapHint: 'Tocá un proyecto para ver su ficha.',
       clearFilters: 'Limpiar filtros',
       empty: 'No hay proyectos que coincidan con esos filtros.',
       statusActive: 'En curso',
       statusDone: 'Finalizado',
-      detailTitle: 'Detalle del proyecto',
       client: 'Organización / Cliente',
       clientType: 'Tipo de cliente',
       period: 'Período',
-      scope: 'Alcance'
+      region: 'Región'
     },
 
     sectionsStrip: {
@@ -120,115 +116,14 @@ export const translations = {
     specializationAreas: {
       kicker: 'Expertise y Oferta',
       title: 'Áreas de Especialización',
-      subtitle: 'Los seis frentes de especialización del ICAP, según su oferta institucional 2026, con un enfoque transversal de género en cada uno.',
-      generoNote: 'Género es un eje transversal que atraviesa las seis áreas de especialización.',
-      items: {
-        salud: {
-          title: 'Salud y Seguridad Social',
-          tag: 'Gerencia hospitalaria, epidemiología y seguridad social',
-          longDesc: 'Según la oferta institucional 2026 del ICAP, esta área comprende:',
-          // Descripción de 3 renglones (redactada a partir de los puntos de
-          // abajo) + las 3 líneas principales de esa misma lista, para la
-          // vista resumida de la tarjeta.
-          shortDesc:
-            'El ICAP fortalece la gestión hospitalaria y de emergencias en el sector salud. ' +
-            'También asesora en temas de pensiones, salud laboral y epidemiología. ' +
-            'Su enfoque busca sistemas de salud más eficientes y con mayor cobertura.',
-          highlights: ['Gerencia Hospitalaria', 'Epidemiología', 'Pensiones'],
-          points: [
-            'Gerencia Hospitalaria',
-            'Epidemiología',
-            'Dirección de servicios de emergencia',
-            'Migración y salud',
-            'Pensiones',
-            'Salud laboral',
-            'Servicios de salud'
-          ]
-        },
-        calidad: {
-          title: 'Calidad',
-          tag: 'Sistemas, información y certificaciones de calidad institucional',
-          longDesc: 'Según la oferta institucional 2026 del ICAP, esta área comprende:',
-          shortDesc:
-            'El ICAP ayuda a las instituciones a construir sistemas de calidad institucional. ' +
-            'Diseña mecanismos de información y medición para respaldar la toma de decisiones. ' +
-            'Acompaña además los procesos de certificación bajo estándares reconocidos.',
-          highlights: ['Calidad institucional', 'Sistemas de calidad', 'Certificaciones'],
-          points: [
-            'Calidad institucional',
-            'Sistema de información y medición',
-            'Sistemas de calidad',
-            'Certificaciones'
-          ]
-        },
-        proyectos: {
-          title: 'Proyectos',
-          tag: 'Formulación, factibilidad y certificación de proyectos',
-          longDesc: 'Según la oferta institucional 2026 del ICAP, esta área comprende:',
-          shortDesc:
-            'El ICAP acompaña todo el ciclo de vida de un proyecto, desde su formulación. ' +
-            'Realiza estudios de prefactibilidad y factibilidad para sustentar decisiones de inversión. ' +
-            'También ofrece procesos de certificación de proyectos.',
-          highlights: ['Formulación de proyectos', 'Estudios de factibilidad', 'Certificaciones'],
-          points: [
-            'Formulación de proyectos',
-            'Estudios de factibilidad',
-            'Estudios de prefactibilidad',
-            'Certificaciones'
-          ]
-        },
-        gobernanza: {
-          title: 'Gobernanza',
-          tag: 'Modernización, políticas públicas y participación ciudadana',
-          longDesc: 'Según la oferta institucional 2026 del ICAP, esta área comprende:',
-          shortDesc:
-            'El ICAP asesora procesos de modernización y reforma del Estado. ' +
-            'Apoya el diseño de políticas públicas y el fortalecimiento de la participación ciudadana. ' +
-            'Trabaja también temas de gobernanza digital y gobiernos locales.',
-          highlights: ['Modernización y reforma', 'Políticas Públicas', 'Participación ciudadana'],
-          points: [
-            'Modernización y reforma',
-            'Políticas Públicas',
-            'Planificación',
-            'Participación ciudadana',
-            'Gestión, Transparencia y Gobierno Abierto',
-            'Gobernanza Digital',
-            'Inversión Pública',
-            'Gobiernos locales'
-          ]
-        },
-        transformacion: {
-          title: 'Transformación Organizacional',
-          tag: 'Diseño organizacional, procesos y perfiles de puestos',
-          longDesc: 'Según la oferta institucional 2026 del ICAP, esta área comprende:',
-          shortDesc:
-            'El ICAP acompaña el diseño y la reingeniería de estructuras organizacionales. ' +
-            'Apoya la mejora de procesos y procedimientos internos. ' +
-            'También asesora en la definición de perfiles de puesto y cargas laborales.',
-          highlights: ['Diseño, reingeniería organizacional', 'Procesos y procedimientos', 'Perfiles, puestos y cargas laborales'],
-          points: [
-            'Diseño, reingeniería organizacional',
-            'Procesos y procedimientos',
-            'Perfiles, puestos y cargas laborales'
-          ]
-        },
-        ambiente: {
-          title: 'Ambiente y energía',
-          tag: 'Cambio climático, gestión ambiental y regulación energética',
-          longDesc: 'Según la oferta institucional 2026 del ICAP, esta área comprende:',
-          shortDesc:
-            'El ICAP apoya la adaptación y mitigación frente al cambio climático. ' +
-            'Asesora en gestión ambiental y regulación energética. ' +
-            'También trabaja la gestión de riesgos y desastres.',
-          highlights: ['Cambio Climático', 'Gestión ambiental', 'Regulación energética'],
-          points: [
-            'Cambio Climático',
-            'Gestión ambiental',
-            'Regulación energética',
-            'Gestión de riesgos y desastres'
-          ]
-        }
-      }
+      subtitle: 'Las catorce áreas temáticas en que se clasifican los proyectos de Asistencia Técnica del ICAP. Cada proyecto puede tocar varias.',
+      projects: 'Proyectos',
+      clients: 'Clientes',
+      ongoing: 'En curso',
+      projectsSuffix: (n) => (n === 1 ? '1 proyecto' : `${n} proyectos`),
+      latest: 'Proyectos recientes',
+      combines: 'Suele combinarse con',
+      seeRelated: 'Ver proyectos relacionados'
     },
 
     authorities: {
@@ -348,19 +243,6 @@ export const translations = {
       }
     },
 
-    areaLabels: {
-      Gobernanza: 'Gobernanza',
-      'Proyectos de Inversión': 'Proyectos de Inversión',
-      'Formación Continua': 'Formación Continua',
-      'Transformación Organizacional': 'Transformación Organizacional',
-      Ambiente: 'Ambiente',
-      Salud: 'Salud',
-      Género: 'Género',
-      Seguridad: 'Seguridad',
-      Calidad: 'Calidad',
-      'Asistencia Técnica': 'Asistencia Técnica'
-    },
-
     regionalMap: {
       kicker: 'Alcance y Territorio',
       title: 'Presencia Regional',
@@ -387,14 +269,18 @@ export const translations = {
       countryListHint: 'Los 10 países se ubican en el mapa a escala real',
       sidebarFooterLabel: 'Presencia y Cooperación ICAP',
       institutionalFocusLabel: 'Enfoque Institucional',
-      projectCountLabel: 'Cantidad de Proyectos',
-      pendingConfirm: 'Pendiente de confirmar',
-      documented: 'Documentado en el brochure',
-      qtyAbbrev: 'Cant.',
-      projectAreasLabel: 'Áreas de Proyecto',
-      noAreaRecord: 'Sin registro de área en el brochure de referencia.',
-      orgsLabel: 'Organizaciones y Contrapartes',
-      noOrgRecord: 'Sin registro de contraparte en el brochure de referencia.',
+      projectsLabel: 'Proyectos de Asistencia Técnica',
+      projectsSource: 'Clasificación 2026',
+      totalLabel: 'Total',
+      nationalLabel: 'Nacionales',
+      regionalLabel: 'Regionales',
+      regionalNote: 'Los regionales abarcan varios países a la vez (Centroamérica, el Caribe u otros).',
+      noProjects: 'Sin proyectos registrados en la clasificación de Asistencia Técnica.',
+      projectAreasLabel: 'Áreas de especialización',
+      orgsLabel: 'Clientes y contrapartes',
+      moreOrgs: (n) => `y ${n} más`,
+      recentLabel: 'Proyectos recientes',
+      seeProjects: (n) => (n === 1 ? 'Ver el proyecto' : `Ver los ${n} proyectos`),
       officeContactLabel: 'Contacto de oficina · ejemplo',
       countries: {
         CR: {
@@ -404,9 +290,7 @@ export const translations = {
           city: 'San José (Curridabat)',
           description:
             'Sede central directiva del ICAP desde 1954, campus de posgrados internacionales, centro de innovación pública y coordinación regional de cooperación técnica.',
-          highlight: 'Sede Central y Campus Académico Principal',
-          organizations: ['ICE', 'MIDEPLAN', 'PANI', 'INDER', 'INCOP', 'MINSA', 'ARESEP', 'IMAS', 'Poder Judicial de Costa Rica'],
-          dataNote: 'Docenas de proyectos documentados en el brochure · cantidad exacta por confirmar'
+          highlight: 'Sede Central y Campus Académico Principal'
         },
         GT: {
           name: 'Guatemala',
@@ -415,9 +299,7 @@ export const translations = {
           city: 'Ciudad de Guatemala',
           description:
             'Oficina nacional de vinculación con ministerios, fortalecimiento institucional y acompañamiento a proyectos de modernización estatal.',
-          highlight: 'Programas de Alta Dirección y Enlace Gubernamental',
-          organizations: ['Academia de Diplomacia de Guatemala', 'Ministerio de Relaciones Exteriores de Guatemala'],
-          dataNote: null
+          highlight: 'Programas de Alta Dirección y Enlace Gubernamental'
         },
         PA: {
           name: 'Panamá',
@@ -426,8 +308,7 @@ export const translations = {
           city: 'Ciudad de Panamá',
           description:
             'Centro regional de capacitación técnica, formación ejecutiva y vinculación estratégica con organismos multilaterales de desarrollo.',
-          highlight: 'Hub Regional de Capacitación y Cooperación',
-          dataNote: 'Sin proyecto nombrado en el brochure de referencia · consta como Estado miembro SICA'
+          highlight: 'Hub Regional de Capacitación y Cooperación'
         },
         BZ: {
           name: 'Belice',
@@ -436,8 +317,7 @@ export const translations = {
           city: 'Belmopán',
           description:
             'Programas de cooperación técnica bilingüe, gestión ambiental, resiliencia climática y formación de cuadros públicos.',
-          highlight: 'Cooperación Técnica e Integración Regional',
-          dataNote: 'Sin proyecto nombrado en el brochure de referencia · consta como Estado miembro SICA'
+          highlight: 'Cooperación Técnica e Integración Regional'
         },
         SV: {
           name: 'El Salvador',
@@ -446,8 +326,7 @@ export const translations = {
           city: 'San Salvador',
           description:
             'Acompañamiento en transformación digital del gobierno, innovación ciudadana y optimización de proyectos de inversión estatal.',
-          highlight: 'Transformación Digital y Servicios Ciudadanos',
-          dataNote: 'Sin proyecto nombrado en el brochure de referencia · consta como Estado miembro SICA'
+          highlight: 'Transformación Digital y Servicios Ciudadanos'
         },
         HN: {
           name: 'Honduras',
@@ -456,8 +335,7 @@ export const translations = {
           city: 'Tegucigalpa',
           description:
             'Fortalecimiento de la gestión en salud pública, programas de posgrado y modernización de la administración territorial.',
-          highlight: 'Gerencia en Salud y Políticas Públicas',
-          dataNote: 'Sin proyecto nombrado en el brochure de referencia · consta como Estado miembro SICA'
+          highlight: 'Gerencia en Salud y Políticas Públicas'
         },
         NI: {
           name: 'Nicaragua',
@@ -466,8 +344,7 @@ export const translations = {
           city: 'Managua',
           description:
             'Capacitación en planificación estratégica, gestión por resultados y fortalecimiento de las capacidades del servidor público.',
-          highlight: 'Formación y Planificación Estratégica',
-          dataNote: 'Sin proyecto nombrado en el brochure de referencia · consta como Estado miembro SICA'
+          highlight: 'Formación y Planificación Estratégica'
         },
         DO: {
           name: 'Rep. Dominicana',
@@ -476,14 +353,7 @@ export const translations = {
           city: 'Santo Domingo',
           description:
             'Convenios de formación académica superior, compras públicas sostenibles y vinculación caribeña-centroamericana.',
-          highlight: 'Alianzas de Posgrado y Contratación Pública',
-          organizations: [
-            'Organización Panamericana de la Salud (OPS)',
-            'Estado de la Nación / CONARE',
-            'Banco Interamericano de Desarrollo (BID)',
-            'CEPREDENAC'
-          ],
-          dataNote: 'Proyectos regionales Centroamérica · República Dominicana'
+          highlight: 'Alianzas de Posgrado y Contratación Pública'
         },
         MX: {
           name: 'México',
@@ -492,9 +362,7 @@ export const translations = {
           city: 'Ciudad de México',
           description:
             'Convenios de investigación aplicada, intercambio de expertos con instituciones académicas y proyectos mesoamericanos.',
-          highlight: 'Alianzas Académicas Mesoamericanas',
-          organizations: ['Poder Judicial de Costa Rica'],
-          dataNote: 'Proyecto compartido con Costa Rica y Colombia'
+          highlight: 'Alianzas Académicas Mesoamericanas'
         },
         CO: {
           name: 'Colombia',
@@ -503,9 +371,7 @@ export const translations = {
           city: 'Bogotá',
           description:
             'Cooperación Sur-Sur en innovación pública, gestión de la seguridad social y transferencia de buenas prácticas.',
-          highlight: 'Innovación Pública y Cooperación Sur-Sur',
-          organizations: ['Poder Judicial de Costa Rica'],
-          dataNote: 'Proyecto compartido con Costa Rica y México'
+          highlight: 'Innovación Pública y Cooperación Sur-Sur'
         }
       }
     },
@@ -723,40 +589,19 @@ export const translations = {
       title: 'Organismos y Socios de Cooperación',
       subtitle: 'Tocá una institución para ver los proyectos que ha trabajado en conjunto con el ICAP.',
       modalSubtitle: 'Organismo Aliado',
-      noProjectRecord: 'Sin registro de proyectos conjuntos documentados en el brochure de referencia.',
-      projectAreasLabel: 'Áreas de Proyecto',
-      noAreaRecord: 'Sin registro de área en el brochure de referencia.',
+      noProjectRecord: 'Este organismo no figura como cliente en la clasificación de proyectos de Asistencia Técnica.',
+      relatedProjects: 'Proyectos con el ICAP',
+      projectAreasLabel: 'Áreas de especialización',
+      seeAll: (n) => (n === 1 ? 'Ver el proyecto' : `Ver los ${n} proyectos`),
       items: {
-        sica: { name: 'SICA', label: 'Sistema de la Integración Centroamericana', description: null, countryNote: null },
-        'ops-oms': {
-          name: 'OPS / OMS',
-          label: 'Organización Panamericana de la Salud',
-          description:
-            'Diplomado en gestión de recursos humanos en salud, desarrollado en conjunto con República Dominicana.',
-          countryNote: 'República Dominicana'
-        },
-        bid: {
-          name: 'BID',
-          label: 'Banco Interamericano de Desarrollo',
-          description:
-            'Proyectos de adaptación al cambio climático y blindaje climático, junto con CEPREDENAC, en República Dominicana.',
-          countryNote: 'República Dominicana'
-        },
-        flacso: {
-          name: 'FLACSO',
-          label: 'Facultad Latinoamericana de Ciencias Sociales',
-          description: null,
-          countryNote: null
-        },
-        bcie: {
-          name: 'BCIE',
-          label: 'Banco Centroamericano de Integración Económica',
-          description: null,
-          countryNote: null
-        },
-        cepal: { name: 'CEPAL', label: 'Comisión Económica para América Latina', description: null, countryNote: null },
-        aecid: { name: 'AECID', label: 'Agencia Española de Cooperación', description: null, countryNote: null },
-        oea: { name: 'OEA', label: 'Organización de los Estados Americanos', description: null, countryNote: null }
+        sica: { name: 'SICA', label: 'Sistema de la Integración Centroamericana' },
+        'ops-oms': { name: 'OPS / OMS', label: 'Organización Panamericana de la Salud' },
+        bid: { name: 'BID', label: 'Banco Interamericano de Desarrollo' },
+        flacso: { name: 'FLACSO', label: 'Facultad Latinoamericana de Ciencias Sociales' },
+        bcie: { name: 'BCIE', label: 'Banco Centroamericano de Integración Económica' },
+        cepal: { name: 'CEPAL', label: 'Comisión Económica para América Latina' },
+        aecid: { name: 'AECID', label: 'Agencia Española de Cooperación' },
+        oea: { name: 'OEA', label: 'Organización de los Estados Americanos' }
       }
     },
 
@@ -888,39 +733,28 @@ export const translations = {
       searchPlaceholder: 'Search by project, client or topic…',
       clearSearch: 'Clear search',
       allClients: 'All',
-      allAreas: 'All areas',
+      allTags: 'All areas',
+      tagsLabel: 'Areas of specialization',
       clientTypes: {
         nacional: 'National institution',
         sica: 'SICA body',
         internacional: 'International cooperation'
       },
-      areas: {
-        Gobernanza: 'Governance',
-        'Proyectos de Inversión': 'Investment Projects',
-        'Formación Continua': 'Continuing Education',
-        'Transformación Organizacional': 'Organizational Transformation',
-        Ambiente: 'Environment',
-        Salud: 'Health',
-        Género: 'Gender',
-        Seguridad: 'Security',
-        Calidad: 'Quality',
-        'Asistencia Técnica': 'Technical Assistance'
-      },
-      scopes: {
-        Regional: 'Regional'
-      },
+      partnerFilter: 'Partner',
+      countryFilter: 'Country',
+      removeFilter: 'Remove filter',
       showing: 'Showing',
       of: 'of',
       projectsWord: 'projects',
+      tapHint: 'Tap a project to open its card.',
       clearFilters: 'Clear filters',
       empty: 'No projects match those filters.',
       statusActive: 'Ongoing',
       statusDone: 'Completed',
-      detailTitle: 'Project details',
       client: 'Organization / Client',
       clientType: 'Client type',
       period: 'Period',
-      scope: 'Scope'
+      region: 'Region'
     },
 
     sectionsStrip: {
@@ -952,112 +786,14 @@ export const translations = {
     specializationAreas: {
       kicker: 'Expertise & Offerings',
       title: 'Areas of Specialization',
-      subtitle: "ICAP's six areas of specialization, per its 2026 institutional offering, each with a cross-cutting gender focus.",
-      generoNote: 'Gender is a cross-cutting theme running through all six areas of specialization.',
-      items: {
-        salud: {
-          title: 'Health and Social Security',
-          tag: 'Hospital management, epidemiology, and social security',
-          longDesc: "According to ICAP's 2026 institutional offering, this area covers:",
-          shortDesc:
-            'ICAP strengthens hospital and emergency management in the health sector. ' +
-            'It also advises on pensions, occupational health, and epidemiology. ' +
-            'Its focus is on more efficient health systems with broader coverage.',
-          highlights: ['Hospital Management', 'Epidemiology', 'Pensions'],
-          points: [
-            'Hospital Management',
-            'Epidemiology',
-            'Emergency services management',
-            'Migration and health',
-            'Pensions',
-            'Occupational health',
-            'Health services'
-          ]
-        },
-        calidad: {
-          title: 'Quality',
-          tag: 'Quality systems, information, and institutional certifications',
-          longDesc: "According to ICAP's 2026 institutional offering, this area covers:",
-          shortDesc:
-            'ICAP helps institutions build institutional quality systems. ' +
-            'It designs information and measurement mechanisms to support decision-making. ' +
-            'It also supports certification processes under recognized standards.',
-          highlights: ['Institutional quality', 'Quality systems', 'Certifications'],
-          points: [
-            'Institutional quality',
-            'Information and measurement systems',
-            'Quality systems',
-            'Certifications'
-          ]
-        },
-        proyectos: {
-          title: 'Projects',
-          tag: 'Project formulation, feasibility, and certification',
-          longDesc: "According to ICAP's 2026 institutional offering, this area covers:",
-          shortDesc:
-            "ICAP supports a project's entire life cycle, starting with its formulation. " +
-            'It carries out pre-feasibility and feasibility studies to back investment decisions. ' +
-            'It also offers project certification processes.',
-          highlights: ['Project formulation', 'Feasibility studies', 'Certifications'],
-          points: [
-            'Project formulation',
-            'Feasibility studies',
-            'Pre-feasibility studies',
-            'Certifications'
-          ]
-        },
-        gobernanza: {
-          title: 'Governance',
-          tag: 'Modernization, public policy, and citizen participation',
-          longDesc: "According to ICAP's 2026 institutional offering, this area covers:",
-          shortDesc:
-            'ICAP advises on state modernization and reform processes. ' +
-            'It supports public policy design and strengthening citizen participation. ' +
-            'It also works on digital governance and local governments.',
-          highlights: ['Modernization and reform', 'Public Policy', 'Citizen participation'],
-          points: [
-            'Modernization and reform',
-            'Public Policy',
-            'Planning',
-            'Citizen participation',
-            'Management, Transparency, and Open Government',
-            'Digital Governance',
-            'Public Investment',
-            'Local governments'
-          ]
-        },
-        transformacion: {
-          title: 'Organizational Transformation',
-          tag: 'Organizational design, processes, and job profiles',
-          longDesc: "According to ICAP's 2026 institutional offering, this area covers:",
-          shortDesc:
-            'ICAP supports the design and reengineering of organizational structures. ' +
-            'It helps improve internal processes and procedures. ' +
-            'It also advises on defining job profiles and workloads.',
-          highlights: ['Organizational design and reengineering', 'Processes and procedures', 'Job profiles, positions, and workloads'],
-          points: [
-            'Organizational design and reengineering',
-            'Processes and procedures',
-            'Job profiles, positions, and workloads'
-          ]
-        },
-        ambiente: {
-          title: 'Environment and Energy',
-          tag: 'Climate change, environmental management, and energy regulation',
-          longDesc: "According to ICAP's 2026 institutional offering, this area covers:",
-          shortDesc:
-            'ICAP supports climate change adaptation and mitigation. ' +
-            'It advises on environmental management and energy regulation. ' +
-            'It also works on risk and disaster management.',
-          highlights: ['Climate Change', 'Environmental management', 'Energy regulation'],
-          points: [
-            'Climate Change',
-            'Environmental management',
-            'Energy regulation',
-            'Risk and disaster management'
-          ]
-        }
-      }
+      subtitle: "The fourteen thematic areas used to classify ICAP's Technical Assistance projects. A project can span several.",
+      projects: 'Projects',
+      clients: 'Clients',
+      ongoing: 'Ongoing',
+      projectsSuffix: (n) => (n === 1 ? '1 project' : `${n} projects`),
+      latest: 'Recent projects',
+      combines: 'Often combined with',
+      seeRelated: 'See related projects'
     },
 
     authorities: {
@@ -1175,19 +911,6 @@ export const translations = {
       }
     },
 
-    areaLabels: {
-      Gobernanza: 'Governance',
-      'Proyectos de Inversión': 'Investment Projects',
-      'Formación Continua': 'Continuing Education',
-      'Transformación Organizacional': 'Organizational Transformation',
-      Ambiente: 'Environment',
-      Salud: 'Health',
-      Género: 'Gender',
-      Seguridad: 'Security',
-      Calidad: 'Quality',
-      'Asistencia Técnica': 'Technical Assistance'
-    },
-
     regionalMap: {
       kicker: 'Reach & Territory',
       title: 'Regional Presence',
@@ -1214,14 +937,18 @@ export const translations = {
       countryListHint: 'All 10 countries are placed on the map to true scale',
       sidebarFooterLabel: 'ICAP Presence & Cooperation',
       institutionalFocusLabel: 'Institutional Focus',
-      projectCountLabel: 'Number of Projects',
-      pendingConfirm: 'Pending confirmation',
-      documented: 'Documented in the brochure',
-      qtyAbbrev: 'Qty.',
-      projectAreasLabel: 'Project Areas',
-      noAreaRecord: 'No area on record in the reference brochure.',
-      orgsLabel: 'Organizations & Counterparts',
-      noOrgRecord: 'No counterpart on record in the reference brochure.',
+      projectsLabel: 'Technical Assistance projects',
+      projectsSource: '2026 classification',
+      totalLabel: 'Total',
+      nationalLabel: 'National',
+      regionalLabel: 'Regional',
+      regionalNote: 'Regional projects span several countries at once (Central America, the Caribbean or others).',
+      noProjects: 'No projects on record in the Technical Assistance classification.',
+      projectAreasLabel: 'Areas of specialization',
+      orgsLabel: 'Clients & counterparts',
+      moreOrgs: (n) => `and ${n} more`,
+      recentLabel: 'Recent projects',
+      seeProjects: (n) => (n === 1 ? 'See the project' : `See all ${n} projects`),
       officeContactLabel: 'Office contact · sample',
       countries: {
         CR: {
@@ -1231,9 +958,7 @@ export const translations = {
           city: 'San José (Curridabat)',
           description:
             "ICAP's executive headquarters since 1954, an international graduate-studies campus, a hub for public innovation, and regional coordination of technical cooperation.",
-          highlight: 'Headquarters and Main Academic Campus',
-          organizations: ['ICE', 'MIDEPLAN', 'PANI', 'INDER', 'INCOP', 'MINSA', 'ARESEP', 'IMAS', 'Judicial Branch of Costa Rica'],
-          dataNote: 'Dozens of projects documented in the brochure · exact count to be confirmed'
+          highlight: 'Headquarters and Main Academic Campus'
         },
         GT: {
           name: 'Guatemala',
@@ -1242,9 +967,7 @@ export const translations = {
           city: 'Guatemala City',
           description:
             'National liaison office with ministries, institutional strengthening, and support for state modernization projects.',
-          highlight: 'Executive Leadership Programs and Government Liaison',
-          organizations: ['Diplomatic Academy of Guatemala', 'Ministry of Foreign Affairs of Guatemala'],
-          dataNote: null
+          highlight: 'Executive Leadership Programs and Government Liaison'
         },
         PA: {
           name: 'Panama',
@@ -1253,8 +976,7 @@ export const translations = {
           city: 'Panama City',
           description:
             'Regional center for technical training, executive education, and strategic engagement with multilateral development organizations.',
-          highlight: 'Regional Training and Cooperation Hub',
-          dataNote: 'No named project in the reference brochure · listed as a SICA member state'
+          highlight: 'Regional Training and Cooperation Hub'
         },
         BZ: {
           name: 'Belize',
@@ -1263,8 +985,7 @@ export const translations = {
           city: 'Belmopan',
           description:
             'Bilingual technical cooperation programs, environmental management, climate resilience, and training for public-sector personnel.',
-          highlight: 'Technical Cooperation and Regional Integration',
-          dataNote: 'No named project in the reference brochure · listed as a SICA member state'
+          highlight: 'Technical Cooperation and Regional Integration'
         },
         SV: {
           name: 'El Salvador',
@@ -1273,8 +994,7 @@ export const translations = {
           city: 'San Salvador',
           description:
             'Support for digital government transformation, citizen innovation, and optimization of state investment projects.',
-          highlight: 'Digital Transformation and Citizen Services',
-          dataNote: 'No named project in the reference brochure · listed as a SICA member state'
+          highlight: 'Digital Transformation and Citizen Services'
         },
         HN: {
           name: 'Honduras',
@@ -1283,8 +1003,7 @@ export const translations = {
           city: 'Tegucigalpa',
           description:
             'Strengthening public health management, graduate programs, and modernization of territorial administration.',
-          highlight: 'Health Management and Public Policy',
-          dataNote: 'No named project in the reference brochure · listed as a SICA member state'
+          highlight: 'Health Management and Public Policy'
         },
         NI: {
           name: 'Nicaragua',
@@ -1293,8 +1012,7 @@ export const translations = {
           city: 'Managua',
           description:
             'Training in strategic planning, results-based management, and strengthening the capacities of public servants.',
-          highlight: 'Training and Strategic Planning',
-          dataNote: 'No named project in the reference brochure · listed as a SICA member state'
+          highlight: 'Training and Strategic Planning'
         },
         DO: {
           name: 'Dominican Rep.',
@@ -1303,14 +1021,7 @@ export const translations = {
           city: 'Santo Domingo',
           description:
             'Higher academic training agreements, sustainable public procurement, and Caribbean–Central American engagement.',
-          highlight: 'Graduate Partnerships and Public Procurement',
-          organizations: [
-            'Pan American Health Organization (PAHO)',
-            'Estado de la Nación / CONARE',
-            'Inter-American Development Bank (IDB)',
-            'CEPREDENAC'
-          ],
-          dataNote: 'Regional projects · Central America and the Dominican Republic'
+          highlight: 'Graduate Partnerships and Public Procurement'
         },
         MX: {
           name: 'Mexico',
@@ -1319,9 +1030,7 @@ export const translations = {
           city: 'Mexico City',
           description:
             'Applied research agreements, expert exchanges with academic institutions, and Mesoamerican projects.',
-          highlight: 'Mesoamerican Academic Partnerships',
-          organizations: ['Judicial Branch of Costa Rica'],
-          dataNote: 'Project shared with Costa Rica and Colombia'
+          highlight: 'Mesoamerican Academic Partnerships'
         },
         CO: {
           name: 'Colombia',
@@ -1330,9 +1039,7 @@ export const translations = {
           city: 'Bogotá',
           description:
             'South-South cooperation in public innovation, social security management, and the transfer of best practices.',
-          highlight: 'Public Innovation and South-South Cooperation',
-          organizations: ['Judicial Branch of Costa Rica'],
-          dataNote: 'Project shared with Costa Rica and Mexico'
+          highlight: 'Public Innovation and South-South Cooperation'
         }
       }
     },
@@ -1545,45 +1252,19 @@ export const translations = {
       title: 'Partner Organizations & Cooperation Agencies',
       subtitle: 'Tap an institution to see the projects it has carried out together with ICAP.',
       modalSubtitle: 'Partner Organization',
-      noProjectRecord: 'No joint projects on record in the reference brochure.',
-      projectAreasLabel: 'Project Areas',
-      noAreaRecord: 'No area on record in the reference brochure.',
+      noProjectRecord: 'This organization does not appear as a client in the Technical Assistance project classification.',
+      relatedProjects: 'Projects with ICAP',
+      projectAreasLabel: 'Areas of specialization',
+      seeAll: (n) => (n === 1 ? 'See the project' : `See all ${n} projects`),
       items: {
-        sica: { name: 'SICA', label: 'Central American Integration System', description: null, countryNote: null },
-        'ops-oms': {
-          name: 'PAHO / WHO',
-          label: 'Pan American Health Organization',
-          description:
-            'A diploma program in health-sector human resources management, developed jointly with the Dominican Republic.',
-          countryNote: 'Dominican Republic'
-        },
-        bid: {
-          name: 'IDB',
-          label: 'Inter-American Development Bank',
-          description:
-            'Climate change adaptation and climate-proofing projects, together with CEPREDENAC, in the Dominican Republic.',
-          countryNote: 'Dominican Republic'
-        },
-        flacso: {
-          name: 'FLACSO',
-          label: 'Latin American Faculty of Social Sciences',
-          description: null,
-          countryNote: null
-        },
-        bcie: {
-          name: 'CABEI',
-          label: 'Central American Bank for Economic Integration',
-          description: null,
-          countryNote: null
-        },
-        cepal: { name: 'ECLAC', label: 'Economic Commission for Latin America', description: null, countryNote: null },
-        aecid: {
-          name: 'AECID',
-          label: 'Spanish Agency for International Development Cooperation',
-          description: null,
-          countryNote: null
-        },
-        oea: { name: 'OAS', label: 'Organization of American States', description: null, countryNote: null }
+        sica: { name: 'SICA', label: 'Central American Integration System' },
+        'ops-oms': { name: 'PAHO / WHO', label: 'Pan American Health Organization' },
+        bid: { name: 'IDB', label: 'Inter-American Development Bank' },
+        flacso: { name: 'FLACSO', label: 'Latin American Faculty of Social Sciences' },
+        bcie: { name: 'CABEI', label: 'Central American Bank for Economic Integration' },
+        cepal: { name: 'ECLAC', label: 'Economic Commission for Latin America' },
+        aecid: { name: 'AECID', label: 'Spanish Agency for International Development Cooperation' },
+        oea: { name: 'OAS', label: 'Organization of American States' }
       }
     },
 

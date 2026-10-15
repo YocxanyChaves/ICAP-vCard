@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MapPin, Info, X } from 'lucide-react';
+import { Info, X, ArrowRight, ChevronRight } from 'lucide-react';
 import BottomSheet from '../../components/BottomSheet';
 import KickerBadge from './KickerBadge';
-import { getAreaMeta } from './areaMeta';
+import { getEtiqueta, nombreEtiqueta } from './etiquetas';
+import { proyectosDeSocio } from './proyectosData';
 import { useLanguage } from '../../i18n/LanguageContext';
 import sicaLogo from '../../assets/allies/sica.png';
 import opsOmsLogo from '../../assets/allies/ops-oms.png';
@@ -20,85 +21,59 @@ import oeaLogo from '../../assets/allies/oea.png';
  * funcionando como fallback: AllyIconBadge muestra las siglas en vez de
  * romper el layout.
  *
- * `projectAreas` / `description` sólo están rellenos para las alianzas
- * que sí tienen un proyecto conjunto documentado en el brochure (OPS/OMS
- * y BID, ambos vía República Dominicana — ver COUNTRIES en
- * RegionalMap.jsx). Para el resto no se inventó nada: se deja vacío y
- * la ficha lo muestra como "sin registro" en vez de rellenarlo con
- * texto genérico.
+ * Los proyectos de cada socio no se escriben acá: salen de
+ * proyectosDeSocio() (proyectosData.js), que busca al organismo dentro
+ * del cliente de cada proyecto de la clasificación. Si un socio no
+ * figura en ningún proyecto, la ficha lo dice en vez de inventar nada.
  */
 const ALLIES = [
   {
     id: 'sica',
     name: 'SICA',
     label: 'Sistema de la Integración Centroamericana',
-    logo: sicaLogo,
-    projectAreas: [],
-    description: null,
-    countryNote: null
+    logo: sicaLogo
   },
   {
     id: 'ops-oms',
     name: 'OPS / OMS',
     label: 'Organización Panamericana de la Salud',
-    logo: opsOmsLogo,
-    projectAreas: ['Transformación Organizacional'],
-    description: 'Diplomado en gestión de recursos humanos en salud, desarrollado en conjunto con República Dominicana.',
-    countryNote: 'República Dominicana'
+    logo: opsOmsLogo
   },
   {
     id: 'bid',
     name: 'BID',
     label: 'Banco Interamericano de Desarrollo',
-    logo: bidLogo,
-    projectAreas: ['Ambiente'],
-    description: 'Proyectos de adaptación al cambio climático y blindaje climático, junto con CEPREDENAC, en República Dominicana.',
-    countryNote: 'República Dominicana'
+    logo: bidLogo
   },
   {
     id: 'flacso',
     name: 'FLACSO',
     label: 'Facultad Latinoamericana de Ciencias Sociales',
-    logo: flacsoLogo,
-    projectAreas: [],
-    description: null,
-    countryNote: null
+    logo: flacsoLogo
   },
   {
     id: 'bcie',
     name: 'BCIE',
     label: 'Banco Centroamericano de Integración Económica',
-    logo: bcieLogo,
-    projectAreas: [],
-    description: null,
-    countryNote: null
+    logo: bcieLogo
   },
   {
     id: 'cepal',
     name: 'CEPAL',
     label: 'Comisión Económica para América Latina',
-    logo: cepalLogo,
-    projectAreas: [],
-    description: null,
-    countryNote: null
+    logo: cepalLogo
   },
   {
     id: 'aecid',
     name: 'AECID',
     label: 'Agencia Española de Cooperación',
-    logo: aecidLogo,
-    projectAreas: [],
-    description: null,
-    countryNote: null
+    logo: aecidLogo
   },
   {
     id: 'oea',
     name: 'OEA',
     label: 'Organización de los Estados Americanos',
-    logo: oeaLogo,
-    projectAreas: [],
-    description: null,
-    countryNote: null
+    logo: oeaLogo
   }
 ];
 
@@ -117,56 +92,89 @@ function AllyIconBadge({ ally, size = 'w-8 h-8', textSize = 'text-xs' }) {
   );
 }
 
-function AllyDetailBody({ ally }) {
-  const { t } = useLanguage();
+function AllyDetailBody({ ally, onNavigate }) {
+  const { t, lang } = useLanguage();
+  const proyectos = proyectosDeSocio(ally.id);
+
+  if (!proyectos.length) {
+    return <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{t.allies.noProjectRecord}</p>;
+  }
+
+  // Etiquetas de todos sus proyectos, de la más frecuente a la menos.
+  const conteo = {};
+  proyectos.forEach((p) => p.etiquetas.forEach((id) => (conteo[id] = (conteo[id] || 0) + 1)));
+  const etiquetas = Object.keys(conteo).sort((a, b) => conteo[b] - conteo[a]);
+
   return (
     <div className="space-y-5">
-      <p className="text-sm text-slate-900 dark:text-slate-100 leading-relaxed">
-        {ally.description || t.allies.noProjectRecord}
-      </p>
-
-      {ally.countryNote && (
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
-          <MapPin className="w-3.5 h-3.5 text-[#0077C8] shrink-0" />
-          {ally.countryNote}
-        </div>
-      )}
+      <div>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-2">
+          {t.allies.relatedProjects} · {proyectos.length}
+        </span>
+        <ul className="space-y-2">
+          {proyectos.map((p) => (
+            <li key={p.id}>
+              <button
+                type="button"
+                onClick={() => onNavigate?.('proyectos', { proyecto: p.id })}
+                className="w-full text-left p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 hover:border-[#0077C8]/40 transition-colors flex items-start gap-3 group"
+              >
+                <span className="flex gap-1 mt-1 shrink-0">
+                  {p.etiquetas.map((id) => (
+                    <span key={id} className="w-2 h-2 rounded-full" style={{ backgroundColor: getEtiqueta(id).color }} />
+                  ))}
+                </span>
+                <span className="text-xs text-slate-800 dark:text-slate-100 leading-snug flex-1 line-clamp-3">{p.titulo}</span>
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#0077C8] shrink-0" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <div>
         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-2">
           {t.allies.projectAreasLabel}
         </span>
-        {ally.projectAreas.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5">
-            {ally.projectAreas.map((a, i) => {
-              const meta = getAreaMeta(a);
-              const AreaIcon = meta.icon;
-              return (
-                <span
-                  key={i}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold leading-relaxed shadow-sm"
-                  style={{ backgroundColor: meta.color, color: meta.text }}
-                >
-                  <AreaIcon className="w-3.5 h-3.5 shrink-0" style={{ color: meta.text }} />
-                  {t.areaLabels[a] || a}
-                </span>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-xs text-slate-400 dark:text-slate-500">{t.allies.noAreaRecord}</p>
-        )}
+        <div className="flex flex-wrap gap-1.5">
+          {etiquetas.map((id) => {
+            const e = getEtiqueta(id);
+            const Icon = e.icon;
+            return (
+              <span
+                key={id}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold shadow-sm"
+                style={{ backgroundColor: e.color, color: e.text }}
+              >
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                {nombreEtiqueta(id, lang)}
+              </span>
+            );
+          })}
+        </div>
       </div>
+
+      <button
+        type="button"
+        onClick={() => onNavigate?.('proyectos', { socio: ally.id })}
+        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#0077C8] text-white font-heading font-bold text-xs sm:text-sm shadow hover:bg-[#005FA3] transition-colors"
+      >
+        {t.allies.seeAll(proyectos.length)}
+        <ArrowRight className="w-4 h-4" />
+      </button>
     </div>
   );
 }
 
-export default function AlliesMarquee() {
+export default function AlliesMarquee({ onNavigate }) {
   const { t } = useLanguage();
-  // Mismos datos (id, logo, projectAreas — llaves de areaMeta.js, no
-  // texto visible) con el nombre/etiqueta/descripción traducidos según
+  // Mismos datos (id, logo) con el nombre y la etiqueta traducidos según
   // el idioma activo, tomados de translations.js por id.
-  const alliesT = ALLIES.map((a) => ({ ...a, ...t.allies.items[a.id] }));
+  const alliesT = ALLIES.map((a) => ({
+    ...a,
+    ...t.allies.items[a.id],
+    proyectos: proyectosDeSocio(a.id)
+  }));
   const sectionRef = useRef(null);
   const isDesktopRef = useRef(false);
   const [selected, setSelected] = useState(null);
@@ -288,6 +296,16 @@ export default function AlliesMarquee() {
                 <span className="text-xs text-[#D6E9F7]/80 line-clamp-1 leading-snug">
                   {item.label}
                 </span>
+                {item.proyectos.length > 0 && (
+                  <span className="mt-1 inline-flex items-center gap-1.5 text-[10px] font-semibold text-white/85">
+                    <span className="flex gap-0.5">
+                      {[...new Set(item.proyectos.flatMap((p) => p.etiquetas))].slice(0, 5).map((id) => (
+                        <span key={id} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getEtiqueta(id).color }} />
+                      ))}
+                    </span>
+                    {t.specializationAreas.projectsSuffix(item.proyectos.length)}
+                  </span>
+                )}
               </div>
               <Info className="w-4 h-4 text-white/40 group-hover:text-white transition-colors shrink-0" />
             </button>
@@ -303,7 +321,7 @@ export default function AlliesMarquee() {
         subtitle={t.allies.modalSubtitle}
         icon={selected && <AllyIconBadge ally={selected} size="w-8 h-8" textSize="text-xs" />}
       >
-        {selected && <AllyDetailBody ally={selected} />}
+        {selected && <AllyDetailBody ally={selected} onNavigate={onNavigate} />}
       </BottomSheet>
 
       {/* Ficha en burbuja anclada a la tarjeta: escritorio */}
@@ -343,7 +361,7 @@ export default function AlliesMarquee() {
               </button>
             </div>
             <div className="p-4 max-h-[60vh] overflow-y-auto overscroll-contain">
-              <AllyDetailBody ally={selected} />
+              <AllyDetailBody ally={selected} onNavigate={onNavigate} />
             </div>
           </div>
         </>

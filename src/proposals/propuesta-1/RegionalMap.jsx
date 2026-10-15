@@ -4,10 +4,12 @@ import {
   CheckCircle2,
   Navigation,
   Mail,
-  BarChart3
+  ArrowRight,
+  ChevronRight
 } from 'lucide-react';
 import BottomSheet from '../../components/BottomSheet';
-import { getAreaMeta } from './areaMeta';
+import { getEtiqueta, nombreEtiqueta } from './etiquetas';
+import { proyectosDePais, esRegional } from './proyectosData';
 import { useLanguage } from '../../i18n/LanguageContext';
 import KickerBadge from './KickerBadge';
 
@@ -123,10 +125,6 @@ const COUNTRIES = [
     city: 'San José (Curridabat)',
     description: 'Sede central directiva del ICAP desde 1954, campus de posgrados internacionales, centro de innovación pública y coordinación regional de cooperación técnica.',
     highlight: 'Sede Central y Campus Académico Principal',
-    projectCount: null,
-    projectAreas: ['Gobernanza', 'Proyectos de Inversión', 'Ambiente', 'Salud', 'Género', 'Seguridad', 'Calidad', 'Formación Continua', 'Transformación Organizacional', 'Asistencia Técnica'],
-    organizations: ['ICE', 'MIDEPLAN', 'PANI', 'INDER', 'INCOP', 'MINSA', 'ARESEP', 'IMAS', 'Poder Judicial de Costa Rica'],
-    dataNote: 'Docenas de proyectos documentados en el brochure &middot; cantidad exacta por confirmar',
     officeEmail: 'sedecentral@icap.ac.cr',
   },
   {
@@ -138,10 +136,6 @@ const COUNTRIES = [
     city: 'Ciudad de Guatemala',
     description: 'Oficina nacional de vinculación con ministerios, fortalecimiento institucional y acompañamiento a proyectos de modernización estatal.',
     highlight: 'Programas de Alta Dirección y Enlace Gubernamental',
-    projectCount: 1,
-    projectAreas: ['Formación Continua'],
-    organizations: ['Academia de Diplomacia de Guatemala', 'Ministerio de Relaciones Exteriores de Guatemala'],
-    dataNote: null,
     officeEmail: 'guatemala@icap.ac.cr',
   },
   {
@@ -153,10 +147,6 @@ const COUNTRIES = [
     city: 'Ciudad de Panamá',
     description: 'Centro regional de capacitación técnica, formación ejecutiva y vinculación estratégica con organismos multilaterales de desarrollo.',
     highlight: 'Hub Regional de Capacitación y Cooperación',
-    projectCount: null,
-    projectAreas: [],
-    organizations: [],
-    dataNote: 'Sin proyecto nombrado en el brochure de referencia &middot; consta como Estado miembro SICA',
     officeEmail: 'panama@icap.ac.cr',
   },
   {
@@ -168,10 +158,6 @@ const COUNTRIES = [
     city: 'Belmopán',
     description: 'Programas de cooperación técnica bilingüe, gestión ambiental, resiliencia climática y formación de cuadros públicos.',
     highlight: 'Cooperación Técnica e Integración Regional',
-    projectCount: null,
-    projectAreas: [],
-    organizations: [],
-    dataNote: 'Sin proyecto nombrado en el brochure de referencia &middot; consta como Estado miembro SICA',
     officeEmail: 'belice@icap.ac.cr',
   },
   {
@@ -183,10 +169,6 @@ const COUNTRIES = [
     city: 'San Salvador',
     description: 'Acompañamiento en transformación digital del gobierno, innovación ciudadana y optimización de proyectos de inversión estatal.',
     highlight: 'Transformación Digital y Servicios Ciudadanos',
-    projectCount: null,
-    projectAreas: [],
-    organizations: [],
-    dataNote: 'Sin proyecto nombrado en el brochure de referencia &middot; consta como Estado miembro SICA',
     officeEmail: 'elsalvador@icap.ac.cr',
   },
   {
@@ -198,10 +180,6 @@ const COUNTRIES = [
     city: 'Tegucigalpa',
     description: 'Fortalecimiento de la gestión en salud pública, programas de posgrado y modernización de la administración territorial.',
     highlight: 'Gerencia en Salud y Políticas Públicas',
-    projectCount: null,
-    projectAreas: [],
-    organizations: [],
-    dataNote: 'Sin proyecto nombrado en el brochure de referencia &middot; consta como Estado miembro SICA',
     officeEmail: 'honduras@icap.ac.cr',
   },
   {
@@ -213,10 +191,6 @@ const COUNTRIES = [
     city: 'Managua',
     description: 'Capacitación en planificación estratégica, gestión por resultados y fortalecimiento de las capacidades del servidor público.',
     highlight: 'Formación y Planificación Estratégica',
-    projectCount: null,
-    projectAreas: [],
-    organizations: [],
-    dataNote: 'Sin proyecto nombrado en el brochure de referencia &middot; consta como Estado miembro SICA',
     officeEmail: 'nicaragua@icap.ac.cr',
   },
   {
@@ -228,10 +202,6 @@ const COUNTRIES = [
     city: 'Santo Domingo',
     description: 'Convenios de formación académica superior, compras públicas sostenibles y vinculación caribeña-centroamericana.',
     highlight: 'Alianzas de Posgrado y Contratación Pública',
-    projectCount: 3,
-    projectAreas: ['Transformación Organizacional', 'Ambiente'],
-    organizations: ['Organización Panamericana de la Salud (OPS)', 'Estado de la Nación / CONARE', 'Banco Interamericano de Desarrollo (BID)', 'CEPREDENAC'],
-    dataNote: 'Proyectos regionales Centroamérica &middot; República Dominicana',
     officeEmail: 'repdominicana@icap.ac.cr',
   },
   {
@@ -243,10 +213,6 @@ const COUNTRIES = [
     city: 'Ciudad de México',
     description: 'Convenios de investigación aplicada, intercambio de expertos con instituciones académicas y proyectos mesoamericanos.',
     highlight: 'Alianzas Académicas Mesoamericanas',
-    projectCount: 1,
-    projectAreas: ['Seguridad'],
-    organizations: ['Poder Judicial de Costa Rica'],
-    dataNote: 'Proyecto compartido con Costa Rica y Colombia',
     officeEmail: 'mexico@icap.ac.cr',
   },
   {
@@ -258,10 +224,6 @@ const COUNTRIES = [
     city: 'Bogotá',
     description: 'Cooperación Sur-Sur en innovación pública, gestión de la seguridad social y transferencia de buenas prácticas.',
     highlight: 'Innovación Pública y Cooperación Sur-Sur',
-    projectCount: 1,
-    projectAreas: ['Seguridad'],
-    organizations: ['Poder Judicial de Costa Rica'],
-    dataNote: 'Proyecto compartido con Costa Rica y México',
     officeEmail: 'colombia@icap.ac.cr',
   }
 ];
@@ -271,8 +233,8 @@ const COUNTRIES = [
  * and the mobile bottom sheet, so a country's info stays consistent
  * wherever it's viewed.
  */
-function CountryDetailBody({ country, tone = 'dark' }) {
-  const { t } = useLanguage();
+function CountryDetailBody({ country, tone = 'dark', onNavigate }) {
+  const { t, lang } = useLanguage();
   const isDark = tone === 'dark';
   // El tono "light" es el que usa el modal móvil (BottomSheet) — como
   // ese modal ahora también tiene su propia variante oscura (ver
@@ -303,78 +265,144 @@ function CountryDetailBody({ country, tone = 'dark' }) {
         </div>
       </div>
 
-      {/* Project Count */}
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <span className={`text-[10px] font-mono-code uppercase font-bold tracking-wider ${labelText}`}>
-            {t.regionalMap.projectCountLabel}
-          </span>
-          <span className={`text-[8px] font-mono-code font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${isDark ? 'bg-white/10 text-[#9FC6E8]' : 'bg-[#EAF3FB] text-[#003366]'}`}>
-            {country.projectCount === null ? t.regionalMap.pendingConfirm : t.regionalMap.documented}
-          </span>
-        </div>
-        <div className={`flex items-center gap-3 p-3.5 rounded-xl border ${chipBg}`}>
-          <BarChart3 className="w-5 h-5 text-[#0077C8] shrink-0" />
-          <div className={`font-heading font-extrabold leading-none ${isDark ? 'text-[#0077C8]' : 'text-[#003366]'} ${country.projectCount === null ? 'text-lg' : 'text-2xl'}`}>
-            {country.projectCount === null ? t.regionalMap.qtyAbbrev : country.projectCount}
-          </div>
-          {country.dataNote && (
-            <span
-              className={`text-[10px] leading-tight ${mutedText}`}
-              dangerouslySetInnerHTML={{ __html: country.dataNote }}
-            />
-          )}
-        </div>
-      </div>
+      {/* Proyectos: todo sale de la clasificación (proyectosData.js),
+          ya no de números escritos a mano por país. */}
+      {(() => {
+        const proyectos = [...proyectosDePais(country.id)].sort((a, b) => b.desde.localeCompare(a.desde));
+        const regionales = proyectos.filter(esRegional).length;
+        const nacionales = proyectos.length - regionales;
 
-      {/* Project Areas */}
-      <div>
-        <span className={`text-[10px] font-mono-code uppercase font-bold tracking-wider block mb-2 ${labelText}`}>
-          {t.regionalMap.projectAreasLabel}
-        </span>
-        {country.projectAreas.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5">
-            {country.projectAreas.map((a, i) => {
-              const meta = getAreaMeta(a);
-              const AreaIcon = meta.icon;
-              return (
-                <span
-                  key={i}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold leading-relaxed shadow-sm"
-                  style={{ backgroundColor: meta.color, color: meta.text }}
-                >
-                  <AreaIcon className="w-3.5 h-3.5 shrink-0" style={{ color: meta.text }} />
-                  {t.areaLabels[a] || a}
+        const conteo = {};
+        proyectos.forEach((p) => p.etiquetas.forEach((id) => (conteo[id] = (conteo[id] || 0) + 1)));
+        const etiquetas = Object.keys(conteo).sort((a, b) => conteo[b] - conteo[a]);
+
+        // Clientes de los proyectos nacionales primero (son los propios
+        // del país), luego los de los regionales.
+        const clientes = [
+          ...new Set([...proyectos.filter((p) => !esRegional(p)), ...proyectos.filter(esRegional)].map((p) => p.cliente))
+        ];
+        const MAX_CLIENTES = 6;
+
+        return (
+          <>
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`text-[10px] font-mono-code uppercase font-bold tracking-wider ${labelText}`}>
+                  {t.regionalMap.projectsLabel}
                 </span>
-              );
-            })}
-          </div>
-        ) : (
-          <p className={`text-xs italic ${mutedText}`}>{t.regionalMap.noAreaRecord}</p>
-        )}
-      </div>
-
-      {/* Partner Organizations */}
-      <div>
-        <span className={`text-[10px] font-mono-code uppercase font-bold tracking-wider block mb-2 ${labelText}`}>
-          {t.regionalMap.orgsLabel}
-        </span>
-        {country.organizations.length > 0 ? (
-          <div className="space-y-1.5">
-            {country.organizations.map((o, i) => (
-              <div
-                key={i}
-                className={`flex items-start gap-2.5 p-2.5 rounded-xl border text-xs leading-relaxed ${chipBg} ${isDark ? 'text-white' : 'text-slate-700'}`}
-              >
-                <Building2 className="w-4 h-4 text-[#0077C8] shrink-0 mt-0.5" />
-                <span>{o}</span>
+                <span className={`text-[8px] font-mono-code font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${isDark ? 'bg-white/10 text-[#9FC6E8]' : 'bg-[#EAF3FB] text-[#003366] dark:bg-white/10 dark:text-[#9FC6E8]'}`}>
+                  {t.regionalMap.projectsSource}
+                </span>
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className={`text-xs italic ${mutedText}`}>{t.regionalMap.noOrgRecord}</p>
-        )}
-      </div>
+              {proyectos.length ? (
+                <>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      [proyectos.length, t.regionalMap.totalLabel],
+                      [nacionales, t.regionalMap.nationalLabel],
+                      [regionales, t.regionalMap.regionalLabel]
+                    ].map(([valor, etq]) => (
+                      <div key={etq} className={`p-2.5 rounded-xl border text-center ${chipBg}`}>
+                        <div className={`font-heading font-extrabold text-2xl leading-none ${isDark ? 'text-[#4FB2F2]' : 'text-[#003366] dark:text-[#4FB2F2]'}`}>
+                          {valor}
+                        </div>
+                        <div className={`text-[10px] mt-1 ${mutedText}`}>{etq}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {regionales > 0 && <p className={`text-[10px] leading-snug mt-1.5 ${mutedText}`}>{t.regionalMap.regionalNote}</p>}
+                </>
+              ) : (
+                <p className={`text-xs italic ${mutedText}`}>{t.regionalMap.noProjects}</p>
+              )}
+            </div>
+
+            {etiquetas.length > 0 && (
+              <div>
+                <span className={`text-[10px] font-mono-code uppercase font-bold tracking-wider block mb-2 ${labelText}`}>
+                  {t.regionalMap.projectAreasLabel}
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {etiquetas.map((id) => {
+                    const e = getEtiqueta(id);
+                    const Icon = e.icon;
+                    return (
+                      <span
+                        key={id}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold shadow-sm"
+                        style={{ backgroundColor: e.color, color: e.text }}
+                      >
+                        <Icon className="w-3.5 h-3.5 shrink-0" />
+                        {nombreEtiqueta(id, lang)}
+                        <span className="opacity-75">{conteo[id]}</span>
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {proyectos.length > 0 && (
+              <div>
+                <span className={`text-[10px] font-mono-code uppercase font-bold tracking-wider block mb-2 ${labelText}`}>
+                  {t.regionalMap.recentLabel}
+                </span>
+                <div className="space-y-1.5">
+                  {proyectos.slice(0, 3).map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => onNavigate?.('proyectos', { proyecto: p.id })}
+                      className={`w-full text-left flex items-start gap-2.5 p-2.5 rounded-xl border text-xs leading-snug group ${chipBg} ${isDark ? 'text-white' : 'text-slate-700 dark:text-white'}`}
+                    >
+                      <span className="flex gap-0.5 mt-1 shrink-0">
+                        {p.etiquetas.map((id) => (
+                          <span key={id} className="w-2 h-2 rounded-full" style={{ backgroundColor: getEtiqueta(id).color }} />
+                        ))}
+                      </span>
+                      <span className="flex-1 line-clamp-2">{p.titulo}</span>
+                      <ChevronRight className="w-4 h-4 text-[#0077C8] opacity-60 group-hover:opacity-100 shrink-0" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {clientes.length > 0 && (
+              <div>
+                <span className={`text-[10px] font-mono-code uppercase font-bold tracking-wider block mb-2 ${labelText}`}>
+                  {t.regionalMap.orgsLabel}
+                </span>
+                <div className="space-y-1.5">
+                  {clientes.slice(0, MAX_CLIENTES).map((o) => (
+                    <div
+                      key={o}
+                      className={`flex items-start gap-2.5 p-2.5 rounded-xl border text-xs leading-relaxed ${chipBg} ${isDark ? 'text-white' : 'text-slate-700 dark:text-white'}`}
+                    >
+                      <Building2 className="w-4 h-4 text-[#0077C8] shrink-0 mt-0.5" />
+                      <span>{o}</span>
+                    </div>
+                  ))}
+                </div>
+                {clientes.length > MAX_CLIENTES && (
+                  <p className={`text-[11px] mt-1.5 ${mutedText}`}>{t.regionalMap.moreOrgs(clientes.length - MAX_CLIENTES)}</p>
+                )}
+              </div>
+            )}
+
+            {proyectos.length > 0 && (
+              <button
+                type="button"
+                onClick={() => onNavigate?.('proyectos', { pais: country.id })}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#0077C8] text-white font-heading font-bold text-xs sm:text-sm shadow hover:bg-[#005FA3] transition-colors"
+              >
+                {t.regionalMap.seeProjects(proyectos.length)}
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
+          </>
+        );
+      })()}
 
       {/* Office Contact */}
       <div className={`flex items-center gap-2.5 p-3 rounded-xl border ${chipBg}`}>
@@ -394,7 +422,7 @@ function CountryDetailBody({ country, tone = 'dark' }) {
   );
 }
 
-export default function RegionalMap() {
+export default function RegionalMap({ onNavigate }) {
   const { t } = useLanguage();
   const [selectedCountry, setSelectedCountry] = useState('CR');
   const [showDetailSheet, setShowDetailSheet] = useState(false);
@@ -457,8 +485,7 @@ export default function RegionalMap() {
     return () => ro.disconnect();
   }, []);
 
-  // Mismos datos (id, projectCount, projectAreas/organizations por
-  // defecto, coordenadas del SVG del mapa) con nombre/estatus/
+  // Mismos datos (id, coordenadas del SVG del mapa) con nombre/estatus/
   // descripción/etc. traducidos según el idioma activo, tomados de
   // translations.js por id.
   const countriesT = COUNTRIES.map((c) => ({ ...c, ...t.regionalMap.countries[c.id] }));
@@ -776,7 +803,7 @@ export default function RegionalMap() {
               <Building2 className="w-3.5 h-3.5 text-[#0077C8]" />
               <span>{current.status}</span>
             </div>
-            <CountryDetailBody country={current} tone="dark" />
+            <CountryDetailBody country={current} tone="dark" onNavigate={onNavigate} />
 
             <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-[#9FC6E8] shrink-0">
               <span>{t.regionalMap.sidebarFooterLabel}</span>
@@ -837,7 +864,7 @@ export default function RegionalMap() {
         subtitle={current.status}
         icon={<FlagIcon countryCode={current.id} className="w-8 h-6" />}
       >
-        <CountryDetailBody country={current} tone="light" />
+        <CountryDetailBody country={current} tone="light" onNavigate={onNavigate} />
 
         <button
           onClick={() => setShowDetailSheet(false)}

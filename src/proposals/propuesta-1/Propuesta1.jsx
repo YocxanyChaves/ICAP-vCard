@@ -89,7 +89,12 @@ export default function Propuesta1({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [settingsOpen]);
 
-  const goToPage = (id) => {
+  // `filtro` sólo lo usa Proyectos: las secciones de Áreas, Presencia y
+  // Socios mandan ahí con la etiqueta, el país o el socio ya elegido (ver
+  // ProyectosAT.jsx). Navegar desde el menú lo deja vacío.
+  const [filtroProyectos, setFiltroProyectos] = useState(null);
+  const goToPage = (id, filtro = null) => {
+    setFiltroProyectos(filtro);
     setActivePage(id);
   };
 
@@ -166,7 +171,7 @@ export default function Propuesta1({
             {activeDept === 'at' ? (
               <>
                 <StatsSection />
-                <AlliesMarquee />
+                <AlliesMarquee onNavigate={goToPage} />
               </>
             ) : (
               <DocenciaMision showCards={false} />
@@ -180,11 +185,11 @@ export default function Propuesta1({
       case 'autoridades':
         return <AuthoritiesSection dept={activeDept} />;
       case 'areas':
-        return <SpecializationAreas />;
+        return <SpecializationAreas onNavigate={goToPage} />;
       case 'presencia':
-        return <RegionalMap />;
+        return <RegionalMap onNavigate={goToPage} />;
       case 'proyectos':
-        return <ProyectosAT />;
+        return <ProyectosAT filtroInicial={filtroProyectos} />;
       case 'contacto':
         return <ContactSection id="propuesta1-contact" contact={contact} dept={activeDept} />;
       // --- Subsecciones propias de Docencia ---------------------------

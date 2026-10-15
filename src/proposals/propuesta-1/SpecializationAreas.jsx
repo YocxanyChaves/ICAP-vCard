@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Stethoscope, BadgeCheck, ClipboardCheck, Cog, Users, Leaf, Scale, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import KickerBadge from './KickerBadge';
+import { ETIQUETAS, getEtiqueta } from './etiquetas';
+import { PROYECTOS_AT } from './proyectosData';
 import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
 
 // Antes esta sección abría el detalle de cada área en un modal/bottom
@@ -12,26 +14,45 @@ import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
 // con scroll/flechitas), es un carrusel horizontal a todo el ancho de
 // pantalla: se "pasea" entre las 6 áreas deslizando o con las flechas/
 // puntitos, en vez de leerlas todas apiladas en una columna.
-// El título, tag, descripción larga y puntos de cada área viven en el
-// diccionario de traducciones (t.specializationAreas.items[id]) — acá
-// sólo queda el "id" (llave de esa traducción) y el ícono, que no
-// cambia según el idioma. Las 6 áreas y sus íconos son las mismas 6
-// que usan areaMeta.js/RegionalMap/AlliesMarquee, para que el ícono de
-// cada área se vea igual en todo el sitio.
-const AREAS = [
-  { id: 'salud', icon: Stethoscope },
-  { id: 'calidad', icon: BadgeCheck },
-  { id: 'proyectos', icon: ClipboardCheck },
-  { id: 'gobernanza', icon: Cog },
-  { id: 'transformacion', icon: Users },
-  { id: 'ambiente', icon: Leaf }
-];
+// Las tarjetas son las 14 etiquetas de etiquetas.js (las mismas con que
+// se clasifican los proyectos). El contenido de cada una no es texto
+// redactado aparte: sale de los proyectos que llevan esa etiqueta
+// (cantidad, clientes, los más recientes y con qué otras etiquetas
+// suele combinarse) — ver resumirEtiqueta más abajo.
+const AREAS = ETIQUETAS;
 
-// Yocxany pidió que al entrar a la sección la tarjeta que queda armada
-// en el centro (la "principal") sea "Proyectos" en vez de la primera
-// del arreglo ("Salud y Seguridad Social") — acá queda como constante
-// para que cambiarla el día de mañana sea de una sola línea.
-const DEFAULT_AREA_ID = 'proyectos';
+const mesActual = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+};
+
+function resumirEtiqueta(id, ahora) {
+  const proyectos = PROYECTOS_AT.filter((p) => p.etiquetas.includes(id)).sort((a, b) =>
+    b.desde.localeCompare(a.desde)
+  );
+  const vecinas = {};
+  proyectos.forEach((p) =>
+    p.etiquetas.forEach((otra) => {
+      if (otra !== id) vecinas[otra] = (vecinas[otra] || 0) + 1;
+    })
+  );
+  return {
+    total: proyectos.length,
+    clientes: new Set(proyectos.map((p) => p.cliente)).size,
+    activos: proyectos.filter((p) => p.hasta >= ahora).length,
+    recientes: proyectos.slice(0, 3),
+    combina: Object.entries(vecinas)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([otra]) => otra)
+  };
+}
+
+// La tarjeta que queda armada en el centro al entrar (la "principal").
+// Antes era "Proyectos" de las 6 áreas originales; con las 14 etiquetas
+// arranca en Política pública — acá queda como constante para que
+// cambiarla el día de mañana sea de una sola línea.
+const DEFAULT_AREA_ID = 'politica';
 const DEFAULT_AREA_INDEX = Math.max(0, AREAS.findIndex((a) => a.id === DEFAULT_AREA_ID));
 
 // Carrusel "infinito": en vez de renderizar las 6 tarjetas una sola
@@ -61,7 +82,7 @@ const CARD_BACKGROUND =
 // pareja tipo abanico (como el mazo de DocenciaImpacto), es más
 // desprolija a propósito, alternando de lado y de tamaño, para que se
 // sienta como una baraja recién repartida y no como un patrón
-// geométrico perfecto. Sólo 6 valores porque son 6 áreas siempre.
+// geométrico perfecto. Se reparten en ciclo (índice % 6) entre las 14.
 const SHUFFLE_ROTATE = [-16, 12, -20, 15, -12, 19];
 
 // Textitos de la UI del carrusel (flechas, puntos) — viven acá, no en
@@ -114,9 +135,15 @@ function CardLightStreak() {
   );
 }
 
-export default function SpecializationAreas() {
+export default function SpecializationAreas({ onNavigate }) {
   const { t, lang } = useLanguage();
   const ui = UI[lang] || UI.es;
+  const tA = t.specializationAreas;
+  const nombre = (e) => e[lang === 'en' ? 'en' : 'es'];
+  const resumenes = useMemo(() => {
+    const ahora = mesActual();
+    return Object.fromEntries(AREAS.map((e) => [e.id, resumirEtiqueta(e.id, ahora)]));
+  }, []);
 
   const sectionRef = useRef(null);
   const trackRef = useRef(null);
@@ -332,7 +359,7 @@ export default function SpecializationAreas() {
 
     // Distancia entre el centro de dos tarjetas consecutivas, medida
     // en vivo (en vez de una constante): así sigue siendo correcta sin
-    // importar el breakpoint (w-[80vw] en mobile, 360px fijo desde sm),
+    // importar el breakpoint (w-[88vw] en mobile, 460px fijo desde sm),
     // sin necesidad de duplicar esa cuenta acá. Se guarda en stepRef
     // porque también la usa el recentrado del scroll infinito.
     const firstEl = cardRefs.current[RENDER_AREAS[0].renderKey];
@@ -534,13 +561,6 @@ export default function SpecializationAreas() {
           <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1.5 max-w-md mx-auto">
             {t.specializationAreas.subtitle}
           </p>
-          {/* Género no es una 7ma tarjeta: es el eje transversal que
-              atraviesa las 6 áreas (igual que en la rueda del brochure
-              oficial), así que se muestra como una nota/badge aparte. */}
-          <div className="inline-flex items-center gap-2 mt-4 px-3.5 py-2 rounded-full bg-[#D86DCB]/10 border border-[#D86DCB]/25 text-[11px] sm:text-xs text-[#0B1F3D] dark:text-white font-medium">
-            <Scale className="w-3.5 h-3.5 text-[#D86DCB] shrink-0" />
-            <span>{t.specializationAreas.generoNote}</span>
-          </div>
         </div>
       </div>
 
@@ -554,7 +574,7 @@ export default function SpecializationAreas() {
           horizontal de la página. Los menús de navegación (arriba y
           el de abajo en mobile) viven fuera de esta sección por
           completo, así que no los toca para nada. */}
-      <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen mt-8 sm:mt-10">
+      <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen mt-2 sm:mt-4">
         <div className="relative">
           {/* Degradés en los bordes para que las tarjetas no corten en
               seco contra la orilla de la pantalla — se "disuelven" en
@@ -565,9 +585,9 @@ export default function SpecializationAreas() {
           {/* El padding lateral NO es un vw fijo cualquiera — es
               exactamente la mitad del espacio que sobra entre el ancho
               de la tarjeta y el ancho del carril: calc((100% -
-              min(80vw,360px)) / 2). min(80vw,360px) es a propósito el
+              min(88vw,460px)) / 2). min(88vw,460px) es a propósito el
               MISMO ancho que terminan teniendo las tarjetas de abajo
-              (w-[80vw] max-w-[360px]) en cualquier tamaño de pantalla,
+              (w-[88vw] max-w-[460px]) en cualquier tamaño de pantalla,
               así el padding siempre "atina" sin necesitar un sm: aparte.
               Con eso, a scrollLeft:0 la PRIMERA tarjeta ya queda
               perfectamente centrada sola (y la ÚLTIMA lo mismo al otro
@@ -577,11 +597,11 @@ export default function SpecializationAreas() {
               se intentara. */}
           <div
             ref={trackRef}
-            className="flex items-stretch gap-5 sm:gap-6 overflow-x-auto snap-x snap-mandatory px-[calc((100%-min(80vw,360px))/2)] pb-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            className="flex items-stretch gap-5 sm:gap-6 overflow-x-auto snap-x snap-mandatory px-[calc((100%-min(88vw,460px))/2)] py-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           >
             {RENDER_AREAS.map((area) => {
               const Icon = area.icon;
-              const areaT = t.specializationAreas.items[area.id];
+              const resumen = resumenes[area.id];
               // El ángulo de entrada se repite por baseIndex (no por
               // posición en RENDER_AREAS) para que la misma área se
               // vea idéntica en sus 3 copias.
@@ -609,7 +629,7 @@ export default function SpecializationAreas() {
                     if (area.renderIndex === closestRenderIndexRef.current) return;
                     scrollToIndex(area.renderIndex);
                   }}
-                  className={`self-stretch shrink-0 snap-center w-[80vw] max-w-[360px] sm:w-[360px] ${
+                  className={`self-stretch shrink-0 snap-center w-[88vw] max-w-[460px] sm:w-[460px] ${
                     settled && area.baseIndex !== activeIndex ? 'cursor-pointer' : ''
                   }`}
                   style={
@@ -638,7 +658,7 @@ export default function SpecializationAreas() {
                   }
                 >
                   <article
-                    className="area-card group relative rounded-[28px] p-6 sm:p-7 overflow-hidden flex flex-col items-center text-center text-white h-full"
+                    className="area-card group relative rounded-[28px] p-5 sm:p-6 overflow-hidden flex flex-col items-center text-center text-white h-full"
                     style={{ background: CARD_BACKGROUND }}
                   >
                     {/* Marca de agua — el mismo escudo blanco vectorizado
@@ -666,59 +686,102 @@ export default function SpecializationAreas() {
                       className="absolute top-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"
                     />
 
-                    {/* Logito en círculo (antes cuadrado redondeado),
-                        con un halo celeste detrás — reusa
-                        .kicker-glow-halo (la misma respiración celeste
-                        del kicker de AT) para que el ícono también
-                        lleve "el toque de luz distintivo de AT". */}
-                    <div className="relative mb-4">
-                      <span
-                        aria-hidden="true"
-                        className="absolute -inset-2.5 rounded-full bg-[#BFE6FF]/35 blur-md kicker-glow-halo pointer-events-none"
-                      />
-                      <div className="relative w-16 h-16 rounded-full bg-white/15 border border-white/25 flex items-center justify-center shrink-0">
-                        <Icon className="w-7 h-7 text-white" />
+                    {/* Encabezado en fila (ícono a la izquierda, nombre y
+                        conteo a la derecha) para que la tarjeta sea más
+                        ancha que alta. El círculo va relleno con el color
+                        de la etiqueta, con el halo celeste de AT detrás. */}
+                    <div className="relative w-full flex items-center gap-4 text-left">
+                      <div className="relative shrink-0">
+                        <span
+                          aria-hidden="true"
+                          className="absolute -inset-2 rounded-full bg-[#BFE6FF]/35 blur-md kicker-glow-halo pointer-events-none"
+                        />
+                        <div
+                          className="relative w-14 h-14 rounded-full border-2 border-white/60 flex items-center justify-center shadow-lg"
+                          style={{ backgroundColor: area.color, color: area.text }}
+                        >
+                          <Icon className="w-6 h-6" />
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-heading font-extrabold text-lg sm:text-xl text-white leading-tight">
+                          {nombre(area)}
+                        </h3>
+                        <p className="text-[11px] sm:text-xs text-white/70 mt-0.5">{tA.projectsSuffix(resumen.total)}</p>
                       </div>
                     </div>
 
-                    <h3 className="relative font-heading font-extrabold text-lg sm:text-xl text-white leading-tight">
-                      {areaT.title}
-                    </h3>
-                    <p className="relative text-[11px] sm:text-xs text-white/70 mt-1">{areaT.tag}</p>
-
-                    {/* w-full + flex justify-center a propósito: el
-                        <article> es un flex-col con items-center (para
-                        centrar el ícono/título), así que sin un ancho
-                        explícito este div se encoge a su contenido — y
-                        como CardLightStreak sólo tiene hijos absolutos
-                        (0px de intrínseco), la rayita quedaba con
-                        width:0 y desaparecía del todo. */}
-                    <div className="relative mt-3 mb-4 w-full flex justify-center">
+                    {/* w-full + flex: CardLightStreak sólo tiene hijos
+                        absolutos (0px de intrínseco), sin un ancho
+                        explícito la rayita queda con width:0. */}
+                    <div className="relative mt-3 mb-3 w-full flex justify-start">
                       <CardLightStreak />
                     </div>
 
-                    {/* Descripción corta (3 renglones, redactada a partir
-                        de los puntos oficiales de la oferta institucional)
-                        + los 3 puntos principales de esa misma lista, en
-                        vez del listado completo — vista resumida de la
-                        tarjeta. Queda alineada a la izquierda (a
-                        diferencia del encabezado, que se centró): un
-                        párrafo largo centrado es más difícil de leer. */}
-                    <p className="relative text-xs sm:text-sm text-white/85 leading-relaxed mb-5 text-left">
-                      {areaT.shortDesc}
-                    </p>
-
-                    <div className="relative space-y-2 mt-auto pt-1 w-full text-left">
-                      {areaT.highlights.map((pt, i) => (
-                        <div
-                          key={i}
-                          className="flex items-start gap-2.5 p-3 rounded-2xl bg-white/10 border border-white/10 text-xs sm:text-[13px] text-white/90 leading-relaxed"
-                        >
-                          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-white" />
-                          <span>{pt}</span>
+                    <div className="relative grid grid-cols-3 gap-2 w-full mb-3">
+                      {[
+                        [resumen.total, tA.projects],
+                        [resumen.clientes, tA.clients],
+                        [resumen.activos, tA.ongoing]
+                      ].map(([valor, etq]) => (
+                        <div key={etq} className="rounded-2xl bg-white/10 border border-white/10 py-1.5">
+                          <div className="font-heading font-extrabold text-xl leading-none">{valor}</div>
+                          <div className="text-[10px] text-white/75 mt-1">{etq}</div>
                         </div>
                       ))}
                     </div>
+
+                    <div className="relative w-full text-left mb-3">
+                      <span className="block text-[10px] font-heading font-bold uppercase tracking-[0.12em] text-white/60 mb-1.5">
+                        {tA.latest}
+                      </span>
+                      <ul className="space-y-1">
+                        {resumen.recientes.map((p) => (
+                          <li
+                            key={p.id}
+                            className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/10 border border-white/10 text-[11px] sm:text-xs text-white/90 leading-snug"
+                            title={p.titulo}
+                          >
+                            <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: area.color }} />
+                            <span className="truncate">{p.titulo}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {resumen.combina.length > 0 && (
+                      <div className="relative w-full text-left mb-4">
+                        <span className="block text-[10px] font-heading font-bold uppercase tracking-[0.12em] text-white/60 mb-1.5">
+                          {tA.combines}
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {resumen.combina.map((otra) => {
+                            const e = getEtiqueta(otra);
+                            return (
+                              <span
+                                key={otra}
+                                className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/10 border border-white/15 text-[10px] sm:text-[11px] text-white/90"
+                              >
+                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: e.color }} />
+                                {nombre(e)}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={(ev) => {
+                        ev.stopPropagation();
+                        onNavigate?.('proyectos', { etiqueta: area.id });
+                      }}
+                      className="relative mt-auto w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-white text-[#003366] font-heading font-bold text-xs sm:text-sm shadow-lg hover:bg-[#EAF6FF] active:scale-[0.98] transition-all"
+                    >
+                      {tA.seeRelated}
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
                   </article>
                 </div>
               );
@@ -732,7 +795,7 @@ export default function SpecializationAreas() {
             normal del contenido (no hace falta que ESTO también sea
             100vw). Antes también iba acá un botón de "reiniciar la
             animación" — Yocxany pidió sacarlo. */}
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-center gap-3 sm:gap-4 mt-5 sm:mt-6">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-center gap-3 sm:gap-4 mt-1 sm:mt-2">
           <button
             type="button"
             onClick={() => scrollByStep(-1)}
@@ -744,14 +807,13 @@ export default function SpecializationAreas() {
 
           <div className="flex items-center gap-2">
             {AREAS.map((area, idx) => {
-              const areaT = t.specializationAreas.items[area.id];
               const isActive = idx === activeIndex;
               return (
                 <button
                   key={area.id}
                   type="button"
                   onClick={() => scrollToBaseIndex(idx)}
-                  aria-label={ui.goTo(areaT.title)}
+                  aria-label={ui.goTo(nombre(area))}
                   aria-current={isActive}
                   className={`h-2 rounded-full transition-all duration-300 ${
                     isActive ? 'w-6 bg-[#0077C8] dark:bg-[#4FB2F2]' : 'w-2 bg-[#0077C8]/25 dark:bg-white/25 hover:bg-[#0077C8]/50 dark:hover:bg-white/45'
