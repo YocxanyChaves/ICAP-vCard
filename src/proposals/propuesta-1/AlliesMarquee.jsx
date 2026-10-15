@@ -278,18 +278,18 @@ export default function AlliesMarquee() {
               key={idx}
               type="button"
               onClick={(e) => handleSelect(item, e)}
-              className="flex items-center gap-3 px-6 py-3.5 mr-4 rounded-2xl bg-white/10 border border-white/20 hover:border-white/50 hover:bg-white/20 transition-all min-w-[200px] sm:min-w-[240px] shrink-0 group text-left cursor-pointer"
+              className="flex items-center gap-3.5 px-7 py-4.5 mr-5 rounded-2xl bg-white/10 border border-white/20 hover:border-white/50 hover:bg-white/20 transition-all min-w-[240px] sm:min-w-[290px] shrink-0 group text-left cursor-pointer"
             >
-              <AllyIconBadge ally={item} size="w-9 h-9" textSize="text-xs" />
+              <AllyIconBadge ally={item} size="w-11 h-11" textSize="text-sm" />
               <div className="flex flex-col min-w-0 flex-1">
-                <span className="font-heading font-bold text-sm text-white group-hover:text-white transition-colors">
+                <span className="font-heading font-bold text-base text-white group-hover:text-white transition-colors">
                   {item.name}
                 </span>
-                <span className="text-[11px] text-[#D6E9F7]/80 line-clamp-1 leading-snug">
+                <span className="text-xs text-[#D6E9F7]/80 line-clamp-1 leading-snug">
                   {item.label}
                 </span>
               </div>
-              <Info className="w-3.5 h-3.5 text-white/40 group-hover:text-white transition-colors shrink-0" />
+              <Info className="w-4 h-4 text-white/40 group-hover:text-white transition-colors shrink-0" />
             </button>
           ))}
         </div>

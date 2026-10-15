@@ -50,12 +50,45 @@ export const translations = {
       autoridades: 'Autoridades',
       areas: 'Áreas',
       presencia: 'Presencia',
+      proyectos: 'Proyectos',
       contacto: 'Contacto',
       docenciaMision: 'Formación',
       docenciaImpacto: 'Impacto',
       docenciaInvestigacion: 'Investigación',
       docenciaPublicaciones: 'Publicaciones',
       docenciaAreas: 'Áreas'
+    },
+
+    proyectosAT: {
+      kicker: 'Portafolio',
+      title: 'Proyectos de Asistencia Técnica',
+      subtitle: 'Algunos de los proyectos que el ICAP ha desarrollado en la última década junto a instituciones nacionales, organismos del SICA y la cooperación internacional.',
+      statProjects: 'Proyectos',
+      statClients: 'Clientes',
+      statActive: 'En curso',
+      searchPlaceholder: 'Buscar por proyecto, cliente o tema…',
+      clearSearch: 'Borrar búsqueda',
+      allClients: 'Todos',
+      allAreas: 'Todas las áreas',
+      clientTypes: {
+        nacional: 'Institución nacional',
+        sica: 'Organismo SICA',
+        internacional: 'Cooperación internacional'
+      },
+      areas: {},
+      scopes: {},
+      showing: 'Mostrando',
+      of: 'de',
+      projectsWord: 'proyectos',
+      clearFilters: 'Limpiar filtros',
+      empty: 'No hay proyectos que coincidan con esos filtros.',
+      statusActive: 'En curso',
+      statusDone: 'Finalizado',
+      detailTitle: 'Detalle del proyecto',
+      client: 'Organización / Cliente',
+      clientType: 'Tipo de cliente',
+      period: 'Período',
+      scope: 'Alcance'
     },
 
     sectionsStrip: {
@@ -836,12 +869,58 @@ export const translations = {
       autoridades: 'Leadership',
       areas: 'Focus Areas',
       presencia: 'Presence',
+      proyectos: 'Projects',
       contacto: 'Contact',
       docenciaMision: 'Training',
       docenciaImpacto: 'Impact',
       docenciaInvestigacion: 'Research',
       docenciaPublicaciones: 'Publications',
       docenciaAreas: 'Areas'
+    },
+
+    proyectosAT: {
+      kicker: 'Portfolio',
+      title: 'Technical Assistance Projects',
+      subtitle: 'A selection of the projects ICAP has carried out over the last decade with national institutions, SICA bodies and international cooperation agencies.',
+      statProjects: 'Projects',
+      statClients: 'Clients',
+      statActive: 'Ongoing',
+      searchPlaceholder: 'Search by project, client or topic…',
+      clearSearch: 'Clear search',
+      allClients: 'All',
+      allAreas: 'All areas',
+      clientTypes: {
+        nacional: 'National institution',
+        sica: 'SICA body',
+        internacional: 'International cooperation'
+      },
+      areas: {
+        Gobernanza: 'Governance',
+        'Proyectos de Inversión': 'Investment Projects',
+        'Formación Continua': 'Continuing Education',
+        'Transformación Organizacional': 'Organizational Transformation',
+        Ambiente: 'Environment',
+        Salud: 'Health',
+        Género: 'Gender',
+        Seguridad: 'Security',
+        Calidad: 'Quality',
+        'Asistencia Técnica': 'Technical Assistance'
+      },
+      scopes: {
+        Regional: 'Regional'
+      },
+      showing: 'Showing',
+      of: 'of',
+      projectsWord: 'projects',
+      clearFilters: 'Clear filters',
+      empty: 'No projects match those filters.',
+      statusActive: 'Ongoing',
+      statusDone: 'Completed',
+      detailTitle: 'Project details',
+      client: 'Organization / Client',
+      clientType: 'Client type',
+      period: 'Period',
+      scope: 'Scope'
     },
 
     sectionsStrip: {

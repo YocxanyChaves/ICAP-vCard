@@ -10,7 +10,8 @@ import {
   FlaskConical,
   BookMarked,
   Orbit,
-  GraduationCap
+  GraduationCap,
+  FolderKanban
 } from 'lucide-react';
 
 // Única fuente de verdad para las secciones del brochure — id, nombre e
@@ -29,6 +30,7 @@ export const PAGES = [
   { id: 'valores', label: 'Valores', icon: Sparkles },
   { id: 'areas', label: 'Áreas', icon: LayoutGrid },
   { id: 'presencia', label: 'Presencia', icon: MapPinned },
+  { id: 'proyectos', label: 'Proyectos', icon: FolderKanban },
   { id: 'autoridades', label: 'Autoridades', icon: Users },
   { id: 'contacto', label: 'Contacto', icon: Phone }
 ];

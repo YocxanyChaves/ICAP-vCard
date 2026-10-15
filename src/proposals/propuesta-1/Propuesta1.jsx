@@ -6,6 +6,7 @@ import StatsSection from './StatsSection';
 import SpecializationAreas from './SpecializationAreas';
 import AuthoritiesSection from './AuthoritiesSection';
 import RegionalMap from './RegionalMap';
+import ProyectosAT from './ProyectosAT';
 import AlliesMarquee from './AlliesMarquee';
 import ContactSection from './ContactSection';
 import DocenciaMision from './DocenciaMision';
@@ -182,6 +183,8 @@ export default function Propuesta1({
         return <SpecializationAreas />;
       case 'presencia':
         return <RegionalMap />;
+      case 'proyectos':
+        return <ProyectosAT />;
       case 'contacto':
         return <ContactSection id="propuesta1-contact" contact={contact} dept={activeDept} />;
       // --- Subsecciones propias de Docencia ---------------------------
