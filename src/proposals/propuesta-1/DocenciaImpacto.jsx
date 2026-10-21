@@ -3,6 +3,7 @@ import { GraduationCap, Wrench, Search, Network, Lightbulb, RotateCw } from 'luc
 import { useLanguage } from '../../i18n/LanguageContext';
 import KickerBadge from './KickerBadge';
 import ClosingPhrase from './ClosingPhrase';
+import EscudoICAP from '../../components/EscudoICAP';
 // SVG vectorizado por Yocxany a partir del PNG original (Logo celeste.svg)
 // — reemplaza los .png de abajo porque soluciona de raíz el borroneo al
 // hacer zoom que preguntaba antes: un PNG rotado con CSS necesita
@@ -17,8 +18,6 @@ import ClosingPhrase from './ClosingPhrase';
 // claro, a pedido de ella (probamos navy antes, pero quiere el celeste
 // original). icap-escudo-navy.svg queda disponible en assets/ por si se
 // necesita en otro lado más adelante, aunque ya no se usa en este archivo.
-import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
-import icapEscudoCeleste from '../../assets/icap-escudo-celeste-vector.svg';
 
 // Mismos ids que t.docenciaImpacto.items en translations.js.
 const ITEMS = [
@@ -89,19 +88,13 @@ function ImpactCardFront({ Icon, name }) {
           borde de la carta — antes iba al centro, pero ahora el centro
           es del ícono del pilar y chocaban (pedido de Yocxany). Abajo-
           izquierda queda libre para el puntito de "voltear". */}
-      <img
-        src={icapEscudoCeleste}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        className="absolute -right-[20%] -bottom-[12%] w-[62%] rotate-[-12deg] opacity-100 dark:hidden pointer-events-none select-none"
+      <EscudoICAP
+        tono="celeste"
+        className="absolute -right-[20%] -bottom-[12%] w-[62%] rotate-[-12deg] opacity-100 dark:hidden pointer-events-none"
       />
-      <img
-        src={icapEscudoWhite}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        className="absolute -right-[20%] -bottom-[12%] w-[62%] rotate-[-12deg] opacity-0 dark:opacity-100 pointer-events-none select-none"
+      <EscudoICAP
+        tono="white"
+        className="absolute -right-[20%] -bottom-[12%] w-[62%] rotate-[-12deg] opacity-0 dark:opacity-100 pointer-events-none"
       />
 
       {/* Ícono del pilar ARRIBA de la carta (centrado a lo ancho), con
@@ -177,12 +170,9 @@ function ImpactCardFront({ Icon, name }) {
 function ImpactCardBack({ Icon, name, description }) {
   return (
     <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-2xl bg-[#0077C8] dark:bg-[#001F3D] border border-[#0077C8] dark:border-white/15 shadow-xl shadow-slate-900/20 overflow-hidden flex flex-col items-center justify-center text-center p-4 sm:p-5 gap-2.5 sm:gap-3">
-      <img
-        src={icapEscudoWhite}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        className="absolute left-1/2 top-1/2 w-[86%] -translate-x-1/2 -translate-y-1/2 rotate-[5deg] opacity-[0.12] pointer-events-none select-none"
+      <EscudoICAP
+        tono="white"
+        className="absolute left-1/2 top-1/2 w-[86%] -translate-x-1/2 -translate-y-1/2 rotate-[5deg] opacity-[0.12] pointer-events-none"
       />
 
       <Icon className="relative w-7 h-7 sm:w-8 sm:h-8 text-white/80 dark:text-[#4FB2F2] shrink-0" aria-hidden="true" />

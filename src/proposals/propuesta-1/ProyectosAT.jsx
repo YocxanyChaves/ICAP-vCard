@@ -4,8 +4,7 @@ import KickerBadge from './KickerBadge';
 import { ETIQUETAS, getEtiqueta, nombreEtiqueta } from './etiquetas';
 import { PROYECTOS_AT, TIPOS_CLIENTE, proyectosDePais, proyectosDeSocio } from './proyectosData';
 import { useLanguage } from '../../i18n/LanguageContext';
-import icapEscudoNavy from '../../assets/icap-escudo-navy.svg';
-import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
+import EscudoICAP from '../../components/EscudoICAP';
 
 /**
  * Portafolio de proyectos de Asistencia Técnica: buscador + filtros por
@@ -102,19 +101,13 @@ function TarjetaProyecto({ p, abierto, onToggle, t, lang, locale, ahora, refCall
       }`}
     >
       {/* Marca de agua: el escudo del ICAP, apenas insinuado. */}
-      <img
-        src={icapEscudoNavy}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        className="dark:hidden absolute -right-6 -bottom-8 w-36 opacity-[0.06] rotate-[-8deg] pointer-events-none select-none"
+      <EscudoICAP
+        tono="navy"
+        className="dark:hidden absolute -right-6 -bottom-8 w-36 opacity-[0.06] rotate-[-8deg] pointer-events-none"
       />
-      <img
-        src={icapEscudoWhite}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        className="hidden dark:block absolute -right-6 -bottom-8 w-36 opacity-[0.07] rotate-[-8deg] pointer-events-none select-none"
+      <EscudoICAP
+        tono="white"
+        className="hidden dark:block absolute -right-6 -bottom-8 w-36 opacity-[0.07] rotate-[-8deg] pointer-events-none"
       />
 
       <button

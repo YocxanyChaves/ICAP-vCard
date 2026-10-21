@@ -1,7 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
-import icapEscudoNavy from '../../assets/icap-escudo-navy.svg';
 import { useSerpienteDeColor } from './serpienteDeColor';
+import EscudoICAP from '../../components/EscudoICAP';
 
 /**
  * "Formación con Visión de Futuro" — el bloque que va debajo del Hero
@@ -633,12 +632,9 @@ export default function FormacionVisionHero({ title, text, closing }) {
           aria-hidden="true"
           className="pointer-events-none absolute left-[-10%] top-[20%] w-[80%] h-[55%] rounded-full bg-[#4FB2F2]/25 blur-3xl animate-aurora"
         />
-        <img
-          src={icapEscudoWhite}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          className="absolute -right-[20%] top-1/2 -translate-y-1/2 w-[80%] max-w-none opacity-[0.06] pointer-events-none select-none"
+        <EscudoICAP
+          tono="white"
+          className="absolute -right-[20%] top-1/2 -translate-y-1/2 w-[80%] max-w-none opacity-[0.06] pointer-events-none"
         />
         <h2
           ref={tituloRef}
@@ -695,19 +691,13 @@ export default function FormacionVisionHero({ title, text, closing }) {
       <div className="flex-1 relative flex flex-col justify-center px-6 sm:px-10 md:px-10 lg:px-12 py-14 md:py-20 overflow-hidden">
         {/* Marca de agua del escudo, centrada y muy tenue — navy en
             tema claro, blanca en oscuro. */}
-        <img
-          src={icapEscudoNavy}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[70%] w-auto max-w-none opacity-[0.05] pointer-events-none select-none dark:hidden"
+        <EscudoICAP
+          tono="navy"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[70%] w-auto max-w-none opacity-[0.05] pointer-events-none dark:hidden"
         />
-        <img
-          src={icapEscudoWhite}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          className="hidden dark:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[70%] w-auto max-w-none opacity-[0.06] pointer-events-none select-none"
+        <EscudoICAP
+          tono="white"
+          className="hidden dark:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[70%] w-auto max-w-none opacity-[0.06] pointer-events-none"
         />
         {/* El `ref` para medir el scroll va en este div envolvente,
             SIN transform — no en el <p> de adentro, que es el que se

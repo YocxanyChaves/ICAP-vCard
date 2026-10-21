@@ -3,7 +3,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import KickerBadge from './KickerBadge';
 import FieldsCarousel from './FieldsCarousel';
 import ClosingPhrase from './ClosingPhrase';
-import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
+import EscudoICAP from '../../components/EscudoICAP';
 
 /**
  * "Investigación" de Docencia — bloque 4 del brochure ("Investigación
@@ -80,23 +80,17 @@ export default function DocenciaInvestigacion() {
             por ancho: el escudo es más alto que ancho y por ancho se
             salía por arriba y abajo del bloque (se veía cortado). */}
         <div className="relative flex flex-col gap-[var(--docencia-gap)] lg:grid lg:grid-cols-[60fr_40fr] lg:gap-0 lg:rounded-[30px] lg:overflow-hidden lg:p-2.5 lg:bg-[#003366] lg:shadow-[0_24px_48px_-24px_rgba(0,31,61,0.45)] lg:border lg:border-[#003366]">
-        <img
-          src={icapEscudoWhite}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          className="hidden lg:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[82%] w-auto max-w-none opacity-[0.07] pointer-events-none select-none"
+        <EscudoICAP
+          tono="white"
+          className="hidden lg:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[82%] w-auto max-w-none opacity-[0.07] pointer-events-none"
         />
         {/* Card del texto — SIEMPRE navy (no sigue el tema, igual que
             el panel izquierdo de FormacionVisionHero), con el escudo
             como marca de agua apenas visible y letras blancas. */}
         <div className="relative bg-[#003366] lg:bg-transparent rounded-[28px] lg:rounded-none p-6 sm:p-8 lg:p-12 shadow-sm lg:shadow-none space-y-4 overflow-hidden lg:flex lg:flex-col lg:justify-center">
-          <img
-            src={icapEscudoWhite}
-            alt=""
-            aria-hidden="true"
-            draggable={false}
-            className="lg:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[65%] max-w-none opacity-[0.07] pointer-events-none select-none"
+          <EscudoICAP
+            tono="white"
+            className="lg:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[65%] max-w-none opacity-[0.07] pointer-events-none"
           />
           {c.paragraphs.map((p, i) => (
             <p key={i} className="relative text-sm sm:text-base text-white/90 leading-relaxed">

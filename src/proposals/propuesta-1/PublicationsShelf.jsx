@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import icapEscudoNavy from '../../assets/icap-escudo-navy.svg';
-import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
+import EscudoICAP from '../../components/EscudoICAP';
 
 /**
  * Estante de libros de Publicaciones (RCAP, Cuadernos, Editorial,
@@ -213,19 +212,13 @@ export default function PublicationsShelf({ items }) {
                   />
                   {/* Sombra del pliegue junto al lomo */}
                   <span aria-hidden="true" className="absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-[#003366]/15 dark:from-black/30 to-transparent" />
-                  <img
-                    src={icapEscudoNavy}
-                    alt=""
-                    aria-hidden="true"
-                    draggable={false}
-                    className="pointer-events-none select-none absolute -right-10 -bottom-12 w-48 sm:w-60 opacity-[0.07] rotate-[8deg] dark:hidden"
+                  <EscudoICAP
+                    tono="navy"
+                    className="pointer-events-none absolute -right-10 -bottom-12 w-48 sm:w-60 opacity-[0.07] rotate-[8deg] dark:hidden"
                   />
-                  <img
-                    src={icapEscudoWhite}
-                    alt=""
-                    aria-hidden="true"
-                    draggable={false}
-                    className="pointer-events-none select-none absolute -right-10 -bottom-12 w-48 sm:w-60 opacity-[0.08] rotate-[8deg] hidden dark:block"
+                  <EscudoICAP
+                    tono="white"
+                    className="pointer-events-none absolute -right-10 -bottom-12 w-48 sm:w-60 opacity-[0.08] rotate-[8deg] hidden dark:block"
                   />
                   {contenido(esAbierto && !sinMovimiento)}
                 </div>

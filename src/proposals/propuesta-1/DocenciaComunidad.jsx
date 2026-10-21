@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import KickerBadge from './KickerBadge';
-import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
 import { useSerpienteDeColor } from './serpienteDeColor';
+import EscudoICAP from '../../components/EscudoICAP';
 
 /**
  * "Comunidad" de Docencia — bloque 7 del brochure ("Una comunidad
@@ -162,12 +162,9 @@ export default function DocenciaComunidad() {
     <section className="px-4 sm:px-6 py-[var(--docencia-gap)] bg-gradient-to-br from-[#003366] via-[#0B5A96] to-[#0077C8] text-white relative overflow-hidden">
       {/* Marca de agua — a la derecha, bien presente. Más tenue en
           mobile, donde queda detrás del texto centrado. */}
-      <img
-        src={icapEscudoWhite}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        className="absolute top-1/2 -right-[22%] sm:-right-[8%] lg:right-[2%] h-[85%] sm:h-[95%] w-auto max-w-none opacity-[0.1] sm:opacity-[0.17] pointer-events-none select-none will-change-transform"
+      <EscudoICAP
+        tono="white"
+        className="absolute top-1/2 -right-[22%] sm:-right-[8%] lg:right-[2%] h-[85%] sm:h-[95%] w-auto max-w-none opacity-[0.1] sm:opacity-[0.17] pointer-events-none will-change-transform"
         style={{
           transform: `translateY(calc(-50% + ${(1 - progress) * 40}px)) rotate(${(1 - progress) * -10 + 4}deg)`,
           transition: 'transform 0.3s ease-out'

@@ -17,9 +17,8 @@ import VCardDownload, { defaultContact, whatsappDigits } from '../../components/
 import BottomSheet from '../../components/BottomSheet';
 import KickerBadge from './KickerBadge';
 import { useLanguage } from '../../i18n/LanguageContext';
-import icapEscudoNavy from '../../assets/icap-escudo-navy.png';
-import icapEscudoWhite from '../../assets/icap-escudo-white.png';
 import icapLogoMark from '../../assets/icap-logo-mark.png';
+import EscudoICAP from '../../components/EscudoICAP';
 
 // Mismo degradado celeste (con su brillo radial arriba-izquierda) que
 // las fichas de "Áreas de Especialización" — se reutiliza tal cual acá
@@ -104,12 +103,9 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
       {/* Escudo grande y apenas insinuado de fondo, como el que ya
           "marca de agua" a Misión — el mismo gesto para cerrar el
           brochure con esa firma institucional. */}
-      <img
-        src={icapEscudoNavy}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        className="pointer-events-none select-none absolute w-72 sm:w-96 -right-16 -top-10 opacity-[0.05] rotate-[8deg]"
+      <EscudoICAP
+        tono="navy" plano
+        className="pointer-events-none absolute w-72 sm:w-96 -right-16 -top-10 opacity-[0.05] rotate-[8deg]"
       />
 
       <div ref={sectionRef} className="max-w-xl mx-auto relative">
@@ -138,12 +134,9 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
                 aria-hidden="true"
                 className="absolute top-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"
               />
-              <img
-                src={icapEscudoWhite}
-                alt=""
-                aria-hidden="true"
-                draggable={false}
-                className="pointer-events-none select-none absolute w-40 sm:w-48 -right-8 -bottom-10 opacity-[0.12] rotate-[9deg]"
+              <EscudoICAP
+                tono="white" plano
+                className="pointer-events-none absolute w-40 sm:w-48 -right-8 -bottom-10 opacity-[0.12] rotate-[9deg]"
               />
 
               <div className="relative flex items-center gap-3.5 sm:gap-5">

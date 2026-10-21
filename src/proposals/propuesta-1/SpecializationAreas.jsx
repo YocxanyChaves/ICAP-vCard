@@ -4,7 +4,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import KickerBadge from './KickerBadge';
 import { ETIQUETAS, getEtiqueta } from './etiquetas';
 import { PROYECTOS_AT } from './proyectosData';
-import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
+import EscudoICAP from '../../components/EscudoICAP';
 
 // Antes esta sección abría el detalle de cada área en un modal/bottom
 // sheet aparte (había que tocar la tarjeta para leer la descripción y
@@ -671,12 +671,9 @@ export default function SpecializationAreas({ onNavigate }) {
                         dos tonos. Opacidad baja a propósito, para que
                         quede como motivo de fondo sin competir con el
                         texto. */}
-                    <img
-                      src={icapEscudoWhite}
-                      alt=""
-                      aria-hidden="true"
-                      draggable={false}
-                      className="absolute left-1/2 top-[58%] w-[95%] -translate-x-1/2 -translate-y-1/2 rotate-[-6deg] opacity-[0.12] pointer-events-none select-none"
+                    <EscudoICAP
+                      tono="white"
+                      className="absolute left-1/2 top-[58%] w-[95%] -translate-x-1/2 -translate-y-1/2 rotate-[-6deg] opacity-[0.12] pointer-events-none"
                     />
 
                     {/* Hairline superior, apenas insinuada — el toque de

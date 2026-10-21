@@ -17,7 +17,7 @@ import {
 import DocenciaComunidad from './DocenciaComunidad';
 import { useLanguage } from '../../i18n/LanguageContext';
 import KickerBadge from './KickerBadge';
-import icapEscudoWhite from '../../assets/icap-escudo-white.svg';
+import EscudoICAP from '../../components/EscudoICAP';
 
 // Mismos ids que t.docenciaAreas.items en translations.js — nombre y
 // descripción de cada área viven ahí; acá sólo quedan el id y el
@@ -226,12 +226,9 @@ function AreaStackCard({ item, itemT, index, total, isFront, ui, tapHint, onSele
       className="absolute inset-0 w-full h-full rounded-[2rem] shadow-xl shadow-slate-900/25 dark:shadow-black/50 overflow-hidden flex flex-col items-center text-center p-6 sm:p-8 cursor-pointer disabled:cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4FB2F2] focus-visible:ring-offset-2"
       style={{ background: CARD_BACKGROUND }}
     >
-      <img
-        src={icapEscudoWhite}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        className="absolute left-1/2 top-[55%] w-[80%] -translate-x-1/2 -translate-y-1/2 rotate-[-6deg] opacity-[0.14] pointer-events-none select-none"
+      <EscudoICAP
+        tono="white"
+        className="absolute left-1/2 top-[55%] w-[80%] -translate-x-1/2 -translate-y-1/2 rotate-[-6deg] opacity-[0.14] pointer-events-none"
       />
 
       <span className="relative font-mono-code text-[10px] sm:text-xs font-bold tracking-widest text-white/60 mt-1">

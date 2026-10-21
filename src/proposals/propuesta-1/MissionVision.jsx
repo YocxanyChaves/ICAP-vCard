@@ -13,11 +13,9 @@ import {
   Leaf,
   Sparkles
 } from 'lucide-react';
-import icapEscudoNavy from '../../assets/icap-escudo-navy.png';
-import icapEscudoWhite from '../../assets/icap-escudo-white.png';
-import icapEscudoCeleste from '../../assets/icap-escudo-celeste.png';
 import { useLanguage } from '../../i18n/LanguageContext';
 import KickerBadge from './KickerBadge';
+import EscudoICAP from '../../components/EscudoICAP';
 
 // El texto de cada pilar/reverso vive en el diccionario de traducciones
 // (t.missionVision.mission.pilares / .reverso, mismo para vision) — acá
@@ -32,16 +30,8 @@ const VISION_REVERSO_ICONS = [Target, Handshake, Leaf, Sparkles];
  * parecido al blanco de fondo, y casi no se notaba) y en blanco sobre
  * el card oscuro.
  */
-function SealWatermark({ src, className = '' }) {
-  return (
-    <img
-      src={src}
-      alt=""
-      aria-hidden="true"
-      draggable={false}
-      className={`pointer-events-none select-none absolute ${className}`}
-    />
-  );
+function SealWatermark({ tono, className = '' }) {
+  return <EscudoICAP tono={tono} plano className={`pointer-events-none absolute ${className}`} />;
 }
 
 /**
@@ -315,11 +305,11 @@ export default function MissionVision() {
                   className="absolute top-0 left-6 right-6 sm:right-auto sm:left-9 sm:w-16 h-[3px] rounded-full bg-gradient-to-r from-[#0077C8] to-[#4FB2F2]"
                 />
                 <SealWatermark
-                  src={icapEscudoNavy}
+                  tono="navy"
                   className="w-56 sm:w-72 -right-12 -bottom-16 opacity-[0.08] dark:opacity-[0.05] rotate-[9deg] dark:hidden"
                 />
                 <SealWatermark
-                  src={icapEscudoWhite}
+                  tono="white"
                   className="w-56 sm:w-72 -right-12 -bottom-16 opacity-0 dark:opacity-[0.06] rotate-[9deg] hidden dark:block"
                 />
 
@@ -370,11 +360,11 @@ export default function MissionVision() {
             back={
               <article className="relative bg-white dark:bg-[#003366] rounded-[28px] sm:rounded-r-none p-6 sm:p-9 border border-slate-100 dark:border-white/10 overflow-hidden h-full flex flex-col mv-card-light">
                 <SealWatermark
-                  src={icapEscudoNavy}
+                  tono="navy"
                   className="w-52 sm:w-64 -right-12 -top-14 opacity-[0.07] dark:opacity-0 rotate-[11deg]"
                 />
                 <SealWatermark
-                  src={icapEscudoWhite}
+                  tono="white"
                   className="w-52 sm:w-64 -right-12 -top-14 opacity-0 dark:opacity-[0.05] rotate-[11deg]"
                 />
 
@@ -412,7 +402,7 @@ export default function MissionVision() {
           <div className="flex sm:flex-col items-center justify-center gap-3 py-1.5 sm:py-0 sm:px-1">
             <span className="h-px sm:h-auto sm:w-px flex-1 bg-gradient-to-r sm:bg-gradient-to-b from-transparent via-slate-300 dark:via-white/20 to-transparent" />
             <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-[#0B2340] border border-slate-200 dark:border-white/15 shadow-md flex items-center justify-center shrink-0 z-10">
-              <img src={icapEscudoCeleste} alt="" aria-hidden="true" className="w-7 h-7 sm:w-8 sm:h-8 opacity-90" />
+              <EscudoICAP tono="celeste" plano className="w-7 h-7 sm:w-8 sm:h-8 opacity-90" />
             </div>
             <span className="h-px sm:h-auto sm:w-px flex-1 bg-gradient-to-r sm:bg-gradient-to-b from-transparent via-slate-300 dark:via-white/20 to-transparent" />
           </div>
@@ -429,11 +419,11 @@ export default function MissionVision() {
                   className="absolute top-0 left-6 right-6 sm:left-auto sm:right-9 sm:w-16 h-[3px] rounded-full bg-gradient-to-r from-[#4FB2F2] to-[#0077C8]"
                 />
                 <SealWatermark
-                  src={icapEscudoNavy}
+                  tono="navy"
                   className="w-56 sm:w-72 -right-12 -bottom-16 opacity-[0.08] dark:opacity-0 rotate-[9deg]"
                 />
                 <SealWatermark
-                  src={icapEscudoWhite}
+                  tono="white"
                   className="w-56 sm:w-72 -right-12 -bottom-16 opacity-0 dark:opacity-[0.08] rotate-[9deg]"
                 />
 
@@ -482,11 +472,11 @@ export default function MissionVision() {
             back={
               <article className="relative bg-white dark:bg-[#003366] rounded-[28px] sm:rounded-l-none p-6 sm:p-9 border border-slate-100 dark:border-white/10 overflow-hidden h-full flex flex-col mv-card-light">
                 <SealWatermark
-                  src={icapEscudoNavy}
+                  tono="navy"
                   className="w-52 sm:w-64 -right-12 -top-14 opacity-[0.07] dark:opacity-0 rotate-[11deg]"
                 />
                 <SealWatermark
-                  src={icapEscudoWhite}
+                  tono="white"
                   className="w-52 sm:w-64 -right-12 -top-14 opacity-0 dark:opacity-[0.07] rotate-[11deg]"
                 />
 

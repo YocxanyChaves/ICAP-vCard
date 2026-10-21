@@ -4,8 +4,7 @@ import { LinkedinIcon, WhatsAppIcon } from '../../components/Icons';
 import { downloadVCard, whatsappDigits } from '../../components/VCardDownload';
 import { useLanguage } from '../../i18n/LanguageContext';
 import KickerBadge from './KickerBadge';
-import icapEscudoWhite from '../../assets/icap-escudo-white.png';
-import icapEscudoNavy from '../../assets/icap-escudo-navy.png';
+import EscudoICAP from '../../components/EscudoICAP';
 
 /**
  * Autoridades del ICAP: la Dirección General arriba y las direcciones
@@ -259,12 +258,9 @@ function QuoteBack({ person, role, onFlip, large = false }) {
   const quote = person.quote[lang] || person.quote.es;
   return (
     <article className="relative h-full rounded-[2rem] overflow-hidden bg-gradient-to-br from-[#003366] via-[#0B5A96] to-[#0077C8] dark:from-[#00264D] dark:via-[#003366] dark:to-[#0B5A96] mv-card-dark p-6 sm:p-8 flex flex-col text-white">
-      <img
-        src={icapEscudoWhite}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        className="pointer-events-none select-none absolute -right-10 -bottom-10 w-48 opacity-[0.07]"
+      <EscudoICAP
+        tono="white" plano
+        className="pointer-events-none absolute -right-10 -bottom-10 w-48 opacity-[0.07]"
       />
       <div aria-hidden="true" className="pointer-events-none absolute -top-16 -left-10 w-56 h-56 rounded-full bg-[#4FB2F2]/25 blur-3xl animate-aurora" />
 
@@ -303,12 +299,9 @@ function DirectorFront({ person, role, tag, onFlip }) {
   const TagIcon = DEPT_ICONS.director;
   return (
     <article className="relative h-full rounded-[2rem] overflow-hidden bg-gradient-to-br from-[#001F3D] via-[#003366] to-[#0B5A96] dark:from-[#00172E] dark:via-[#00264D] dark:to-[#003366] mv-card-dark p-6 sm:p-8 text-white">
-      <img
-        src={icapEscudoWhite}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        className="pointer-events-none select-none absolute -right-12 -top-10 w-60 sm:w-72 opacity-[0.06]"
+      <EscudoICAP
+        tono="white" plano
+        className="pointer-events-none absolute -right-12 -top-10 w-60 sm:w-72 opacity-[0.06]"
       />
       <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -left-16 w-64 h-64 rounded-full bg-[#0077C8]/30 blur-3xl animate-aurora" />
 
@@ -344,12 +337,9 @@ function DeptFront({ deptKey, person, role, tag, isCurrent, onFlip }) {
         isCurrent ? 'border-[#4FB2F2]/70 dark:border-[#4FB2F2]/60' : 'border-white dark:border-white/10'
       }`}
     >
-      <img
-        src={icapEscudoNavy}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        className="pointer-events-none select-none absolute -right-8 -bottom-8 w-44 opacity-[0.05] dark:invert"
+      <EscudoICAP
+        tono="navy" plano
+        className="pointer-events-none absolute -right-8 -bottom-8 w-44 opacity-[0.05] dark:invert"
       />
       {/* Franja superior en degradé: identidad de "ficha" institucional */}
       <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#003366] via-[#0077C8] to-[#4FB2F2]" />
