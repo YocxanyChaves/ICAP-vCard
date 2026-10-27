@@ -8,6 +8,7 @@ Plataforma interactiva para la presentación institucional y tarjeta de presenta
 
 ```text
 ICAP-vCard/
+├── .github/workflows/         # Publicación automática en GitHub Pages
 ├── index.html                 # Punto de entrada (meta noindex: no aparece en buscadores)
 ├── public/
 │   └── favicon.png
@@ -70,11 +71,20 @@ ICAP-vCard/
    ```bash
    npm run dev
    ```
+   Se abre en `http://localhost:5173/ICAP-vCard/` (la ruta base es la misma que en GitHub Pages).
 
 3. **Compilar para producción:**
    ```bash
    npm run build
    ```
+
+---
+
+## 🌐 Publicación
+
+El sitio está en **https://yocxanychaves.github.io/ICAP-vCard/**. Cada push a `main` lo
+vuelve a compilar y publicar solo (`.github/workflows/deploy.yml`, GitHub Actions → Pages).
+Si algún día cambia el nombre del repo, hay que cambiar también `base` en `vite.config.js`.
 
 ---
 
