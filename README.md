@@ -4,66 +4,48 @@ Plataforma interactiva para la presentación institucional y tarjeta de presenta
 
 ---
 
-## 🚀 Arquitectura del Proyecto
-
-El repositorio aloja **3 propuestas de diseño independientes y complementarias** sin mezclar su lógica:
+## 🚀 Estructura del Proyecto
 
 ```text
 ICAP-vCard/
+├── index.html                 # Punto de entrada (meta noindex: no aparece en buscadores)
 ├── public/
-│   └── assets/                  # Recursos estáticos y logos
+│   └── favicon.png
 ├── src/
-│   ├── components/              # Componentes compartidos
-│   │   ├── Icons.jsx            # Iconos SVG de marcas (LinkedIn, WhatsApp)
-│   │   ├── VCardDownload.jsx    # Generador y descargador de archivo .vcf
-│   │   └── ProposalSwitcher.jsx # Barra flotante para comparar propuestas y alternar vistas
+│   ├── main.jsx               # Monta la app
+│   ├── App.jsx                # Providers + selector de vista (Completa / Móvil 390px)
+│   ├── Brochure.jsx           # Página principal: menú, navegación entre secciones, ajustes
 │   │
-│   ├── styles/
-│   │   └── global.css           # Tailwind CSS, fuentes (Raleway, Open Sans) e identidad ICAP
+│   ├── sections/              # Una pantalla del menú por archivo
+│   │   ├── Hero.jsx, MissionVision.jsx, ValuesWheel.jsx, StatsSection.jsx
+│   │   ├── SpecializationAreas.jsx, AuthoritiesSection.jsx, RegionalMap.jsx
+│   │   ├── ProyectosAT.jsx, AlliesMarquee.jsx, ContactSection.jsx
+│   │   └── Docencia*.jsx, FormacionVisionHero.jsx   # Menú de Docencia
 │   │
-│   ├── proposals/
-│   │   ├── propuesta-1/         # 📄 Propuesta 1: Brochure Institucional Completo + vCard
-│   │   │   ├── Hero.jsx
-│   │   │   ├── MissionVision.jsx
-│   │   │   ├── ValuesWheel.jsx
-│   │   │   ├── StatsSection.jsx
-│   │   │   ├── SpecializationAreas.jsx
-│   │   │   ├── RegionalMap.jsx
-│   │   │   ├── AlliesMarquee.jsx
-│   │   │   ├── ContactSection.jsx
-│   │   │   └── Propuesta1.jsx
-│   │   │
-│   │   ├── propuesta-2/         # 📇 Propuesta 2: vCard Minimalista
-│   │   │   └── Propuesta2.jsx
-│   │   │
-│   │   └── propuesta-3/         # ⚡ Propuesta 3: Versión Híbrida (vCard + Brochure)
-│   │       └── Propuesta3.jsx
-│   │
-│   ├── App.jsx                  # Orquestador y selector de vistas (Móvil 390px / Full)
-│   └── main.jsx
+│   ├── components/            # Piezas reutilizables (BottomSheet, KickerBadge, EscudoICAP,
+│   │                          # VCardDownload, Icons, carruseles, pirámide/logo holográfico…)
+│   ├── data/                  # Datos y constantes: proyectos, etiquetas, menú, formas del logo
+│   ├── hooks/                 # Hooks propios (serpienteDeColor)
+│   ├── i18n/                  # Textos ES/EN y su contexto
+│   ├── theme/                 # Modo claro/oscuro
+│   ├── styles/global.css      # Tailwind, fuentes e identidad ICAP
+│   └── assets/                # Escudo, logo y logos de aliados
 ├── package.json
 └── README.md
 ```
 
 ---
 
-## 🎨 Descripción de las 3 Propuestas
+## 🎨 Contenido
 
-1. **Propuesta 1 — Brochure Institucional Completo (+ vCard):**
-   - **Hero Institucional:** SICA 1954, emblema ICAP, botones de llamada a la acción y modal *"Acerca del ICAP"*.
-   - **Misión y Visión:** Tarjetas con modales interactivos de detalle.
-   - **Valores Institucionales:** Rueda orbital interactiva de 6 valores con selección de nodos.
-   - **ICAP en Cifras:** Métricas de trayectoria (124 proyectos, 47 clientes, 18 países).
-   - **Áreas de Especialización:** 6 áreas con modales de información extendida.
-   - **Presencia Regional:** Mapa interactivo de Centroamérica con sedes de Costa Rica, Guatemala, Panamá y cobertura regional.
-   - **Red Institucional:** Marquesina de organismos aliados (SICA, OPS/OMS, BID, FLACSO, etc.).
-   - **Ficha de Contacto:** Acciones directas a WhatsApp, Correo, LinkedIn, Agendar Cita y Guardar Contacto (`.vcf`).
-
-2. **Propuesta 2 — vCard Minimalista:**
-   - Tarjeta ejecutiva directa en modo oscuro institucional (`#0B2A4A`), botones de acceso rápido y descarga instantánea de contacto.
-
-3. **Propuesta 3 — Versión Híbrida:**
-   - Combina la ficha ejecutiva de contacto en la parte superior con el acceso fluido al brochure institucional en la parte inferior.
+- **Hero Institucional:** SICA 1954, emblema ICAP, botones de llamada a la acción.
+- **Misión y Visión**, **Valores Institucionales** (rueda orbital interactiva) e **ICAP en Cifras**.
+- **Áreas de Especialización** y **Proyectos de Asistencia Técnica** con filtros por área y cliente.
+- **Autoridades:** organigrama y fichas volteables.
+- **Presencia Regional:** mapa interactivo de Centroamérica.
+- **Red Institucional:** marquesina de organismos aliados (SICA, OPS/OMS, BID, FLACSO, etc.).
+- **Docencia:** misión, impacto, investigación, publicaciones y áreas.
+- **Contacto:** WhatsApp, correo, LinkedIn, agendar cita y guardar contacto (`.vcf`).
 
 ---
 
@@ -96,9 +78,8 @@ ICAP-vCard/
 
 ---
 
-## 📱 Selector de Propuestas y Simulador Móvil
+## 🔒 Buscadores
 
-En la parte inferior de la pantalla encontrarás una **barra flotante**:
-- Permite alternar entre **Propuesta 1**, **Propuesta 2** y **Propuesta 3** en tiempo real.
-- Permite alternar entre **Vista Móvil (Simulador de iPhone 390px)** y **Vista Completa de Escritorio**.
-
+La página es pública (cualquiera con el enlace la abre) pero **no se indexa**: `index.html` lleva
+`<meta name="robots" content="noindex, nofollow, …">`. No se usa `robots.txt` con `Disallow`
+a propósito: si Google no puede rastrear la página, no ve el `noindex` y podría listar la URL igual.

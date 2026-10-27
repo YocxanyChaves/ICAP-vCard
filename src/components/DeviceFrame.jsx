@@ -1,18 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 /**
- * Renderiza `children` dentro de un <iframe> real en vez de un simple <div>.
- *
- * Por qué: Tailwind evalúa sus prefijos "sm:" / "md:" contra el ancho REAL
- * de la ventana del navegador, no contra el ancho de un div. Si el "modo
- * móvil" del selector fuera solo un div angosto flotando en una pantalla
- * de escritorio, esas clases seguirían activas y el diseño se vería
- * distinto (y peor) que en un celular real o en el inspector angostado.
- * Un <iframe> en cambio tiene su propio viewport independiente, así que
- * las media queries de Tailwind se evalúan correctamente contra su ancho
- * real — el mismo comportamiento que ver la página angostando la ventana
- * del navegador de verdad.
+ * Renderiza `children` dentro de un <iframe> real: así los breakpoints de
+ * Tailwind (sm:, md:) se evalúan contra el ancho del iframe y no contra
+ * el de la ventana, igual que en un celular de verdad.
  */
 export default function DeviceFrame({ width = 390, height = '100%', children }) {
   const iframeRef = useRef(null);

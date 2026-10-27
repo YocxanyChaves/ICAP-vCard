@@ -1,19 +1,13 @@
 import escudoSprite from '../assets/icap-escudo.svg?no-inline';
 
 /**
- * Escudo del ICAP como marca de agua. Antes había seis archivos del mismo
- * dibujo (3 SVG de ~260 KB + 3 PNG de ~200 KB, uno por color); ahora es un
- * solo sprite liviano (assets/icap-escudo.svg) y el color se elige acá.
+ * Escudo del ICAP como marca de agua: un solo sprite SVG
+ * (assets/icap-escudo.svg) de 7 capas, cada una con su tono en --e1..--e7.
+ *  - tono: 'white' | 'navy' | 'celeste'.
+ *  - plano: el escudo en un solo color con ~66% de opacidad.
  *
- * El dibujo son 7 capas apiladas; cada una toma su tono de --e1..--e7.
- *  - tono: 'white' | 'navy' | 'celeste' — las paletas exactas de los SVG
- *    anteriores (icap-escudo-white/navy/celeste-vector.svg).
- *  - plano: imita a los PNG anteriores, que eran el escudo en un solo
- *    color con ~66% de opacidad horneada en el archivo. Se usa donde antes
- *    iba un .png, para que esas marcas de agua se vean igual que antes.
- *
- * `className` / `style` se pasan tal cual, como al <img> de antes: el
- * alto (o el ancho) sale solo de la proporción del viewBox.
+ * `className` / `style` van directo al elemento; el alto (o el ancho)
+ * sale de la proporción del viewBox.
  */
 const TONOS = {
   white: ['#f7fafc', '#eff5f9', '#e2ecf5', '#d6e4f1', '#cfe0ef', '#c2d7ea', '#bbd3e8'],

@@ -2,7 +2,7 @@
 
 /* Modo oscuro por clase (no por prefers-color-scheme del sistema): el
    switch de tema en el header agrega/quita `.dark` en el contenedor
-   raíz de la app (ver Propuesta1.jsx), y esta variante hace que
+   raíz de la app (ver Brochure.jsx), y esta variante hace que
    cualquier `dark:` de Tailwind reaccione a esa clase en vez de a la
    preferencia del sistema operativo. */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -13,11 +13,8 @@
     --font-heading: 'Raleway', system-ui, -apple-system, sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
     /* Distancia única de las subsecciones de Docencia: menú superior →
-       primer elemento, y entre cada elemento de la subsección. Tomada
-       de lo que medía en Formación (que antes la calculaba con
-       justify-evenly sobre ~88vh), después bajada a pedido de Yocxany
-       ("está muy separado todo"). Crece con el alto de la pantalla,
-       con piso y techo para que no quede ni pegado ni exagerado. */
+       primer elemento, y entre cada elemento. Crece con el alto de la
+       pantalla, con piso y techo. */
     --docencia-gap: clamp(1.75rem, 6vh, 3.75rem);
   }
 }
@@ -71,16 +68,10 @@ h1, h2, h3, h4, h5, h6 {
   100% { transform: translateX(-50%); }
 }
 
-/* Tira infinita de aliados: el truco de "duplicar el arreglo y trasladar
-   -50%" sólo da un loop sin costuras si el ancho de cada mitad es
-   EXACTAMENTE igual. Con `gap` en el contenedor flex eso no se cumple:
-   16 tarjetas tienen 15 gaps en total (no 16), así que la mitad del
-   ancho total queda medio gap corrida del ancho real de una mitad — de
-   ahí el salto/reinicio brusco en cada vuelta. Por eso el espaciado va
-   como margen en cada tarjeta (ver AlliesMarquee.jsx) en vez de `gap`
-   en el contenedor: así cada tarjeta aporta el mismo ancho (tarjeta +
-   margen) y las dos mitades quedan matemáticamente idénticas, sin
-   costura visible. */
+/* Tira infinita de aliados: duplicar el arreglo y trasladar -50% sólo
+   da un loop sin costura si las dos mitades miden EXACTAMENTE lo mismo.
+   Con `gap` no se cumple (16 tarjetas tienen 15 gaps), así que el
+   espaciado va como margen en cada tarjeta (ver AlliesMarquee.jsx). */
 .animate-marquee {
   display: flex;
   width: max-content;
@@ -115,20 +106,11 @@ h1, h2, h3, h4, h5, h6 {
   animation: fadeIn 0.2s ease-out forwards;
 }
 
-/* Este keyframe SÓLO anima opacity a propósito — nada de transform.
-   Ese era justo el bug de "Áreas" (modal/BottomSheet cortado): esta
-   animación envuelve CADA página completa, y cualquier transform que
-   toque (aunque sea un translateX(0) que no mueve nada, o incluso
-   `transform: none` como valor final del keyframe — Chrome igual
-   reporta una matriz identidad ya calculada, no la palabra "none")
-   deja ese contenedor con un transform "activo" para siempre gracias a
-   `forwards`. Eso convierte a esta página en el "viewport" de
-   cualquier `position: fixed` de adentro (como el BottomSheet/modal)
-   en vez de la ventana real — si la página es más cortita que la
-   pantalla (como "Áreas"), el modal queda encogido/cortado a esa
-   altura en vez de cubrir toda la pantalla. Por eso esta entrada de
-   página sólo usa opacity: así el contenedor nunca tiene transform,
-   ni por un instante, y ningún fixed de adentro se rompe. */
+/* Este keyframe SÓLO anima opacity, a propósito. Envuelve cada página y
+   con `forwards` cualquier transform (aunque sea identidad) quedaría
+   activo para siempre, convirtiendo la página en el "viewport" de los
+   `position: fixed` de adentro: el BottomSheet/modal quedaría cortado al
+   alto de la página en vez de cubrir la pantalla. */
 @keyframes pageIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -138,14 +120,9 @@ h1, h2, h3, h4, h5, h6 {
   animation: pageIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Entrada de la ficha del valor activo (Valores Institucionales): cada
-   vez que cambia el valor seleccionado el key={current.id} hace que
-   React remonte esta tarjeta, así que la animación se repite sola en
-   cada cambio, sin lógica extra. Una animación propia (no la genérica
-   .animate-page-in, que ya se usa para el cambio de sección completa)
-   para que el cambio de ficha se sienta como su propio gesto: alzado +
-   fundido + un empujoncito de escala, con movimiento suficiente para
-   notarse a simple vista aunque la esfera también esté animando. */
+/* Entrada de la ficha del valor activo (Valores Institucionales): el
+   key={current.id} la remonta en cada cambio, así la animación se repite
+   sola. Alzado + fundido + un empujoncito de escala. */
 @keyframes valueCardIn {
   0% { opacity: 0; transform: translateY(22px) scale(0.93); }
   60% { opacity: 1; }
@@ -156,30 +133,10 @@ h1, h2, h3, h4, h5, h6 {
   animation: valueCardIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Tarjetas de "Formación" (Docencia — DocenciaMision.jsx), que rotan
-   solas de a 2: la entrada tenía que sentirse como un "fluuush" bien
-   marcado, no apenas una subidita — así que además de recorrer bastante
-   más distancia que .animate-slide-up, el blur es lo que hace la
-   estela: arranca desenfocada y se va aclarando a medida que "frena" en
-   su lugar, en vez de llegar siempre nítida. A propósito NO se apoya en
-   que la animación sea rápida (eso se ve como un salto, no como una
-   estela) — dura más que el resto de transiciones del sitio y el
-   desenfoque es lo que vende el movimiento. La salida (cardWhooshOut)
-   es la misma idea al revés: se va hacia arriba perdiendo foco y
-   achicándose, como si la tarjeta se disolviera en su propia estela en
-   vez de cortarse en seco. Yocxany pidió bajarle un poco al blur (antes
-   14px/5px de entrada y 10px de salida) — se sigue sintiendo el efecto
-   pero sin quedar tan "empañado" mientras se mueve.
-
-   Con el texto de contexto justo encima de las cards (cardsIntro, ver
-   DocenciaMision.jsx), esta salida hacia arriba pasaba POR ENCIMA del
-   texto y lo tapaba un instante — Yocxany aclaró que no quería que la
-   tarjeta cambiara de dirección (probé que se hundiera hacia abajo,
-   pero no era eso), sino que se escondiera DETRÁS del texto al
-   cruzarlo, para que nunca lo tape. Eso es cuestión de apilamiento
-   (z-index), no de dirección — ver el z-10 del párrafo cardsIntro.text
-   en DocenciaMision.jsx, que ahora queda siempre por encima de las
-   cards en el eje de profundidad. */
+/* Tarjetas de "Formación" (DocenciaMision.jsx), que rotan de a 2. La
+   entrada recorre bastante distancia y arranca desenfocada, aclarándose
+   al frenar: el blur es lo que hace la estela. La salida (cardWhooshOut)
+   es lo mismo al revés: se va hacia arriba perdiendo foco y achicándose. */
 @keyframes cardWhooshIn {
   0% {
     opacity: 0;
@@ -218,21 +175,10 @@ h1, h2, h3, h4, h5, h6 {
   animation: cardWhooshOut 0.5s cubic-bezier(0.5, 0, 1, 1) both;
 }
 
-/* Yocxany notó que el blur de la estela "atravesaba" el ícono y el
-   texto de la card, dejándolos ilegibles mientras entran/salen —
-   pidió que el efecto siguiera pasando pero sin afectar el texto.
-   Como un filter:blur() no se puede excluir de sólo una parte de un
-   mismo elemento, la solución es en dos capas superpuestas: una
-   "fantasma" (aria-hidden, detrás) que es una copia idéntica del
-   ícono+texto y sí lleva el blur+fade+scale de siempre
-   (cardWhoosh-in/out), y encima el contenido real, a OPACIDAD FIJA
-   EN 1 (nunca se desvanece, así tapa a la fantasma en todo momento)
-   y SIN escalar — sólo translateY. Se le quitó el scale() a esta
-   capa a propósito: animar scale() sobre texto lo suaviza por el
-   reescalado/antialiasing mientras el valor no es exactamente 1,
-   dando un efecto "borroso" aunque no lleve filter:blur — con sólo
-   translateY el texto real queda nítido de verdad en todo momento,
-   sin ningún artefacto. */
+/* El blur se aplica a una capa "fantasma" (aria-hidden, detrás), copia
+   del ícono+texto con blur+fade+scale. Encima va el contenido real con
+   opacidad fija en 1 y SÓLO translateY: animar scale() sobre texto lo
+   suaviza, así queda nítido en todo momento. */
 @keyframes cardContentIn {
   0% {
     transform: translateY(85%);
@@ -259,12 +205,9 @@ h1, h2, h3, h4, h5, h6 {
   animation: cardContentOut 0.5s cubic-bezier(0.5, 0, 1, 1) both;
 }
 
-/* Versión "de regreso" de las 4 animaciones de arriba — mismas curvas,
-   duraciones, blur y escala, sólo con la dirección vertical invertida.
-   Se usan cuando en Formación se va al par ANTERIOR (scroll hacia
-   arriba o clic en un puntito anterior): el par actual se va hacia
-   ABAJO y el anterior baja desde ARRIBA, para dar la ilusión de que se
-   "devolvió" en vez de repetir el mismo movimiento de avanzar. */
+/* Versión "de regreso" de las 4 animaciones de arriba, con la dirección
+   vertical invertida: al ir al par ANTERIOR el actual se va hacia abajo y
+   el anterior baja desde arriba. */
 @keyframes cardWhooshInBack {
   0% {
     opacity: 0;
@@ -334,11 +277,6 @@ h1, h2, h3, h4, h5, h6 {
   to { transform: rotate(360deg); }
 }
 
-@keyframes orbitSpinReverse {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(-360deg); }
-}
-
 /* Ping animation for SVG circles: animates r/opacity directly instead of
    transform:scale(), which for SVG shapes without transform-box:fill-box
    scales from the whole viewport origin, not the shape's own center. */
@@ -353,7 +291,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Halo pulsante detrás de la esfera del menú inferior activo.
    Se aplica sobre un hijo posicionado con inset-0 dentro de un wrapper que
-   ya trae su propio transform de traslado (ver Propuesta1.jsx), para que
+   ya trae su propio transform de traslado (ver Brochure.jsx), para que
    la animación de escala no pise el transform inline de posición. */
 @keyframes pulseSlow {
   0%, 100% { opacity: 0.45; transform: scale(1); }
@@ -364,20 +302,13 @@ h1, h2, h3, h4, h5, h6 {
   animation: pulseSlow 2.6s ease-in-out infinite;
 }
 
-/* Ondas de fondo del Hero: drift horizontal infinito y sin costuras.
-   El svg mide 200% de ancho con el mismo trazo repetido cada 800
-   unidades de viewBox (mismo Y de entrada y salida en cada tramo), así
-   que trasladar -50% (= un "tile" completo) deja el dibujo idéntico al
-   punto de partida y el loop no se nota.
+/* Ondas de fondo del Hero: drift horizontal infinito y sin costuras. El
+   svg mide 200% de ancho con el mismo trazo repetido cada 800 unidades de
+   viewBox, así que trasladar -50% deja el dibujo idéntico al de partida.
 
-   Las dos ondas principales comparten exactamente la misma clase de
-   drift/bob/rayo (mismo sentido, misma duración, sin animation-delay
-   propio) para avanzar siempre juntas — no es parallax caótico, es una
-   sola cadencia repetida en dos alturas, a propósito, para que el
-   movimiento se sienta controlado y pausado en vez de errático. La
-   onda central (muy tenue) dura exactamente el doble, así vuelve a
-   alinearse con las otras dos cada dos ciclos en lugar de derivar sin
-   patrón. */
+   Las dos ondas principales comparten la misma clase de drift/bob/rayo
+   (sin delay) para avanzar juntas. La onda central (muy tenue) dura el
+   doble, así se realinea con las otras cada dos ciclos. */
 @keyframes waveDrift {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
@@ -447,15 +378,9 @@ h1, h2, h3, h4, h5, h6 {
   animation: heroRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Entrada del encabezado de "Formación" (kicker + título/texto en
-   DocenciaMision.jsx) — Yocxany la pidió más fluida y lenta que
-   heroRise, "como palabras que las trae el viento o una brisa": en
-   vez de sólo subir, el texto entra desplazándose desde el lado con
-   un desenfoque que se va aclarando a medida que "aterriza", y con
-   una curva de easing más suave y una duración mayor (1.1s en vez de
-   0.7s) para que se sienta como una brisa y no como un salto. Efecto
-   propio de esta sección — no se reutiliza heroRise para no cambiar
-   la entrada del Hero, que usa esa animación en otro lado. */
+/* Entrada del encabezado de "Formación" (DocenciaMision.jsx): entra desde
+   el lado con un desenfoque que se va aclarando, más lenta y suave que
+   heroRise (1.1s), como traída por una brisa. */
 @keyframes breezeIn {
   from {
     opacity: 0;
@@ -491,13 +416,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Rebote MUY sutil para la frase de cierre de "Formación con Visión de
-   Futuro" (FormacionVisionHero.jsx) cuando el scroll de esa sección
-   termina de acomodarse. Yocxany pidió específicamente "menos boop,
-   algo más sutil" después de probar `animate-stat-pop` (pensado para
-   los contadores de "ICAP en Cifras", con un rebote bien marcado) —
-   por eso este es un keyframe propio, no una versión reducida vía
-   props: mismo espíritu (un pequeño "pop" de escala al aterrizar) pero
-   con una amplitud mucho menor. */
+   Futuro" (FormacionVisionHero.jsx) y ClosingPhrase.jsx: un pequeño "pop"
+   de escala con mucha menos amplitud que `animate-stat-pop`. */
 @keyframes closingBoop {
   0% { scale: 1; }
   40% { scale: 1.035; }
@@ -537,16 +457,11 @@ h1, h2, h3, h4, h5, h6 {
   animation: lightRingSweep 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* "Asomo" de las fichas de Misión/Visión al entrar a la sección: un
-   vistazo de que la ficha se puede voltear, SIN llegar a voltearla
-   (se queda a medio camino y regresa). Gira hacia el mismo lado que
-   el volteo real (rotateY positivo) para que anticipe el gesto
-   correcto, con un pasadito leve al volver (-3deg) como un rebote
-   chiquito de "acomodo". Una animación de CSS sobre `transform` pisa
-   por encima del `transform` inline que controla el volteo real
-   mientras dura (así no hay que tocar el estado de volteado), y como
-   termina exactamente en rotateY(0deg) — el mismo valor en reposo —
-   no hay salto visible cuando se quita la clase al terminar. */
+/* "Asomo" de las fichas de Misión/Visión al entrar: gira hacia el mismo
+   lado que el volteo real sin llegar a voltear, y vuelve con un leve
+   rebote (-3deg). Mientras dura pisa el `transform` inline del volteo, y
+   como termina en rotateY(0deg) (el valor en reposo) no hay salto al
+   quitar la clase. */
 @keyframes flipHint {
   0% { transform: rotateY(0deg); }
   38% { transform: rotateY(20deg); }
@@ -559,12 +474,9 @@ h1, h2, h3, h4, h5, h6 {
   animation: flipHint 1.15s cubic-bezier(0.45, 0, 0.2, 1) both;
 }
 
-/* Ficha "despegada" del fondo (Misión/Visión): la profundidad se logra
-   sólo con sombras en capas (una pegada/cerca/oscura + una amplia/
-   lejos/difusa) — el mismo truco de Material Design para que algo se
-   vea "flotando" sobre la página, sin ningún transform 3D real. Al
-   pasar el mouse se levanta un poco (translateY) y la sombra se
-   agranda, como si se despegara todavía más del fondo. */
+/* Ficha "despegada" del fondo (Misión/Visión): profundidad sólo con
+   sombras en capas (una cercana y oscura + una amplia y difusa). En hover
+   sube un poco y la sombra crece. */
 .mv-card-light {
   box-shadow:
     0 2px 4px -2px rgba(0, 51, 102, 0.1),
@@ -597,16 +509,10 @@ h1, h2, h3, h4, h5, h6 {
     0 48px 76px -30px rgba(0, 8, 20, 0.6);
 }
 
-/* Fichas celeste de Áreas de Especialización: la "ilusión 3D" viene
-   toda de acá, sin ningún transform real — un realce blanco bien
-   marcado arriba (inset), como si la luz pegara fuerte en el borde
-   superior de una superficie curva/pulida; un bisel angosto a los
-   lados (claro a la izquierda, oscuro a la derecha) que refuerza esa
-   curvatura; una sombra oscura amplia abajo (inset) que hunde la
-   parte baja de la tarjeta; y una sombra exterior grande, teñida del
-   mismo celeste, para que se note bien despegada de la página. El
-   hover sigue chill: sólo un levantado chiquito (3px) y la sombra se
-   agranda un poco más — nada de escalas, rotaciones ni saltos. */
+/* Fichas celeste de Áreas de Especialización: la "ilusión 3D" sale toda
+   de las sombras — realce blanco arriba (inset), bisel a los lados,
+   sombra oscura abajo (inset) y una sombra exterior grande teñida de
+   celeste. El hover sólo levanta 3px y agranda un poco la sombra. */
 .area-card {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
@@ -625,41 +531,11 @@ h1, h2, h3, h4, h5, h6 {
     0 32px 46px -22px rgba(1, 20, 42, 0.4);
 }
 
-/* Entrada al hacer scroll: cada tarjeta llega deslizándose desde SU
-   lado de la pantalla (la de la columna izquierda entra desde la
-   izquierda, la de la derecha desde la derecha — en móvil, con una
-   sola columna, igual alternan y queda como un zigzag sutil). Es un
-   wrapper aparte alrededor de <article className="area-card">, no el
-   mismo elemento: así este translateX de entrada nunca compite por la
-   propiedad `transform` con el translateY(-4px) del hover de arriba
-   (misma especificidad + mismo elemento habría hecho que uno pisara al
-   otro). body ya tiene overflow-x: hidden, así que el desplazamiento
-   inicial (fuera de pantalla) nunca genera scroll horizontal. */
-.area-card-reveal {
-  opacity: 0;
-  transform: translateX(-48px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.area-card-reveal-right {
-  transform: translateX(48px);
-}
-
-.area-card-reveal.is-visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* "Boop" sincronizado del abanico de Impacto (DocenciaImpacto.jsx —
-   ImpactFan): apenas TODAS las cartas terminan de abrirse en abanico,
-   pegan un rebotecito chiquito a la vez, todas juntas, como un último
-   "acomodo" del mazo. Se aplica sobre el <button> de cada carta (no
-   sobre el wrapper que la posiciona en el abanico ni sobre el div que
-   la voltea en 3D) justamente porque el transform de reposo de ESE
-   elemento es "ninguno" — sólo cambia con :hover vía clases de
-   Tailwind — así esta animación no compite por la propiedad transform
-   con el translateX/rotate/translateY del abanico ni con el rotateY
-   del volteo (mismo motivo que .area-card-reveal más arriba). */
+/* "Boop" sincronizado de las cartas de Impacto (DocenciaImpacto.jsx —
+   ImpactFan): un rebotecito de todas a la vez cuando terminan de llegar.
+   Va sobre el <button> de cada carta porque su transform de reposo es
+   "ninguno" (sólo cambia con :hover), así no compite con el transform de
+   la entrada ni con el rotateY del volteo. */
 @keyframes cardBoop {
   0% { transform: scale(1); }
   45% { transform: scale(1.045); }
@@ -671,13 +547,9 @@ h1, h2, h3, h4, h5, h6 {
   animation: cardBoop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-/* KickerBadge variant="glow" (títulos de Asistencia Técnica): halo
-   difuminado que respira detrás de la píldora + una barrita de luz
-   que la recorre cada cierto tiempo, en vez del puntito parpadeante
-   que usa Docencia — mismo espíritu que .animate-pulse-slow (el halo
-   de la esfera del menú inferior) pero acá con su propio nombre
-   porque además hay una segunda animación (la barrita) que tiene que
-   ir sincronizada con ella. */
+/* KickerBadge variant="glow" (títulos de Asistencia Técnica): halo que
+   respira + una barrita de luz que recorre la píldora cada cierto tiempo,
+   sincronizada con él. */
 @keyframes kickerGlowPulse {
   0%, 100% { opacity: 0.4; transform: scale(0.97); }
   50% { opacity: 0.9; transform: scale(1.13); }
@@ -691,9 +563,7 @@ h1, h2, h3, h4, h5, h6 {
    hace una pausa antes de repetir — un "brillo" que pasa de vez en
    cuando en vez de un escaneo constante, para que no distraiga del
    texto. */
-/* Más seguido a pedido de Yocxany: antes un ciclo de 3.4s (cruce de
-   ~2s + ~1.4s de pausa); ahora 2.4s con el cruce a la misma velocidad
-   (~2s) y una pausa cortita (~0.4s). */
+/* Ciclo de 2.4s: cruce de ~2s y una pausa cortita (~0.4s). */
 @keyframes kickerLightSweep {
   0% { transform: translateX(-140%); opacity: 0; }
   14% { opacity: 1; }

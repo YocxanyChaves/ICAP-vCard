@@ -1,4 +1,3 @@
-import React from 'react';
 import { UserPlus, Download } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 
@@ -78,12 +77,9 @@ export default function VCardDownload({
 
   const handleDownload = (e) => {
     e.preventDefault();
-    // El objeto `defaultContact` es un dato plano de ejemplo (no un
-    // componente), así que no puede leer el idioma activo por sí
-    // mismo — si es un contacto de ejemplo, se le superponen los
-    // campos traducidos justo antes de generar el .vcf, sin tocar los
-    // datos reales de contacto (teléfono, correo, etc.) que sí son
-    // los mismos en cualquier idioma.
+    // `defaultContact` no conoce el idioma activo: si es el contacto de
+    // ejemplo, se le superponen los campos traducidos antes de generar el
+    // .vcf (teléfono, correo, etc. no cambian).
     const dataToDownload = contact.isSample
       ? {
           ...contact,

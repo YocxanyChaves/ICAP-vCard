@@ -1,15 +1,12 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useMemo, useState } from 'react';
 import { translations } from './translations';
 
 const LanguageContext = createContext(null);
 
 /**
- * Proveedor del idioma activo (es/en) para todo el brochure. Se monta
- * una sola vez, envolviendo el árbol en App.jsx — como el contexto de
- * React sigue funcionando a través de un `createPortal` (ver
- * DeviceFrame.jsx, usado por la "Vista Móvil"), esto alcanza tanto a
- * la vista completa como a la previsualización dentro del iframe, sin
- * necesidad de un segundo Provider.
+ * Idioma activo (es/en). Se monta una sola vez en App.jsx y también
+ * llega al iframe de "Vista Móvil" a través del createPortal de
+ * DeviceFrame.
  */
 export function LanguageProvider({ children }) {
   const [lang, setLang] = useState('es');

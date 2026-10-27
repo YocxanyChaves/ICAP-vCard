@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import Propuesta1 from './proposals/propuesta-1/Propuesta1';
+import { useState } from 'react';
+import Brochure from './Brochure';
 import DeviceFrame from './components/DeviceFrame';
 import { defaultContact } from './components/VCardDownload';
 import { LanguageProvider } from './i18n/LanguageContext';
@@ -13,16 +13,13 @@ function App() {
   const [viewMode, setViewMode] = useState('full');
 
   const app = (
-    <Propuesta1 contact={defaultContact} viewMode={viewMode} onSetViewMode={setViewMode} />
+    <Brochure contact={defaultContact} viewMode={viewMode} onSetViewMode={setViewMode} />
   );
 
-  // LanguageProvider/ThemeProvider envuelven TODO el árbol (incluido lo
-  // que va dentro del iframe de "Vista Móvil"): el contexto de React
-  // sigue llegando a través del createPortal que usa DeviceFrame, así
-  // que un único par de Providers alcanza para ambos modos de vista. El
-  // toggle de tema en sí (la clase `dark`) se aplica más adentro, en el
-  // contenedor raíz de Propuesta1.jsx — así queda dentro del propio
-  // árbol portado al iframe, en vez de acá afuera.
+  // Un solo par de Providers alcanza para ambos modos de vista: el contexto
+  // llega al iframe de "Vista Móvil" a través del createPortal de
+  // DeviceFrame. La clase `dark` se aplica dentro de Brochure.jsx para que
+  // también quede dentro del iframe.
   if (viewMode === 'mobile') {
     return (
       <ThemeProvider>

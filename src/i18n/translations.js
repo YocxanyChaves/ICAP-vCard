@@ -19,12 +19,8 @@ export const translations = {
     header: {
       subtitle: 'Brochure Institucional',
       home: 'Ir al inicio',
-      fullView: 'Vista Completa',
-      mobileView: 'Vista Móvil (390px)',
       about: 'Sobre ICAP',
       contact: 'Contactanos',
-      language: 'Cambiar idioma',
-      theme: 'Cambiar tema claro/oscuro',
       settings: 'Configuración',
       settingsView: 'Vista',
       settingsLanguage: 'Idioma',
@@ -286,7 +282,6 @@ export const translations = {
         CR: {
           name: 'Costa Rica',
           status: 'Sede Central',
-          capital: 'San José',
           city: 'San José (Curridabat)',
           description:
             'Sede central directiva del ICAP desde 1954, campus de posgrados internacionales, centro de innovación pública y coordinación regional de cooperación técnica.',
@@ -295,7 +290,6 @@ export const translations = {
         GT: {
           name: 'Guatemala',
           status: 'Sede y Enlace País',
-          capital: 'Guatemala',
           city: 'Ciudad de Guatemala',
           description:
             'Oficina nacional de vinculación con ministerios, fortalecimiento institucional y acompañamiento a proyectos de modernización estatal.',
@@ -304,7 +298,6 @@ export const translations = {
         PA: {
           name: 'Panamá',
           status: 'Centro Regional',
-          capital: 'Panama',
           city: 'Ciudad de Panamá',
           description:
             'Centro regional de capacitación técnica, formación ejecutiva y vinculación estratégica con organismos multilaterales de desarrollo.',
@@ -313,7 +306,6 @@ export const translations = {
         BZ: {
           name: 'Belice',
           status: 'Estado Miembro SICA',
-          capital: 'Belmopan',
           city: 'Belmopán',
           description:
             'Programas de cooperación técnica bilingüe, gestión ambiental, resiliencia climática y formación de cuadros públicos.',
@@ -322,7 +314,6 @@ export const translations = {
         SV: {
           name: 'El Salvador',
           status: 'Estado Miembro SICA',
-          capital: 'San Salvador',
           city: 'San Salvador',
           description:
             'Acompañamiento en transformación digital del gobierno, innovación ciudadana y optimización de proyectos de inversión estatal.',
@@ -331,7 +322,6 @@ export const translations = {
         HN: {
           name: 'Honduras',
           status: 'Estado Miembro SICA',
-          capital: 'Tegucigalpa',
           city: 'Tegucigalpa',
           description:
             'Fortalecimiento de la gestión en salud pública, programas de posgrado y modernización de la administración territorial.',
@@ -340,7 +330,6 @@ export const translations = {
         NI: {
           name: 'Nicaragua',
           status: 'Estado Miembro SICA',
-          capital: 'Managua',
           city: 'Managua',
           description:
             'Capacitación en planificación estratégica, gestión por resultados y fortalecimiento de las capacidades del servidor público.',
@@ -349,7 +338,6 @@ export const translations = {
         DO: {
           name: 'Rep. Dominicana',
           status: 'Estado Miembro SICA',
-          capital: 'Santo Domingo',
           city: 'Santo Domingo',
           description:
             'Convenios de formación académica superior, compras públicas sostenibles y vinculación caribeña-centroamericana.',
@@ -358,7 +346,6 @@ export const translations = {
         MX: {
           name: 'México',
           status: 'Cooperación Regional',
-          capital: 'Ciudad de México',
           city: 'Ciudad de México',
           description:
             'Convenios de investigación aplicada, intercambio de expertos con instituciones académicas y proyectos mesoamericanos.',
@@ -367,7 +354,6 @@ export const translations = {
         CO: {
           name: 'Colombia',
           status: 'Cooperación Regional',
-          capital: 'Bogotá',
           city: 'Bogotá',
           description:
             'Cooperación Sur-Sur en innovación pública, gestión de la seguridad social y transferencia de buenas prácticas.',
@@ -381,11 +367,8 @@ export const translations = {
       title: 'Conocimiento para Anticipar, Liderar y Transformar',
       subtitle:
         'Las instituciones enfrentan escenarios cada vez más complejos: transformación digital, nuevas demandas ciudadanas, cambios demográficos, desafíos sanitarios, sostenibilidad, innovación tecnológica y evolución de los modelos de gobernanza. Frente a este entorno, el ICAP forma profesionales capaces de interpretar tendencias, anticipar escenarios y transformar conocimiento en decisiones estratégicas. El Departamento de Docencia e Investigación impulsa una formación de posgrado conectada con la realidad regional, la investigación aplicada, la innovación académica y la generación de conocimiento con impacto.',
-      // Frase de cierre del bloque de Inicio (FormacionVisionHero.jsx)
-      // — antes era la última oración de `subtitle`, pero Yocxany
-      // pidió que se destacara aparte, grande, abajo a la derecha,
-      // como remate de la sección, en vez de perderse como una
-      // oración más dentro del párrafo.
+      // Frase de cierre del bloque de Inicio (FormacionVisionHero.jsx),
+      // destacada aparte: grande, abajo a la derecha.
       closing: 'Prepárese para liderar los desafíos del futuro.',
       // Encabezado propio que va arriba del carrusel de cards, en la
       // página dedicada "Formación" del menú (no en el texto de Inicio,
@@ -517,10 +500,8 @@ export const translations = {
       title: 'Áreas para los Desafíos del Presente y del Futuro',
       subtitle:
         'La oferta académica del ICAP evoluciona de acuerdo con las necesidades de las instituciones y las transformaciones del entorno.',
-      // Aviso bajo la tarjeta de adelante del mazo (DocenciaAreasWheel.jsx)
-      // — mismo espíritu que el "↩ Tap to explore" de la referencia de
-      // Miu Miu que pasó Yocxany, para avisar que la tarjeta se puede
-      // tocar y "pasar" a la siguiente.
+      // Aviso bajo la tarjeta de adelante del mazo (DocenciaAreasWheel.jsx):
+      // se puede tocar para pasar a la siguiente.
       tapHint: 'Tocá para explorar',
       items: {
         integracionRegional: {
@@ -689,12 +670,8 @@ export const translations = {
     header: {
       subtitle: 'Institutional Brochure',
       home: 'Go to home',
-      fullView: 'Full View',
-      mobileView: 'Mobile View (390px)',
       about: 'About ICAP',
       contact: 'Contact Us',
-      language: 'Switch language',
-      theme: 'Switch light/dark theme',
       settings: 'Settings',
       settingsView: 'View',
       settingsLanguage: 'Language',
@@ -954,7 +931,6 @@ export const translations = {
         CR: {
           name: 'Costa Rica',
           status: 'Headquarters',
-          capital: 'San José',
           city: 'San José (Curridabat)',
           description:
             "ICAP's executive headquarters since 1954, an international graduate-studies campus, a hub for public innovation, and regional coordination of technical cooperation.",
@@ -963,7 +939,6 @@ export const translations = {
         GT: {
           name: 'Guatemala',
           status: 'Country Office & Liaison',
-          capital: 'Guatemala City',
           city: 'Guatemala City',
           description:
             'National liaison office with ministries, institutional strengthening, and support for state modernization projects.',
@@ -972,7 +947,6 @@ export const translations = {
         PA: {
           name: 'Panama',
           status: 'Regional Center',
-          capital: 'Panama',
           city: 'Panama City',
           description:
             'Regional center for technical training, executive education, and strategic engagement with multilateral development organizations.',
@@ -981,7 +955,6 @@ export const translations = {
         BZ: {
           name: 'Belize',
           status: 'SICA Member State',
-          capital: 'Belmopan',
           city: 'Belmopan',
           description:
             'Bilingual technical cooperation programs, environmental management, climate resilience, and training for public-sector personnel.',
@@ -990,7 +963,6 @@ export const translations = {
         SV: {
           name: 'El Salvador',
           status: 'SICA Member State',
-          capital: 'San Salvador',
           city: 'San Salvador',
           description:
             'Support for digital government transformation, citizen innovation, and optimization of state investment projects.',
@@ -999,7 +971,6 @@ export const translations = {
         HN: {
           name: 'Honduras',
           status: 'SICA Member State',
-          capital: 'Tegucigalpa',
           city: 'Tegucigalpa',
           description:
             'Strengthening public health management, graduate programs, and modernization of territorial administration.',
@@ -1008,7 +979,6 @@ export const translations = {
         NI: {
           name: 'Nicaragua',
           status: 'SICA Member State',
-          capital: 'Managua',
           city: 'Managua',
           description:
             'Training in strategic planning, results-based management, and strengthening the capacities of public servants.',
@@ -1017,7 +987,6 @@ export const translations = {
         DO: {
           name: 'Dominican Rep.',
           status: 'SICA Member State',
-          capital: 'Santo Domingo',
           city: 'Santo Domingo',
           description:
             'Higher academic training agreements, sustainable public procurement, and Caribbean–Central American engagement.',
@@ -1026,7 +995,6 @@ export const translations = {
         MX: {
           name: 'Mexico',
           status: 'Regional Cooperation',
-          capital: 'Mexico City',
           city: 'Mexico City',
           description:
             'Applied research agreements, expert exchanges with academic institutions, and Mesoamerican projects.',
@@ -1035,7 +1003,6 @@ export const translations = {
         CO: {
           name: 'Colombia',
           status: 'Regional Cooperation',
-          capital: 'Bogotá',
           city: 'Bogotá',
           description:
             'South-South cooperation in public innovation, social security management, and the transfer of best practices.',
@@ -1049,10 +1016,8 @@ export const translations = {
       title: 'Knowledge to Anticipate, Lead, and Transform',
       subtitle:
         'Institutions face increasingly complex scenarios: digital transformation, new citizen demands, demographic shifts, health challenges, sustainability, technological innovation, and evolving governance models. In this environment, ICAP trains professionals capable of interpreting trends, anticipating scenarios, and turning knowledge into strategic decisions. The Department of Teaching and Research drives graduate-level education connected to regional realities, applied research, academic innovation, and the generation of knowledge with impact.',
-      // Closing line for the Inicio block (FormacionVisionHero.jsx) —
-      // used to be the last sentence of `subtitle`, split out so it
-      // can be shown large, bottom-right, as the section's closing
-      // statement instead of blending into the paragraph.
+      // Closing line for the Inicio block (FormacionVisionHero.jsx), shown
+      // large, bottom-right.
       closing: 'Get ready to lead the challenges of the future.',
       // Heading shown above the cards carousel on the dedicated
       // "Formación" (Training) menu page — not on the Inicio text,
