@@ -34,6 +34,12 @@ import { useLanguage } from './i18n/LanguageContext';
 import { useTheme } from './theme/ThemeContext';
 import icapLogoMark from './assets/icap-logo-mark.png';
 
+// Link directo a Docencia: <base>/docencia/ abre el brochure sólo con el
+// departamento de Docencia, sin el selector ni Asistencia Técnica. En el
+// build, vite.config.js copia index.html a docencia/index.html para que
+// GitHub Pages sirva esa ruta.
+const DOCENCIA_ONLY = /\/docencia\/?$/.test(window.location.pathname);
+
 export default function Brochure({
   contact = defaultContact,
   viewMode = 'full',
@@ -48,16 +54,16 @@ export default function Brochure({
   // --- Departamento activo: Asistencia Técnica / Docencia --------------
   // Comparten Hero, Autoridades y Contacto (mismos ids en PAGES y
   // DOCENCIA_PAGES); el resto de subsecciones son propias de cada uno.
-  const [activeDept, setActiveDept] = useState('at');
+  const [activeDept, setActiveDept] = useState(DOCENCIA_ONLY ? 'docencia' : 'at');
   const activePages = activeDept === 'at' ? PAGES : DOCENCIA_PAGES;
 
-  // Al cambiar de departamento se vuelve al Hero, salvo en Autoridades o
-  // Contacto, que existen en los dos.
+  // Al cambiar de departamento siempre se vuelve al inicio del Hero (el
+  // scroll lo resetea el efecto de abajo, que también escucha activeDept).
   const switchDept = (dept) => {
+    if (dept === activeDept) return;
     setActiveDept(dept);
-    if (activePage !== 'autoridades' && activePage !== 'contacto') {
-      setActivePage('inicio');
-    }
+    setFiltroProyectos(null);
+    setActivePage('inicio');
   };
 
   // --- Menú de configuración (engranaje): vista, idioma y tema ---------
@@ -88,7 +94,21 @@ export default function Brochure({
     if (mainRef.current) {
       mainRef.current.scrollTo({ top: 0, behavior: 'instant' in document.documentElement.style ? 'instant' : 'auto' });
     }
-  }, [activePage]);
+  }, [activePage, activeDept]);
+
+  // Alto visible del <main> (entre el header y el menú inferior) en la
+  // variable --main-h: el Hero la usa para ocupar justo una pantalla, sea
+  // cual sea el dispositivo (también dentro del iframe de Vista Móvil).
+  useLayoutEffect(() => {
+    const main = mainRef.current;
+    if (!main) return undefined;
+    const update = () => main.style.setProperty('--main-h', `${main.clientHeight}px`);
+    update();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(update);
+    ro.observe(main);
+    return () => ro.disconnect();
+  }, []);
 
   // --- Esfera animada del menú inferior --------------------------------
   // Un solo "blob" que se mide contra el botón activo y se traslada hasta
@@ -138,12 +158,7 @@ export default function Brochure({
       case 'inicio':
         return (
           <>
-            <Hero
-              onOpenAbout={() => setAboutModalOpen(true)}
-              onScrollToContact={() => goToPage('contacto')}
-              onNavigate={goToPage}
-              pages={activePages}
-            />
+            <Hero onNavigate={goToPage} pages={activePages} dept={activeDept} />
             {/* Debajo del Hero: AT muestra Cifras y Socios; Docencia, el texto de
                 Formación sin el carrusel de cards (showCards en DocenciaMision.jsx). */}
             {activeDept === 'at' ? (
@@ -219,6 +234,9 @@ export default function Brochure({
 
         {/* Selector de departamento en desktop (md+). En móvil va en su propia
             fila, debajo del header. */}
+        {DOCENCIA_ONLY ? (
+          <div className="flex-1" />
+        ) : (
         <div className="hidden md:flex flex-1 justify-center px-2">
           <div className="flex items-center bg-black/30 p-0.5 rounded-xl border border-white/10">
             <button
@@ -245,6 +263,7 @@ export default function Brochure({
             </button>
           </div>
         </div>
+        )}
 
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <button
@@ -383,6 +402,7 @@ export default function Brochure({
 
       {/* Selector de departamento en móvil: fila propia bajo el header, con
           el mismo degradado. */}
+      {!DOCENCIA_ONLY && (
       <div className="md:hidden shrink-0 z-30 bg-gradient-to-br from-[#003366]/95 via-[#0B5A96]/95 to-[#0077C8]/95 dark:bg-none dark:bg-[#003366]/95 border-b border-white/10 px-3 py-2">
         <div className="flex items-center bg-black/30 p-0.5 rounded-xl border border-white/10 w-full">
           <button
@@ -409,10 +429,11 @@ export default function Brochure({
           </button>
         </div>
       </div>
+      )}
 
       {/* Active Page */}
       <main ref={mainRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
-        <div key={activePage} className="animate-page-in">
+        <div key={`${activeDept}-${activePage}`} className="animate-page-in">
           {renderPage()}
         </div>
       </main>
@@ -497,6 +518,10 @@ export default function Brochure({
         maxWidth="max-w-xl"
       >
         <div className="space-y-4 text-xs sm:text-sm text-slate-900 dark:text-slate-100 leading-relaxed">
+          {/* Frase institucional (antes en el Hero) */}
+          <p className="pl-3 border-l-[3px] border-[#0077C8] font-heading font-semibold text-sm sm:text-base text-[#003366] dark:text-[#9FC6E8] leading-snug">
+            {t.aboutModal.tagline}
+          </p>
           <p>
             {t.aboutModal.intro}
           </p>

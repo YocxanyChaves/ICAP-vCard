@@ -121,12 +121,10 @@ function ImpactCardBack({ Icon, name, description }) {
 }
 
 /**
- * Las 5 cartas en fila. En mobile y tablet la fila se desliza en
- * horizontal (overflow-x-auto + scroll-snap) con cartas de 192×288px; el
- * padding lateral de calc(50vw − media carta) deja centrar hasta las de
- * las puntas, y al entrar se centra el scroll en la del medio. Desde
- * `lg:` es una grilla de 5 columnas (aspect 2/3), sin scroll. El py-6 es
- * para que el levante del hover/volteo no se recorte.
+ * Las 5 cartas en fila, SÓLO desde `lg:` (grilla de 5 columnas, aspect
+ * 2/3). En celular y tablet va ImpactList: el carrusel horizontal con
+ * cartas que se volteaban solas era incómodo de navegar con el dedo. El
+ * py-6 es para que el levante del hover/volteo no se recorte.
  *
  * Cada carta es un botón que se VOLTEA en 3D al tocarla. Tres capas de
  * transform, cada una en su propio elemento para que no se pisen:
@@ -160,24 +158,7 @@ function ImpactFan({ items, c, phase }) {
   const [autoFlipId, setAutoFlipId] = useState(null);
   const [autoStopped, setAutoStopped] = useState(false);
   const autoPausedRef = useRef(false);
-  const scrollRef = useRef(null);
-  const midCardRef = useRef(null);
-
-  // En mobile, al entrar, el scroll horizontal se centra en la carta del
-  // medio (instantáneo, `behavior: 'auto'`, para no competir con la
-  // animación). En lg+ no hay overflow, así que no mueve nada.
-  //
-  // OJO: se mueve sólo el scroll del propio contenedor y no se usa
-  // scrollIntoView, que también movería el <main> de la página.
-  useEffect(() => {
-    if (phase !== 'fanned') return;
-    const box = scrollRef.current;
-    const card = midCardRef.current;
-    if (!box || !card) return;
-    const boxRect = box.getBoundingClientRect();
-    const cardRect = card.getBoundingClientRect();
-    box.scrollLeft += cardRect.left + cardRect.width / 2 - (boxRect.left + boxRect.width / 2);
-  }, [phase]);
+  const gridRef = useRef(null);
 
   // La última carta en llegar es la de índice más alto
   // (transitionDelay = (items.length - 1) * 90ms) y tarda 750ms más en
@@ -213,7 +194,8 @@ function ImpactFan({ items, c, phase }) {
     let timeoutId;
 
     const flipNext = () => {
-      if (autoPausedRef.current) {
+      // En celular la grilla está oculta (va ImpactList): nada que voltear.
+      if (autoPausedRef.current || gridRef.current?.offsetParent === null) {
         timeoutId = setTimeout(flipNext, 400);
         return;
       }
@@ -232,8 +214,8 @@ function ImpactFan({ items, c, phase }) {
 
   return (
     <div
-      ref={scrollRef}
-      className="flex gap-4 overflow-x-auto -mx-4 sm:-mx-6 px-[calc(50vw-7rem)] py-6 snap-x snap-proximity lg:grid lg:grid-cols-5 lg:gap-5 lg:overflow-visible lg:mx-0 lg:px-0 lg:snap-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      ref={gridRef}
+      className="hidden lg:grid grid-cols-5 gap-5 py-6"
       role="list"
       onMouseEnter={() => {
         autoPausedRef.current = true;
@@ -252,9 +234,8 @@ function ImpactFan({ items, c, phase }) {
         return (
           <div
             key={item.id}
-            ref={i === midIndex ? midCardRef : undefined}
             role="listitem"
-            className="w-56 h-[21rem] shrink-0 snap-center lg:w-auto lg:h-auto lg:aspect-[2/3]"
+            className="aspect-[2/3]"
             style={{
               zIndex: flipped ? 50 : hoveredId === item.id ? 40 : 10 - Math.abs(offset),
               pointerEvents: phase === 'fanned' ? 'auto' : 'none',
@@ -303,6 +284,54 @@ function ImpactFan({ items, c, phase }) {
         );
       })}
     </div>
+  );
+}
+
+/**
+ * Versión de celular y tablet (debajo de `lg:`): lista vertical de
+ * fichas con ícono, nombre y descripción siempre visibles. Nada que
+ * deslizar ni voltear: se lee con el scroll normal de la página. Las
+ * fichas entran en cascada desde abajo la primera vez que se ve la
+ * sección y ya no se vuelven a esconder.
+ */
+function ImpactList({ items, c, visible }) {
+  const [entered, setEntered] = useState(false);
+  if (visible && !entered) setEntered(true);
+  return (
+    <ol className="lg:hidden w-full max-w-lg mx-auto flex flex-col gap-3 text-left">
+      {items.map((item, i) => {
+        const Icon = item.icon;
+        const itemT = c.items[item.id];
+        return (
+          <li
+            key={item.id}
+            className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#003366] border border-slate-100 dark:border-white/10 shadow-lg shadow-slate-900/10 dark:shadow-black/30 p-4 pl-5 flex items-start gap-4 transition-all duration-700 ease-out"
+            style={{
+              opacity: entered ? 1 : 0,
+              transform: entered ? 'translateY(0)' : 'translateY(18px)',
+              transitionDelay: entered ? `${250 + i * 90}ms` : '0ms'
+            }}
+          >
+            <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#0077C8] to-[#4FB2F2]" />
+            <EscudoICAP
+              tono="celeste"
+              plano
+              className="pointer-events-none absolute -right-6 -bottom-8 w-24 opacity-[0.08] dark:opacity-[0.12] rotate-[-12deg]"
+            />
+            <span className="relative shrink-0 w-12 h-12 rounded-full bg-[#EAF3FB] dark:bg-white/10 text-[#0077C8] dark:text-[#4FB2F2] flex items-center justify-center">
+              <Icon className="w-6 h-6" strokeWidth={1.8} />
+            </span>
+            <div className="relative min-w-0">
+              <span className="block font-mono-code text-[10px] font-bold text-[#0077C8]/70 dark:text-[#4FB2F2]/70">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <h3 className="font-heading font-bold text-base text-[#003366] dark:text-[#9FC6E8] leading-tight">{itemT.name}</h3>
+              <p className="text-[13px] text-slate-700 dark:text-slate-300 leading-snug mt-1">{itemT.description}</p>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
@@ -409,6 +438,7 @@ export default function DocenciaImpacto() {
         </h2>
 
         <div className="w-full py-2 sm:py-3">
+          <ImpactList items={ITEMS} c={c} visible={visible} />
           <ImpactFan items={ITEMS} c={c} phase={fanPhase} />
         </div>
 

@@ -39,10 +39,10 @@ ICAP-vCard/
 
 ## 🎨 Contenido
 
-- **Hero Institucional:** SICA 1954, emblema ICAP, botones de llamada a la acción.
+- **Hero Institucional:** a pantalla completa, con el departamento activo (AT o Docencia), emblema ICAP y SICA 1954.
 - **Misión y Visión**, **Valores Institucionales** (rueda orbital interactiva) e **ICAP en Cifras**.
 - **Áreas de Especialización** y **Proyectos de Asistencia Técnica** con filtros por área y cliente.
-- **Autoridades:** organigrama y fichas volteables.
+- **Autoridades:** ficha volteable de la Dirección General.
 - **Presencia Regional:** mapa interactivo de Centroamérica.
 - **Red Institucional:** marquesina de organismos aliados (SICA, OPS/OMS, BID, FLACSO, etc.).
 - **Docencia:** misión, impacto, investigación, publicaciones y áreas.
@@ -85,6 +85,10 @@ ICAP-vCard/
 El sitio está en **https://yocxanychaves.github.io/ICAP-vCard/**. Cada push a `main` lo
 vuelve a compilar y publicar solo (`.github/workflows/deploy.yml`, GitHub Actions → Pages).
 Si algún día cambia el nombre del repo, hay que cambiar también `base` en `vite.config.js`.
+
+**Link directo a Docencia:** **https://yocxanychaves.github.io/ICAP-vCard/docencia/** abre el
+brochure sólo con Docencia (sin el selector ni Asistencia Técnica). Al compilar,
+`vite.config.js` copia `index.html` a `docencia/index.html` para que Pages sirva esa ruta.
 
 ---
 

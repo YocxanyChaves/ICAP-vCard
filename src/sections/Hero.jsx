@@ -1,4 +1,4 @@
-import { ChevronDown, ArrowRight } from 'lucide-react';
+import { ChevronDown, Handshake, GraduationCap } from 'lucide-react';
 import icapLogoMark from '../assets/icap-logo-mark.png';
 import SectionsStrip from '../components/SectionsStrip';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -14,10 +14,45 @@ const PARTICLES = [
   { left: '88%', size: 6, duration: '11.5s', delay: '-3.5s' }
 ];
 
-export default function Hero({ onOpenAbout, onScrollToContact, onNavigate, pages }) {
+/**
+ * Pastilla del departamento activo, arriba del logo. Más grande y
+ * luminosa que el resto de badges para que se note dónde está uno.
+ */
+function DeptBadge({ dept, label }) {
+  const isAT = dept !== 'docencia';
+  const Icon = isAT ? Handshake : GraduationCap;
+  return (
+    <div
+      className="relative inline-flex items-center gap-2 sm:gap-2.5 pl-1 pr-4 sm:pr-5 py-1 rounded-full bg-[#002a52]/70 border border-[#7dd3fc]/50 text-white text-[13px] sm:text-base font-heading font-extrabold tracking-wide shadow-[0_0_22px_-8px_rgba(125,211,252,0.7)] mb-[var(--hero-gap)] animate-hero-rise"
+      style={{ animationDelay: '90ms' }}
+    >
+      <span className="relative shrink-0 w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center">
+        {!isAT && (
+          // Docencia: aro que late alrededor del ícono.
+          <span aria-hidden="true" className="absolute inset-0 rounded-full bg-[#7dd3fc]/60 animate-ping" />
+        )}
+        <span
+          className={`relative w-full h-full rounded-full flex items-center justify-center ${
+            isAT
+              ? // AT: ícono de neón — trazo celeste encendido sobre navy,
+                // con un resplandor que se enciende y baja (.hero-neon).
+                'bg-[#001F3D] border-2 border-[#7dd3fc] text-[#bfe6ff] hero-neon'
+              : 'bg-gradient-to-br from-white to-[#D6E9F7] text-[#0077C8] shadow-md'
+          }`}
+        >
+          <Icon className={`w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] ${isAT ? 'hero-neon-icon' : ''}`} strokeWidth={2.2} />
+        </span>
+      </span>
+
+      <span className="relative">{label}</span>
+    </div>
+  );
+}
+
+export default function Hero({ onNavigate, pages, dept = 'at' }) {
   const { t } = useLanguage();
   return (
-    <section className="relative min-h-[520px] sm:min-h-[584px] bg-gradient-to-br from-[#003366] via-[#0B5A96] to-[#0077C8] text-white px-4 sm:px-6 pt-4 sm:pt-6 pb-9 sm:pb-14 flex flex-col items-center justify-center text-center overflow-hidden">
+    <section className="hero-screen relative min-h-[max(var(--main-h,100dvh),540px)] bg-gradient-to-br from-[#003366] via-[#0B5A96] to-[#0077C8] text-white px-4 sm:px-6 pt-4 sm:pt-6 pb-5 sm:pb-7 flex flex-col items-center text-center overflow-hidden">
       {/* Resplandor radial de fondo, con una deriva muy lenta para que respire */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,255,255,0.18),rgba(0,119,200,0)_65%)] pointer-events-none animate-glow-drift" />
 
@@ -99,25 +134,24 @@ export default function Hero({ onOpenAbout, onScrollToContact, onNavigate, pages
 
       {/* Accesos rápidos embebidos en el Hero, para que compartan su fondo. Van
           fuera de la columna angosta del texto para tener más ancho. */}
-      <div className="relative z-10 w-full max-w-3xl sm:max-w-4xl mx-auto mb-6 sm:mb-8 animate-hero-rise" style={{ animationDelay: '0ms' }}>
+      <div className="relative z-10 w-full max-w-3xl sm:max-w-4xl mx-auto animate-hero-rise" style={{ animationDelay: '0ms' }}>
         <SectionsStrip onNavigate={onNavigate} pages={pages} />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center max-w-xl mx-auto w-full">
-        {/* Kicker badge */}
-        <div
-          className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 text-[#9FC6E8] text-[11px] sm:text-xs font-semibold tracking-widest uppercase mb-5 shadow-sm animate-hero-rise"
-          style={{ animationDelay: '90ms' }}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-[#0077C8] animate-ping" />
-          {t.hero.badge}
-        </div>
+      {/* Bloque central: ocupa todo el alto que sobra y se centra; el
+          espaciado entre elementos crece con la pantalla (--hero-gap). */}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto w-full py-[var(--hero-gap)]">
+        {/* Departamento donde está ubicado el usuario: arriba y con
+            protagonismo. AT lleva el ícono brillando y la rayita de luz de
+            los títulos (kicker-light-sweep); Docencia, el punto pulsante y
+            el ícono con un aro que late. */}
+        <DeptBadge key={dept} dept={dept} label={t.hero.dept[dept]} />
 
         {/* Emblem: isotipo real del ICAP con halo pulsante y un anillo punteado que gira lentamente */}
-        <div className="relative w-16 h-16 sm:w-20 sm:h-20 mb-5 shrink-0 animate-hero-rise" style={{ animationDelay: '170ms' }}>
+        <div className="relative w-20 h-20 sm:w-28 sm:h-28 mb-[var(--hero-gap)] shrink-0 animate-hero-rise" style={{ animationDelay: '170ms' }}>
           <div className="absolute inset-0 rounded-full bg-white/25 blur-md animate-pulse-slow" aria-hidden="true" />
           <div
-            className="absolute -inset-2 sm:-inset-2.5 rounded-full border border-dashed border-white/30 pointer-events-none"
+            className="absolute -inset-2.5 sm:-inset-3.5 rounded-full border border-dashed border-white/30 pointer-events-none"
             style={{ animation: 'orbitSpin 16s linear infinite' }}
             aria-hidden="true"
           />
@@ -133,58 +167,43 @@ export default function Hero({ onOpenAbout, onScrollToContact, onNavigate, pages
 
         {/* Title */}
         <h1
-          className="font-heading font-extrabold text-4xl sm:text-7xl tracking-tight text-white mb-2.5 drop-shadow-sm animate-hero-rise"
+          className="font-heading font-extrabold text-5xl sm:text-8xl tracking-tight text-white mb-3 sm:mb-4 drop-shadow-sm animate-hero-rise"
           style={{ animationDelay: '240ms' }}
         >
           {t.hero.title}
         </h1>
         <h2
-          className="font-semibold text-base sm:text-2xl text-[#EAF3FB] max-w-md leading-snug mb-3.5 animate-hero-rise"
+          className="font-semibold text-lg sm:text-3xl text-[#EAF3FB] max-w-xl leading-snug mb-4 sm:mb-5 animate-hero-rise"
           style={{ animationDelay: '310ms' }}
         >
           {t.hero.subtitle}
         </h2>
 
-        {/* Description */}
-        <p
-          className="text-xs sm:text-base text-[#9FC6E8] max-w-lg leading-relaxed mb-7 px-2 animate-hero-rise"
+        {/* Badge institucional, ahora debajo del subtítulo */}
+        <div
+          className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 text-[#9FC6E8] text-[11px] sm:text-xs font-semibold tracking-widest uppercase shadow-sm animate-hero-rise"
           style={{ animationDelay: '380ms' }}
         >
-          {t.hero.description}
-        </p>
-
-        {/* CTAs: Explicit padding, no cutting off */}
-        <div
-          className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full max-w-md px-2 animate-hero-rise"
-          style={{ animationDelay: '450ms' }}
-        >
-          <button
-            onClick={onOpenAbout}
-            className="w-full sm:w-1/2 flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl font-heading font-bold text-xs sm:text-sm tracking-wider uppercase border-2 border-white/40 hover:border-white hover:bg-white/10 text-white transition-all active:scale-[0.98] shadow-sm cursor-pointer"
-          >
-            <span>{t.hero.ctaAbout}</span>
-            <ArrowRight className="w-4 h-4 shrink-0" />
-          </button>
-          <button
-            onClick={onScrollToContact}
-            className="w-full sm:w-1/2 flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl font-heading font-bold text-xs sm:text-sm tracking-wider uppercase bg-[#0077C8] hover:bg-[#005A96] text-white shadow-lg shadow-[#0077C8]/30 transition-all active:scale-[0.98] cursor-pointer"
-          >
-            <span>{t.hero.ctaContact}</span>
-          </button>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#7dd3fc]" />
+          {t.hero.badge}
         </div>
+      </div>
 
-        {/* Scroll indicator */}
+      {/* Scroll indicator, pegado abajo del Hero: el scroll es del <main>
+          de Brochure.jsx (no de la ventana) y baja justo una pantalla. */}
         <div
-          className="mt-10 flex flex-col items-center gap-1.5 cursor-pointer animate-hero-rise"
-          style={{ animationDelay: '520ms' }}
-          onClick={() => window.scrollBy({ top: 380, behavior: 'smooth' })}
+          className="relative z-10 flex flex-col items-center gap-1.5 cursor-pointer animate-hero-rise"
+          style={{ animationDelay: '450ms' }}
+          onClick={(e) => {
+            const main = e.currentTarget.closest('main');
+            main?.scrollBy({ top: main.clientHeight, behavior: 'smooth' });
+          }}
         >
           <span className="text-[10px] tracking-widest text-[#9FC6E8] uppercase font-bold font-mono-code">
             {t.hero.scrollHint}
           </span>
           <ChevronDown className="w-4 h-4 text-[#9FC6E8] animate-bounce" />
         </div>
-      </div>
     </section>
   );
 }

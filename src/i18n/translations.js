@@ -91,10 +91,11 @@ export const translations = {
       badge: 'ICAP · Fundado en 1954',
       title: 'ICAP',
       subtitle: 'Instituto Centroamericano de Administración Pública',
-      description:
-        'Organismo regional del SICA especializado en la modernización institucional, gestión de políticas públicas y formación del talento humano.',
-      ctaAbout: 'CONOCÉ EL ICAP',
-      ctaContact: 'CONTACTANOS',
+      // Debajo del título: el departamento donde está ubicado el usuario.
+      dept: {
+        at: 'Departamento de Asistencia Técnica',
+        docencia: 'Departamento de Docencia'
+      },
       scrollHint: 'Descubrí más'
     },
 
@@ -126,18 +127,15 @@ export const translations = {
       kicker: 'Liderazgo Institucional',
       title: 'Autoridades',
       subtitle:
-        'Quienes conducen el ICAP: la Dirección General y las direcciones de sus dos departamentos. Volteá cada ficha para leer su mensaje.',
+        'Quien conduce el ICAP desde la Dirección General. Volteá la ficha para leer su mensaje.',
       roles: {
-        director: 'Director del ICAP',
-        at: 'Director de Asistencia Técnica',
-        docencia: 'Director de Docencia'
+        director: 'Director del ICAP'
       },
       tags: {
-        director: 'Dirección General',
-        at: 'Asistencia Técnica',
-        docencia: 'Docencia'
+        director: 'Dirección General'
       },
-      currentDept: 'Departamento actual',
+      institution: 'Instituto Centroamericano de Administración Pública · SICA',
+      location: 'San José, Costa Rica',
       flipFront: 'Ver su mensaje',
       flipBack: 'Volver a la ficha',
       quotePending: 'Mensaje pendiente · pronto se agregará una frase de su autoría.',
@@ -620,6 +618,8 @@ export const translations = {
     aboutModal: {
       title: 'Acerca del ICAP',
       subtitle: 'Organismo Internacional del SICA',
+      tagline:
+        'Organismo regional del SICA especializado en la modernización institucional, gestión de políticas públicas y formación del talento humano.',
       // Contenido redactado a partir de la página "Presentación" y del
       // "Resumen Estratégico" del brochure institucional 2026 — nada
       // inventado: los 4 datos de las tarjetas y el cierre sobre el
@@ -742,10 +742,10 @@ export const translations = {
       badge: 'ICAP · Founded in 1954',
       title: 'ICAP',
       subtitle: 'Central American Institute of Public Administration',
-      description:
-        'A regional SICA body specialized in institutional modernization, public policy management, and human talent development.',
-      ctaAbout: 'ABOUT ICAP',
-      ctaContact: 'CONTACT US',
+      dept: {
+        at: 'Technical Assistance Department',
+        docencia: 'Teaching Department'
+      },
       scrollHint: 'Discover more'
     },
 
@@ -777,18 +777,15 @@ export const translations = {
       kicker: 'Institutional Leadership',
       title: 'Leadership',
       subtitle:
-        "The people who lead ICAP: the Executive Office and the heads of its two departments. Flip each card to read their message.",
+        'The person who leads ICAP from the Executive Office. Flip the card to read their message.',
       roles: {
-        director: 'Director of ICAP',
-        at: 'Director of Technical Assistance',
-        docencia: 'Director of Teaching'
+        director: 'Director of ICAP'
       },
       tags: {
-        director: 'Executive Office',
-        at: 'Technical Assistance',
-        docencia: 'Teaching'
+        director: 'Executive Office'
       },
-      currentDept: 'Current department',
+      institution: 'Central American Institute of Public Administration · SICA',
+      location: 'San José, Costa Rica',
       flipFront: 'Read their message',
       flipBack: 'Back to profile',
       quotePending: 'Message pending · a short quote of their own will be added soon.',
@@ -1267,6 +1264,8 @@ export const translations = {
     aboutModal: {
       title: 'About ICAP',
       subtitle: 'International SICA Body',
+      tagline:
+        'A regional SICA body specialized in institutional modernization, public policy management, and human talent development.',
       intro:
         "The Central American Institute of Public Administration (ICAP) is an international body of the Central American Integration System (SICA), founded in 1954, specialized in public administration and in strengthening public-sector capacities across the Central American region. Its main objective is to promote efficient, transparent, and service-oriented public management.",
       cards: [

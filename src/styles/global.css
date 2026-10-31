@@ -703,36 +703,6 @@ h1, h2, h3, h4, h5, h6 {
   animation: authorityRingSpin 4.5s linear infinite;
 }
 
-/* Organigrama de Autoridades: un pulso de luz baja desde la Dirección
-   General y se reparte hacia los dos departamentos. Cada tramo de la
-   línea tiene una "chispa" adentro (span con overflow recortado) que
-   lo cruza en el primer tercio del ciclo y después descansa; los
-   tramos se encadenan con animation-delay (ver CONNECTOR_DELAYS en el
-   componente) para que se lea como un solo pulso que viaja. */
-@keyframes authorityPulseY {
-  0% { transform: translateY(-100%); opacity: 0; }
-  6% { opacity: 1; }
-  30% { opacity: 1; }
-  36% { transform: translateY(170%); opacity: 0; }
-  100% { transform: translateY(170%); opacity: 0; }
-}
-
-@keyframes authorityPulseX {
-  0% { transform: translateX(-100%); opacity: 0; }
-  6% { opacity: 1; }
-  30% { opacity: 1; }
-  36% { transform: translateX(170%); opacity: 0; }
-  100% { transform: translateX(170%); opacity: 0; }
-}
-
-.authority-pulse-y {
-  animation: authorityPulseY 2.6s ease-in-out infinite;
-}
-
-.authority-pulse-x {
-  animation: authorityPulseX 2.6s ease-in-out infinite;
-}
-
 /* Entrada en cascada de las fichas de Autoridades al cargar la página. */
 @keyframes authorityRise {
   from { opacity: 0; transform: translateY(18px) scale(0.98); }
@@ -743,15 +713,91 @@ h1, h2, h3, h4, h5, h6 {
   animation: authorityRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* Hero de Inicio (Hero.jsx): ocupa una pantalla (--main-h, medido en
+   Brochure.jsx) y el aire entre sus elementos crece con esa altura: más
+   apretado en celulares bajitos, más holgado en monitores grandes. */
+.hero-screen {
+  --hero-gap: clamp(1.1rem, calc(var(--main-h, 100vh) * 0.04), 2.75rem);
+}
+
+/* Ícono de Asistencia Técnica en la pastilla del Hero: neón SIEMPRE
+   prendido (resplandor celeste fuerte) que cada 3s titila como si se
+   fuera a apagar — dos bajones rápidos — y vuelve a quedar encendido. */
+@keyframes heroNeon {
+  0%, 84%, 89%, 95%, 100% {
+    border-color: #7dd3fc;
+    box-shadow: 0 0 6px #bfe6ff, 0 0 18px #4fb2f2, 0 0 32px rgba(79, 178, 242, 0.75), inset 0 0 8px rgba(125, 211, 252, 0.7);
+  }
+  86.5%, 92% {
+    border-color: rgba(125, 211, 252, 0.4);
+    box-shadow: 0 0 0 transparent, 0 0 0 transparent, 0 0 0 transparent, inset 0 0 0 transparent;
+  }
+}
+
+@keyframes heroNeonIcon {
+  0%, 84%, 89%, 95%, 100% { color: #e6f6ff; filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 7px #4fb2f2); }
+  86.5%, 92% { color: rgba(191, 230, 255, 0.45); filter: drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent); }
+}
+
+.hero-neon {
+  animation: heroNeon 3s linear infinite;
+}
+
+.hero-neon-icon {
+  animation: heroNeonIcon 3s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .authority-ring,
-  .authority-pulse-y,
-  .authority-pulse-x,
-  .animate-authority-rise {
+  .hero-neon,
+  .hero-neon-icon {
     animation: none;
   }
-  .authority-pulse-y,
-  .authority-pulse-x {
-    opacity: 0;
+}
+
+/* Ficha de la Dirección General: luz que recorre el borde. Es un
+   cuadrado enorme con un conic-gradient girando detrás de la ficha;
+   el contenedor (overflow-hidden, padding de 2px) deja ver sólo el
+   filo, así que se lee como un trazo de luz dando la vuelta al marco. */
+.authority-frame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 250%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(79, 178, 242, 0.25) 0deg,
+    rgba(79, 178, 242, 0.25) 200deg,
+    #4fb2f2 260deg,
+    #ffffff 300deg,
+    #8fd3ff 320deg,
+    rgba(79, 178, 242, 0.25) 360deg
+  );
+  animation: authorityRingSpin 7s linear infinite;
+}
+
+/* Destello diagonal que cruza la ficha cada pocos segundos. */
+@keyframes authoritySheen {
+  0% { transform: translateX(-120%) skewX(-18deg); }
+  22% { transform: translateX(320%) skewX(-18deg); }
+  100% { transform: translateX(320%) skewX(-18deg); }
+}
+
+.authority-sheen {
+  position: absolute;
+  inset: -10% auto -10% 0;
+  width: 35%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.09), transparent);
+  animation: authoritySheen 7s ease-in-out 1.5s infinite;
+  transform: translateX(-120%) skewX(-18deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .authority-frame,
+  .authority-sheen,
+  .authority-ring,
+  .animate-authority-rise {
+    animation: none;
   }
 }
