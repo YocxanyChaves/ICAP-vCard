@@ -1,11 +1,11 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Search, X, Building2, CalendarDays, MapPin, FolderOpen, Layers, ChevronDown, Handshake } from 'lucide-react';
+import { Search, X, Building2, CalendarDays, MapPin, FolderOpen, Layers, ChevronDown, Handshake, Earth, RotateCcw } from 'lucide-react';
 import KickerBadge from '../components/KickerBadge';
 import { ETIQUETAS, getEtiqueta, nombreEtiqueta } from '../data/etiquetas';
 import { PROYECTOS_AT, REGION_PAISES, proyectosDeSocio } from '../data/proyectosData';
 import { useLanguage } from '../i18n/LanguageContext';
 import EscudoICAP from '../components/EscudoICAP';
-import { FlagIcon } from './RegionalMap';
+import { BANDERAS } from '../data/banderas';
 
 /**
  * Portafolio de proyectos de Asistencia Técnica: buscador (nombre del
@@ -106,47 +106,62 @@ function PuntosEtiquetas({ etiquetas, lang }) {
   );
 }
 
-/** Banderita en círculo; seleccionada, con el anillo de luz girando. */
-function BanderaPais({ code, nombre, n, activo, onClick }) {
+/**
+ * Botón de país (o el de "Todos", con el mapamundi), como en
+ * referencias-proyectos (BandaPaises.jsx): un disco claro y, adentro, la
+ * bandera real en un círculo más pequeño. Seleccionado, el anillo de luz
+ * gira alrededor del disco. Mientras se filtra, los no elegidos se
+ * atenúan un poco.
+ */
+function BanderaPais({ code, nombre, n, activo, atenuado, onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={activo}
-      title={`${nombre} · ${n}`}
-      className={`group flex flex-col items-center gap-1.5 transition-all duration-200 ${
-        n || activo ? '' : 'opacity-40'
+      title={n == null ? nombre : `${nombre} · ${n}`}
+      className={`group flex flex-col items-center gap-1.5 transition-opacity duration-200 ${
+        (n === 0 && !activo) ? 'opacity-35' : atenuado ? 'opacity-60 hover:opacity-100' : ''
       }`}
     >
       <span
-        className={`relative w-11 h-11 sm:w-12 sm:h-12 rounded-full transition-transform duration-300 ${
-          activo ? 'scale-110' : 'group-hover:-translate-y-1'
+        className={`relative w-11 h-11 sm:w-12 sm:h-12 rounded-full transition-transform duration-300 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] ${
+          activo ? 'scale-110' : 'group-hover:-translate-y-0.5 group-hover:scale-105'
         }`}
       >
-        {activo && (
-          <>
-            <span aria-hidden="true" className="absolute -inset-2 rounded-full bg-[#4FB2F2]/35 blur-md" />
-            <span aria-hidden="true" className="absolute -inset-[5px] rounded-full authority-ring" />
-          </>
-        )}
+        {activo && <span aria-hidden="true" className="absolute -inset-[3px] rounded-full authority-ring" />}
+        {/* Disco */}
         <span
-          className={`relative block w-full h-full rounded-full overflow-hidden ring-2 shadow-md ${
-            activo ? 'ring-white dark:ring-[#9FC6E8]' : 'ring-white/80 dark:ring-white/15'
+          className={`relative w-full h-full rounded-full flex items-center justify-center border shadow-[0_2px_6px_-3px_rgba(0,51,102,0.3)] transition-colors ${
+            activo
+              ? 'bg-[#EAF3FB] dark:bg-white/15 border-transparent'
+              : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 group-hover:bg-[#EAF3FB] dark:group-hover:bg-white/10'
           }`}
         >
-          <FlagIcon
-            countryCode={code}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-full w-[170%] max-w-none rounded-none! border-0!"
-          />
+          {/* Bandera (o mapamundi) en su círculo, más pequeño que el disco */}
+          {code ? (
+            <img
+              src={BANDERAS[code]}
+              alt=""
+              draggable={false}
+              className="w-[72%] h-[72%] rounded-full object-cover ring-1 ring-black/10 dark:ring-white/15"
+            />
+          ) : (
+            <span className="w-[72%] h-[72%] rounded-full bg-[#0077C8] text-white flex items-center justify-center">
+              <Earth className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+            </span>
+          )}
         </span>
         {/* Cuántos proyectos daría al sumarlo */}
-        <span
-          className={`absolute -top-1 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full text-[9px] font-mono-code font-bold flex items-center justify-center ring-2 ring-[#D6E9F7] dark:ring-[#001F3D] ${
-            activo ? 'bg-[#0077C8] text-white' : 'bg-white dark:bg-[#0B2340] text-slate-600 dark:text-slate-300'
-          }`}
-        >
-          {n}
-        </span>
+        {n != null && (
+          <span
+            className={`absolute -top-1 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full text-[9px] font-mono-code font-bold flex items-center justify-center ring-2 ring-[#D6E9F7] dark:ring-[#001F3D] ${
+              activo ? 'bg-[#0077C8] text-white' : 'bg-white dark:bg-[#0B2340] text-slate-600 dark:text-slate-300'
+            }`}
+          >
+            {n}
+          </span>
+        )}
       </span>
       <span
         className={`text-[10px] sm:text-[11px] font-heading leading-tight text-center ${
@@ -276,16 +291,14 @@ function DetalleProyecto({ p, columna, columnas, onClose, t, tAll, lang, locale,
               {paises.length > 0 && (
                 <span className="flex items-center -space-x-1.5">
                   {paises.map((code) => (
-                    <span
+                    <img
                       key={code}
+                      src={BANDERAS[code]}
+                      alt={tAll.regionalMap.countries[code]?.name || code}
                       title={tAll.regionalMap.countries[code]?.name || code}
-                      className="relative w-5 h-5 rounded-full overflow-hidden ring-2 ring-white dark:ring-[#0B2340]"
-                    >
-                      <FlagIcon
-                        countryCode={code}
-                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-full w-[170%] max-w-none rounded-none! border-0!"
-                      />
-                    </span>
+                      draggable={false}
+                      className="w-5 h-5 rounded-full object-cover ring-2 ring-white dark:ring-[#0B2340]"
+                    />
                   ))}
                 </span>
               )}
@@ -332,14 +345,17 @@ export default function ProyectosAT({ filtroInicial = null }) {
     return () => ro.disconnect();
   }, [grid]);
 
-  // Al abrir una ficha, se lleva a la vista (sólo lo necesario).
+  // Al abrir una ficha a mano NO se mueve la pantalla: se despliega y el
+  // usuario baja si quiere. Sólo cuando se llega desde otra sección con un
+  // proyecto puntual (filtroInicial.proyecto) se lleva a la vista, porque
+  // si no, no sabría dónde quedó.
   useEffect(() => {
-    if (!abierto) return undefined;
+    if (!filtroInicial?.proyecto) return undefined;
     const id = setTimeout(() => {
-      panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, filtroInicial?.proyecto === abierto ? 350 : 60);
+      panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 350);
     return () => clearTimeout(id);
-  }, [abierto, filtroInicial]);
+  }, [filtroInicial]);
 
   // Más recientes primero.
   const ordenados = useMemo(() => [...PROYECTOS_AT].sort((a, b) => b.desde.localeCompare(a.desde)), []);
@@ -443,7 +459,14 @@ export default function ProyectosAT({ filtroInicial = null }) {
           {t.countriesLabel}
         </p>
         <p className="text-center text-[10px] text-slate-500 dark:text-slate-400 mb-3">{t.countriesHint}</p>
-        <div className="grid grid-cols-5 sm:grid-cols-10 gap-x-2 gap-y-4 max-w-3xl mx-auto mb-7 pt-1">
+        <div className="flex flex-wrap justify-center gap-x-3 sm:gap-x-4 gap-y-4 max-w-3xl mx-auto mb-7 pt-1">
+          {/* Mapamundi: todos los países (quita la selección) */}
+          <BanderaPais
+            nombre={t.allCountries}
+            activo={!paises.length}
+            atenuado={paises.length > 0}
+            onClick={() => setPaises([])}
+          />
           {PAISES.map((code) => (
             <BanderaPais
               key={code}
@@ -451,6 +474,7 @@ export default function ProyectosAT({ filtroInicial = null }) {
               nombre={tAll.regionalMap.countries[code]?.name || code}
               n={conteoPais(code)}
               activo={paises.includes(code)}
+              atenuado={paises.length > 0 && !paises.includes(code)}
               onClick={() => setPaises((prev) => alternar(prev, code))}
             />
           ))}
@@ -524,16 +548,20 @@ export default function ProyectosAT({ filtroInicial = null }) {
         )}
 
         {/* Conteo + limpiar */}
-        <div className="flex items-center justify-between gap-3 mb-3 text-[11px] sm:text-xs text-slate-600 dark:text-slate-300">
+        <div className="flex items-center justify-between gap-3 mb-4 text-[11px] sm:text-xs text-slate-600 dark:text-slate-300">
           <span>
             {t.showing} <strong className="text-slate-900 dark:text-white">{visibles.length}</strong> {t.of} {resumen.total}{' '}
             {t.projectsWord} · <span className="opacity-80">{t.tapHint}</span>
           </span>
-          {hayFiltros && (
-            <button onClick={limpiar} className="font-heading font-bold text-[#0077C8] dark:text-[#4FB2F2] hover:underline shrink-0">
-              {t.clearFilters}
-            </button>
-          )}
+          {/* Siempre visible; apagado mientras no haya nada que limpiar */}
+          <button
+            onClick={limpiar}
+            disabled={!hayFiltros}
+            className="shrink-0 inline-flex items-center gap-1.5 h-9 px-4 rounded-xl font-heading font-bold text-[11px] sm:text-xs bg-[#0077C8] text-white shadow-md shadow-[#0077C8]/25 transition-all hover:bg-[#005A96] hover:-translate-y-0.5 active:scale-95 disabled:bg-white/70 disabled:dark:bg-white/5 disabled:text-slate-400 disabled:shadow-none disabled:translate-y-0 disabled:cursor-default"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            {t.clearFilters}
+          </button>
         </div>
 
         {/* Tarjetas. La abierta deja su hueco y su ficha va a lo ancho
