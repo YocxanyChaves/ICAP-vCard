@@ -34,11 +34,15 @@ import { useLanguage } from './i18n/LanguageContext';
 import { useTheme } from './theme/ThemeContext';
 import icapLogoMark from './assets/icap-logo-mark.png';
 
-// Link directo a Docencia: <base>/docencia/ abre el brochure sólo con el
-// departamento de Docencia, sin el selector ni Asistencia Técnica. En el
-// build, vite.config.js copia index.html a docencia/index.html para que
-// GitHub Pages sirva esa ruta.
-const DOCENCIA_ONLY = /\/docencia\/?$/.test(window.location.pathname);
+// Links de entrada (p. ej. desde la página oficial del ICAP):
+//   <base>            → arranca en Asistencia Técnica (el Hero principal)
+//   <base>docencia/   → arranca en Docencia
+// Es el mismo brochure con el switch de siempre: sólo cambia el
+// departamento inicial. En el build, vite.config.js copia index.html a
+// docencia/index.html para que GitHub Pages sirva esa ruta.
+const BASE = import.meta.env.BASE_URL; // '/ICAP-vCard/'
+const DOCENCIA_PATH = `${BASE}docencia/`;
+const startsInDocencia = () => /\/docencia\/?$/.test(window.location.pathname);
 
 export default function Brochure({
   contact = defaultContact,
@@ -54,7 +58,7 @@ export default function Brochure({
   // --- Departamento activo: Asistencia Técnica / Docencia --------------
   // Comparten Hero, Autoridades y Contacto (mismos ids en PAGES y
   // DOCENCIA_PAGES); el resto de subsecciones son propias de cada uno.
-  const [activeDept, setActiveDept] = useState(DOCENCIA_ONLY ? 'docencia' : 'at');
+  const [activeDept, setActiveDept] = useState(() => (startsInDocencia() ? 'docencia' : 'at'));
   const activePages = activeDept === 'at' ? PAGES : DOCENCIA_PAGES;
 
   // Al cambiar de departamento siempre se vuelve al inicio del Hero (el
@@ -64,6 +68,16 @@ export default function Brochure({
     setActiveDept(dept);
     setFiltroProyectos(null);
     setActivePage('inicio');
+    // La dirección del navegador acompaña al switch, así recargar o
+    // compartir el link abre en el departamento que se está viendo.
+    try {
+      const path = dept === 'docencia' ? DOCENCIA_PATH : BASE;
+      if (window.location.pathname !== path) {
+        window.history.replaceState(null, '', path + window.location.search + window.location.hash);
+      }
+    } catch {
+      // Sin acceso al history: el switch funciona igual.
+    }
   };
 
   // --- Menú de configuración (engranaje): vista, idioma y tema ---------
@@ -234,9 +248,6 @@ export default function Brochure({
 
         {/* Selector de departamento en desktop (md+). En móvil va en su propia
             fila, debajo del header. */}
-        {DOCENCIA_ONLY ? (
-          <div className="flex-1" />
-        ) : (
         <div className="hidden md:flex flex-1 justify-center px-2">
           <div className="flex items-center bg-black/30 p-0.5 rounded-xl border border-white/10">
             <button
@@ -263,7 +274,6 @@ export default function Brochure({
             </button>
           </div>
         </div>
-        )}
 
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <button
@@ -402,7 +412,6 @@ export default function Brochure({
 
       {/* Selector de departamento en móvil: fila propia bajo el header, con
           el mismo degradado. */}
-      {!DOCENCIA_ONLY && (
       <div className="md:hidden shrink-0 z-30 bg-gradient-to-br from-[#003366]/95 via-[#0B5A96]/95 to-[#0077C8]/95 dark:bg-none dark:bg-[#003366]/95 border-b border-white/10 px-3 py-2">
         <div className="flex items-center bg-black/30 p-0.5 rounded-xl border border-white/10 w-full">
           <button
@@ -429,7 +438,6 @@ export default function Brochure({
           </button>
         </div>
       </div>
-      )}
 
       {/* Active Page */}
       <main ref={mainRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain">

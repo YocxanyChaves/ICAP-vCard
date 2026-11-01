@@ -86,9 +86,14 @@ El sitio está en **https://yocxanychaves.github.io/ICAP-vCard/**. Cada push a `
 vuelve a compilar y publicar solo (`.github/workflows/deploy.yml`, GitHub Actions → Pages).
 Si algún día cambia el nombre del repo, hay que cambiar también `base` en `vite.config.js`.
 
-**Link directo a Docencia:** **https://yocxanychaves.github.io/ICAP-vCard/docencia/** abre el
-brochure sólo con Docencia (sin el selector ni Asistencia Técnica). Al compilar,
-`vite.config.js` copia `index.html` a `docencia/index.html` para que Pages sirva esa ruta.
+**Links de entrada** (p. ej. desde la página oficial del ICAP):
+
+- **https://yocxanychaves.github.io/ICAP-vCard/** → abre en Asistencia Técnica (Hero principal).
+- **https://yocxanychaves.github.io/ICAP-vCard/docencia/** → abre en Docencia.
+
+Es el mismo brochure con el switch de siempre; al cambiar de departamento la dirección del
+navegador se actualiza sola. Al compilar, `vite.config.js` copia `index.html` a
+`docencia/index.html` para que Pages sirva esa ruta.
 
 ---
 
