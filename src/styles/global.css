@@ -713,6 +713,23 @@ h1, h2, h3, h4, h5, h6 {
   animation: authorityRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* Ficha de un proyecto abierta en el renglón siguiente (ProyectosAT.jsx):
+   baja un poquito y se aclara al aparecer. */
+@keyframes proyectoIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-proyecto-in {
+  animation: proyectoIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-proyecto-in {
+    animation: none;
+  }
+}
+
 /* Hero de Inicio (Hero.jsx): ocupa una pantalla (--main-h, medido en
    Brochure.jsx) y el aire entre sus elementos crece con esa altura: más
    apretado en celulares bajitos, más holgado en monitores grandes. */

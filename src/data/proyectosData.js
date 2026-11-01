@@ -21,7 +21,6 @@
  *
  * Para agregar un proyecto nuevo basta con sumar un objeto a esta lista.
  */
-export const TIPOS_CLIENTE = ['nacional', 'sica', 'internacional'];
 
 export const PROYECTOS_AT = [
   {

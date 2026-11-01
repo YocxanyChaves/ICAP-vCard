@@ -1,17 +1,25 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Search, X, Building2, CalendarDays, MapPin, FolderOpen, Layers, ChevronDown, Handshake } from 'lucide-react';
 import KickerBadge from '../components/KickerBadge';
 import { ETIQUETAS, getEtiqueta, nombreEtiqueta } from '../data/etiquetas';
-import { PROYECTOS_AT, TIPOS_CLIENTE, proyectosDePais, proyectosDeSocio } from '../data/proyectosData';
+import { PROYECTOS_AT, REGION_PAISES, proyectosDeSocio } from '../data/proyectosData';
 import { useLanguage } from '../i18n/LanguageContext';
 import EscudoICAP from '../components/EscudoICAP';
+import { FlagIcon } from './RegionalMap';
 
 /**
- * Portafolio de proyectos de Asistencia Técnica: buscador + filtros por
- * etiqueta (las 14 de etiquetas.js, que son también las Áreas de
- * Especialización) y por tipo de cliente. Cada tarjeta muestra sólo el
- * nombre y un puntito por etiqueta; al tocarla se despliega ahí mismo
- * con el resto de la ficha.
+ * Portafolio de proyectos de Asistencia Técnica: buscador (nombre del
+ * proyecto o cliente) + filtros por PAÍS (banderitas) y por ETIQUETA (las
+ * 14 de etiquetas.js, que son también las Áreas de Especialización).
+ *
+ * Países y etiquetas son de selección múltiple y se combinan con "Y": un
+ * proyecto aparece si tiene TODAS las etiquetas y TODOS los países
+ * elegidos (un proyecto puede tener varias etiquetas y abarcar varios
+ * países a la vez). Si ninguno cumple, se muestra el aviso de vacío.
+ *
+ * Al tocar una tarjeta, su ficha se abre a lo ancho en el renglón
+ * SIGUIENTE de la grilla, y en su lugar queda un hueco punteado hasta que
+ * se cierra; sólo puede haber una abierta.
  *
  * `filtroInicial` llega desde otras secciones (Brochure.jsx):
  *  - { etiqueta }  "Ver proyectos relacionados" de Áreas.
@@ -19,6 +27,11 @@ import EscudoICAP from '../components/EscudoICAP';
  *  - { pais }      un país de Presencia.
  *  - { proyecto }  un proyecto puntual: queda abierto y a la vista.
  */
+
+// Países con banderita en el filtro: los del mapa de Presencia, de
+// norte a sur y después los de fuera del istmo.
+const PAISES = ['GT', 'BZ', 'SV', 'HN', 'NI', 'CR', 'PA', 'DO', 'MX', 'CO'];
+const paisesDe = (p) => REGION_PAISES[p.region] || [];
 
 // 'AAAA-MM' del mes actual — un proyecto cuyo "hasta" sea este mes o
 // posterior se considera en curso.
@@ -62,6 +75,9 @@ const normalizar = (s) =>
     .replace(/[̀-ͯ]/g, '')
     .toLowerCase();
 
+// Agrega o quita un valor de una lista (selección múltiple).
+const alternar = (lista, valor) => (lista.includes(valor) ? lista.filter((v) => v !== valor) : [...lista, valor]);
+
 function EstadoBadge({ activo, t }) {
   return activo ? (
     <span className="inline-flex items-center gap-1 text-[10px] font-mono-code font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
@@ -90,101 +106,195 @@ function PuntosEtiquetas({ etiquetas, lang }) {
   );
 }
 
-function TarjetaProyecto({ p, abierto, onToggle, t, lang, locale, ahora, refCallback }) {
+/** Banderita en círculo; seleccionada, con el anillo de luz girando. */
+function BanderaPais({ code, nombre, n, activo, onClick }) {
   return (
-    <article
-      ref={refCallback}
-      className={`relative rounded-2xl bg-white dark:bg-[#0B2340] border overflow-hidden transition-all duration-300 ${
-        abierto
-          ? 'border-[#0077C8]/40 dark:border-[#4FB2F2]/40 shadow-xl sm:col-span-2 lg:col-span-3'
-          : 'border-slate-100 dark:border-white/10 shadow-sm hover:shadow-lg hover:-translate-y-0.5'
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={activo}
+      title={`${nombre} · ${n}`}
+      className={`group flex flex-col items-center gap-1.5 transition-all duration-200 ${
+        n || activo ? '' : 'opacity-40'
       }`}
     >
-      {/* Marca de agua: el escudo del ICAP, apenas insinuado. */}
-      <EscudoICAP
-        tono="navy"
-        className="dark:hidden absolute -right-6 -bottom-8 w-36 opacity-[0.06] rotate-[-8deg] pointer-events-none"
-      />
-      <EscudoICAP
-        tono="white"
-        className="hidden dark:block absolute -right-6 -bottom-8 w-36 opacity-[0.07] rotate-[-8deg] pointer-events-none"
-      />
-
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={abierto}
-        className="relative w-full text-left p-4 flex flex-col gap-3 min-h-[112px]"
-      >
-        <div className="flex items-center justify-between gap-3">
-          <PuntosEtiquetas etiquetas={p.etiquetas} lang={lang} />
-          <ChevronDown
-            className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-300 ${abierto ? 'rotate-180' : ''}`}
-          />
-        </div>
-        <h3
-          className={`font-heading font-bold text-sm leading-snug text-[#003366] dark:text-white ${
-            abierto ? '' : 'line-clamp-3'
-          }`}
-        >
-          {p.titulo}
-        </h3>
-      </button>
-
-      {/* Ficha desplegable: grid-rows 0fr → 1fr anima la altura sin
-          tener que medirla. */}
-      <div
-        className={`relative grid transition-[grid-template-rows] duration-300 ease-out ${
-          abierto ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+      <span
+        className={`relative w-11 h-11 sm:w-12 sm:h-12 rounded-full transition-transform duration-300 ${
+          activo ? 'scale-110' : 'group-hover:-translate-y-1'
         }`}
       >
-        <div className="overflow-hidden">
-          <div className="px-4 pb-4 space-y-3">
-            <div className="flex flex-wrap gap-1.5">
-              {p.etiquetas.map((id) => {
-                const e = getEtiqueta(id);
-                const Icon = e.icon;
-                return (
-                  <span
-                    key={id}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-heading font-bold"
-                    style={{ backgroundColor: e.color, color: e.text }}
-                  >
-                    <Icon className="w-3 h-3 shrink-0" />
-                    {nombreEtiqueta(id, lang)}
-                  </span>
-                );
-              })}
-            </div>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {[
-                [Building2, t.client, p.cliente],
-                [Layers, t.clientType, t.clientTypes[p.tipoCliente]],
-                [CalendarDays, t.period, formatearPeriodo(p, locale)],
-                [MapPin, t.region, lang === 'en' ? REGION_EN[p.region] || p.region : p.region]
-              ].map(([Icon, etiqueta, valor]) => (
-                <div
-                  key={etiqueta}
-                  className="p-2.5 rounded-xl bg-slate-50/90 dark:bg-white/5 border border-slate-100 dark:border-white/10 flex items-start gap-2.5"
+        {activo && (
+          <>
+            <span aria-hidden="true" className="absolute -inset-2 rounded-full bg-[#4FB2F2]/35 blur-md" />
+            <span aria-hidden="true" className="absolute -inset-[5px] rounded-full authority-ring" />
+          </>
+        )}
+        <span
+          className={`relative block w-full h-full rounded-full overflow-hidden ring-2 shadow-md ${
+            activo ? 'ring-white dark:ring-[#9FC6E8]' : 'ring-white/80 dark:ring-white/15'
+          }`}
+        >
+          <FlagIcon
+            countryCode={code}
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-full w-[170%] max-w-none rounded-none! border-0!"
+          />
+        </span>
+        {/* Cuántos proyectos daría al sumarlo */}
+        <span
+          className={`absolute -top-1 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full text-[9px] font-mono-code font-bold flex items-center justify-center ring-2 ring-[#D6E9F7] dark:ring-[#001F3D] ${
+            activo ? 'bg-[#0077C8] text-white' : 'bg-white dark:bg-[#0B2340] text-slate-600 dark:text-slate-300'
+          }`}
+        >
+          {n}
+        </span>
+      </span>
+      <span
+        className={`text-[10px] sm:text-[11px] font-heading leading-tight text-center ${
+          activo ? 'font-extrabold text-[#003366] dark:text-white' : 'font-semibold text-slate-600 dark:text-slate-300'
+        }`}
+      >
+        {nombre}
+      </span>
+    </button>
+  );
+}
+
+/** Tarjeta compacta de la grilla (todas del mismo alto). */
+function TarjetaProyecto({ p, onOpen, lang }) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-expanded={false}
+      className="group relative h-[132px] w-full text-left rounded-2xl bg-white dark:bg-[#0B2340] border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden p-4 flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[#0077C8]/25 dark:hover:border-[#4FB2F2]/30"
+    >
+      <EscudoICAP tono="navy" className="dark:hidden absolute -right-6 -bottom-8 w-32 opacity-[0.06] rotate-[-8deg] pointer-events-none" />
+      <EscudoICAP tono="white" className="hidden dark:block absolute -right-6 -bottom-8 w-32 opacity-[0.07] rotate-[-8deg] pointer-events-none" />
+      <span className="relative flex items-center justify-between gap-3">
+        <PuntosEtiquetas etiquetas={p.etiquetas} lang={lang} />
+        <ChevronDown className="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-300 group-hover:translate-y-0.5" />
+      </span>
+      <h3 className="relative font-heading font-bold text-sm leading-snug text-[#003366] dark:text-white line-clamp-3">
+        {p.titulo}
+      </h3>
+    </button>
+  );
+}
+
+/** Hueco que deja la tarjeta abierta en su renglón (al tocarlo, cierra). */
+function HuecoProyecto({ onClose, t }) {
+  return (
+    <button
+      type="button"
+      onClick={onClose}
+      aria-label={t.close}
+      className="h-[132px] w-full rounded-2xl border-2 border-dashed border-[#0077C8]/35 dark:border-[#4FB2F2]/35 bg-[#0077C8]/[0.04] dark:bg-white/[0.03] flex flex-col items-center justify-center gap-1 text-[#0077C8] dark:text-[#4FB2F2] transition-colors hover:bg-[#0077C8]/[0.08]"
+    >
+      <ChevronDown className="w-5 h-5 animate-bounce" />
+      <span className="text-[10px] font-mono-code font-bold uppercase tracking-wider">{t.openBelow}</span>
+    </button>
+  );
+}
+
+/**
+ * Ficha completa, a lo ancho del renglón siguiente. Una flechita arriba
+ * apunta a la columna de donde salió el proyecto.
+ */
+function DetalleProyecto({ p, columna, columnas, onClose, t, tAll, lang, locale, ahora, panelRef }) {
+  const flecha = `${((columna + 0.5) / columnas) * 100}%`;
+  const paises = paisesDe(p);
+  return (
+    <div ref={panelRef} className="col-span-full relative pt-2 animate-proyecto-in">
+      <span
+        aria-hidden="true"
+        className="absolute top-0 w-4 h-4 -translate-x-1/2 rotate-45 bg-white dark:bg-[#0B2340] border-l border-t border-[#0077C8]/40 dark:border-[#4FB2F2]/40 z-10"
+        style={{ left: flecha }}
+      />
+      <article className="relative rounded-2xl bg-white dark:bg-[#0B2340] border border-[#0077C8]/40 dark:border-[#4FB2F2]/40 shadow-xl overflow-hidden">
+        <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#003366] via-[#0077C8] to-[#4FB2F2]" />
+        <EscudoICAP tono="navy" className="dark:hidden absolute -right-8 -bottom-10 w-48 opacity-[0.06] rotate-[-8deg] pointer-events-none" />
+        <EscudoICAP tono="white" className="hidden dark:block absolute -right-8 -bottom-10 w-48 opacity-[0.07] rotate-[-8deg] pointer-events-none" />
+
+        <div className="relative p-4 sm:p-6 space-y-4">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="font-heading font-extrabold text-base sm:text-lg leading-snug text-[#003366] dark:text-white">
+              {p.titulo}
+            </h3>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={t.close}
+              className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-300 hover:bg-[#0077C8] hover:text-white transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="flex flex-wrap gap-1.5">
+            {p.etiquetas.map((id) => {
+              const e = getEtiqueta(id);
+              const Icon = e.icon;
+              return (
+                <span
+                  key={id}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-heading font-bold"
+                  style={{ backgroundColor: e.color, color: e.text }}
                 >
-                  <Icon className="w-4 h-4 text-[#0077C8] dark:text-[#4FB2F2] shrink-0 mt-0.5" />
-                  <div className="min-w-0">
-                    <dt className="font-heading font-bold text-[10px] uppercase tracking-wide text-slate-500 dark:text-[#9FC6E8]">
-                      {etiqueta}
-                    </dt>
-                    <dd className="text-xs sm:text-[13px] text-slate-800 dark:text-slate-100">{valor}</dd>
-                  </div>
+                  <Icon className="w-3 h-3 shrink-0" />
+                  {nombreEtiqueta(id, lang)}
+                </span>
+              );
+            })}
+          </div>
+
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {[
+              [Building2, t.client, p.cliente],
+              [Layers, t.clientType, t.clientTypes[p.tipoCliente]],
+              [CalendarDays, t.period, formatearPeriodo(p, locale)],
+              [MapPin, t.region, lang === 'en' ? REGION_EN[p.region] || p.region : p.region]
+            ].map(([Icon, etiqueta, valor]) => (
+              <div
+                key={etiqueta}
+                className="p-2.5 rounded-xl bg-slate-50/90 dark:bg-white/5 border border-slate-100 dark:border-white/10 flex items-start gap-2.5"
+              >
+                <Icon className="w-4 h-4 text-[#0077C8] dark:text-[#4FB2F2] shrink-0 mt-0.5" />
+                <div className="min-w-0">
+                  <dt className="font-heading font-bold text-[10px] uppercase tracking-wide text-slate-500 dark:text-[#9FC6E8]">
+                    {etiqueta}
+                  </dt>
+                  <dd className="text-xs sm:text-[13px] text-slate-800 dark:text-slate-100">{valor}</dd>
                 </div>
-              ))}
-            </dl>
-            <div className="flex items-center justify-between">
+              </div>
+            ))}
+          </dl>
+
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-3">
               <EstadoBadge activo={enCurso(p, ahora)} t={t} />
-              <span className="text-[10px] font-mono-code text-slate-400">#{p.id}</span>
+              {/* Banderitas de los países que abarca */}
+              {paises.length > 0 && (
+                <span className="flex items-center -space-x-1.5">
+                  {paises.map((code) => (
+                    <span
+                      key={code}
+                      title={tAll.regionalMap.countries[code]?.name || code}
+                      className="relative w-5 h-5 rounded-full overflow-hidden ring-2 ring-white dark:ring-[#0B2340]"
+                    >
+                      <FlagIcon
+                        countryCode={code}
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-full w-[170%] max-w-none rounded-none! border-0!"
+                      />
+                    </span>
+                  ))}
+                </span>
+              )}
             </div>
+            <span className="text-[10px] font-mono-code text-slate-400">#{p.id}</span>
           </div>
         </div>
-      </div>
-    </article>
+      </article>
+    </div>
   );
 }
 
@@ -195,27 +305,44 @@ export default function ProyectosAT({ filtroInicial = null }) {
   const ahora = mesActual();
 
   const [busqueda, setBusqueda] = useState('');
-  const [etiqueta, setEtiqueta] = useState(filtroInicial?.etiqueta || null);
-  const [tipo, setTipo] = useState(null);
+  const [etiquetas, setEtiquetas] = useState(filtroInicial?.etiqueta ? [filtroInicial.etiqueta] : []);
+  const [paises, setPaises] = useState(filtroInicial?.pais ? [filtroInicial.pais] : []);
   const [socio, setSocio] = useState(filtroInicial?.socio || null);
-  const [pais, setPais] = useState(filtroInicial?.pais || null);
   const [abierto, setAbierto] = useState(filtroInicial?.proyecto || null);
-  const tarjetasRef = useRef({});
+  const panelRef = useRef(null);
+  // La grilla va en estado (callback ref) porque desaparece cuando no hay
+  // resultados y vuelve a montarse después.
+  const [grid, setGrid] = useState(null);
 
-  // Si se llegó por un proyecto puntual, se lleva a la vista ya abierto.
+  // Columnas reales de la grilla (1, 2 o 3 según el ancho), para saber
+  // dónde termina el renglón de la tarjeta abierta.
+  const [columnas, setColumnas] = useState(1);
+  useLayoutEffect(() => {
+    if (!grid) return undefined;
+    const medir = () => {
+      const view = grid.ownerDocument.defaultView;
+      const n = view.getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length;
+      setColumnas(n || 1);
+    };
+    medir();
+    const RO = grid.ownerDocument.defaultView.ResizeObserver;
+    if (!RO) return undefined;
+    const ro = new RO(medir);
+    ro.observe(grid);
+    return () => ro.disconnect();
+  }, [grid]);
+
+  // Al abrir una ficha, se lleva a la vista (sólo lo necesario).
   useEffect(() => {
-    if (!filtroInicial?.proyecto) return undefined;
+    if (!abierto) return undefined;
     const id = setTimeout(() => {
-      tarjetasRef.current[filtroInicial.proyecto]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 350);
+      panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, filtroInicial?.proyecto === abierto ? 350 : 60);
     return () => clearTimeout(id);
-  }, [filtroInicial]);
+  }, [abierto, filtroInicial]);
 
   // Más recientes primero.
-  const ordenados = useMemo(
-    () => [...PROYECTOS_AT].sort((a, b) => b.desde.localeCompare(a.desde)),
-    []
-  );
+  const ordenados = useMemo(() => [...PROYECTOS_AT].sort((a, b) => b.desde.localeCompare(a.desde)), []);
 
   const resumen = useMemo(
     () => ({
@@ -226,47 +353,39 @@ export default function ProyectosAT({ filtroInicial = null }) {
     [ahora]
   );
 
-  // Socio y país vienen de otras secciones: se traducen a un conjunto de
-  // ids para filtrar igual que el resto.
-  const idsContexto = useMemo(() => {
-    if (socio) return new Set(proyectosDeSocio(socio).map((p) => p.id));
-    if (pais) return new Set(proyectosDePais(pais).map((p) => p.id));
-    return null;
-  }, [socio, pais]);
+  const idsSocio = useMemo(() => (socio ? new Set(proyectosDeSocio(socio).map((p) => p.id)) : null), [socio]);
 
-  // El conteo por etiqueta respeta los demás filtros, para que cada
-  // cápsula diga cuántos resultados daría al tocarla.
-  const coincideTexto = (p) => {
-    if (!busqueda.trim()) return true;
-    const q = normalizar(busqueda.trim());
-    const nombres = p.etiquetas.map((id) => nombreEtiqueta(id, lang)).join(' ');
-    return normalizar(`${p.titulo} ${p.cliente} ${nombres} ${p.region}`).includes(q);
-  };
-  const baseSinEtiqueta = ordenados.filter(
-    (p) => coincideTexto(p) && (!tipo || p.tipoCliente === tipo) && (!idsContexto || idsContexto.has(p.id))
+  // Búsqueda: sólo nombre del proyecto y cliente.
+  const q = normalizar(busqueda.trim());
+  const base = ordenados.filter(
+    (p) => (!q || normalizar(`${p.titulo} ${p.cliente}`).includes(q)) && (!idsSocio || idsSocio.has(p.id))
   );
-  const conteoPorEtiqueta = baseSinEtiqueta.reduce((acc, p) => {
-    p.etiquetas.forEach((id) => {
-      acc[id] = (acc[id] || 0) + 1;
-    });
-    return acc;
-  }, {});
-  const visibles = etiqueta ? baseSinEtiqueta.filter((p) => p.etiquetas.includes(etiqueta)) : baseSinEtiqueta;
+  const cumpleEtiquetas = (p, lista) => lista.every((id) => p.etiquetas.includes(id));
+  const cumplePaises = (p, lista) => lista.every((code) => paisesDe(p).includes(code));
+  const visibles = base.filter((p) => cumpleEtiquetas(p, etiquetas) && cumplePaises(p, paises));
 
-  const hayFiltros = busqueda || etiqueta || tipo || socio || pais;
+  // Cada cápsula / bandera dice cuántos resultados quedarían al sumarla
+  // a lo que ya está elegido.
+  const conteoEtiqueta = (id) =>
+    etiquetas.includes(id)
+      ? visibles.length
+      : visibles.filter((p) => p.etiquetas.includes(id)).length;
+  const conteoPais = (code) =>
+    paises.includes(code) ? visibles.length : visibles.filter((p) => paisesDe(p).includes(code)).length;
+
+  const hayFiltros = busqueda || etiquetas.length || paises.length || socio;
   const limpiar = () => {
     setBusqueda('');
-    setEtiqueta(null);
-    setTipo(null);
+    setEtiquetas([]);
+    setPaises([]);
     setSocio(null);
-    setPais(null);
   };
 
-  const contexto = socio
-    ? { label: t.partnerFilter, valor: tAll.allies.items[socio]?.name || socio, quitar: () => setSocio(null) }
-    : pais
-      ? { label: t.countryFilter, valor: tAll.regionalMap.countries[pais]?.name || pais, quitar: () => setPais(null) }
-      : null;
+  // Dónde va la ficha abierta: al final del renglón de su tarjeta.
+  const idxAbierto = visibles.findIndex((p) => p.id === abierto);
+  const proyectoAbierto = idxAbierto >= 0 ? visibles[idxAbierto] : null;
+  const finRenglon = idxAbierto >= 0 ? Math.min(Math.floor(idxAbierto / columnas) * columnas + columnas, visibles.length) - 1 : -1;
+  const cerrar = () => setAbierto(null);
 
   return (
     <section className="px-4 sm:px-6 pt-[var(--docencia-gap)] pb-12 sm:pb-20 bg-[#D6E9F7] dark:bg-[#001F3D] text-slate-900 dark:text-white">
@@ -279,9 +398,7 @@ export default function ProyectosAT({ filtroInicial = null }) {
           <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#003366] dark:text-[#9FC6E8] tracking-tight">
             {t.title}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1.5 max-w-lg mx-auto">
-            {t.subtitle}
-          </p>
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1.5 max-w-lg mx-auto">{t.subtitle}</p>
 
           <div className="mt-5 grid grid-cols-3 gap-2 sm:gap-3 max-w-md mx-auto">
             {[
@@ -289,23 +406,18 @@ export default function ProyectosAT({ filtroInicial = null }) {
               [resumen.clientes, t.statClients],
               [resumen.activos, t.statActive]
             ].map(([valor, etq]) => (
-              <div
-                key={etq}
-                className="rounded-2xl bg-white/70 dark:bg-white/5 border border-white dark:border-white/10 py-2.5 px-2"
-              >
+              <div key={etq} className="rounded-2xl bg-white/70 dark:bg-white/5 border border-white dark:border-white/10 py-2.5 px-2">
                 <div className="font-heading font-extrabold text-xl sm:text-2xl text-[#0077C8] dark:text-[#4FB2F2] leading-none">
                   {valor}
                 </div>
-                <div className="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-tight">
-                  {etq}
-                </div>
+                <div className="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-tight">{etq}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Buscador */}
-        <div className="relative max-w-xl mx-auto mb-4">
+        {/* Buscador: nombre del proyecto o cliente */}
+        <div className="relative max-w-xl mx-auto mb-6">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           <input
             type="search"
@@ -326,85 +438,82 @@ export default function ProyectosAT({ filtroInicial = null }) {
           )}
         </div>
 
-        {/* Tipo de cliente */}
-        <div className="flex justify-center mb-4">
-          <div className="inline-flex flex-wrap justify-center items-center bg-white/70 dark:bg-black/30 p-0.5 rounded-xl border border-slate-200 dark:border-white/10">
-            {[null, ...TIPOS_CLIENTE].map((tp) => (
-              <button
-                key={tp || 'todos'}
-                onClick={() => setTipo(tp)}
-                aria-pressed={tipo === tp}
-                className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-heading font-semibold transition-all ${
-                  tipo === tp
-                    ? 'bg-[#0077C8] text-white shadow'
-                    : 'text-slate-600 dark:text-[#9FC6E8] hover:bg-slate-100 dark:hover:bg-white/10'
-                }`}
-              >
-                {tp ? t.clientTypes[tp] : t.allClients}
-              </button>
-            ))}
-          </div>
+        {/* Países: banderitas en círculo, selección múltiple */}
+        <p className="text-center font-heading font-bold text-[10px] uppercase tracking-[0.14em] text-[#0077C8] dark:text-[#4FB2F2]">
+          {t.countriesLabel}
+        </p>
+        <p className="text-center text-[10px] text-slate-500 dark:text-slate-400 mb-3">{t.countriesHint}</p>
+        <div className="grid grid-cols-5 sm:grid-cols-10 gap-x-2 gap-y-4 max-w-3xl mx-auto mb-7 pt-1">
+          {PAISES.map((code) => (
+            <BanderaPais
+              key={code}
+              code={code}
+              nombre={tAll.regionalMap.countries[code]?.name || code}
+              n={conteoPais(code)}
+              activo={paises.includes(code)}
+              onClick={() => setPaises((prev) => alternar(prev, code))}
+            />
+          ))}
         </div>
 
-        {/* Etiquetas: cada cápsula lleva su color; al activarla se
-            rellena entera de ese color, con un halo del mismo tono. */}
-        <p className="text-center font-heading font-bold text-[10px] uppercase tracking-[0.14em] text-[#0077C8] dark:text-[#4FB2F2] mb-2">
+        {/* Etiquetas: grilla pareja de cápsulas, selección múltiple. Cada
+            una lleva su color; al activarla se rellena de ese color. */}
+        <p className="text-center font-heading font-bold text-[10px] uppercase tracking-[0.14em] text-[#0077C8] dark:text-[#4FB2F2]">
           {t.tagsLabel}
         </p>
-        <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 mb-5">
+        <p className="text-center text-[10px] text-slate-500 dark:text-slate-400 mb-3">{t.tagsHint}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-6">
           <button
-            onClick={() => setEtiqueta(null)}
-            aria-pressed={!etiqueta}
-            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-heading font-bold border-2 transition-all active:scale-95 ${
-              !etiqueta
+            onClick={() => setEtiquetas([])}
+            aria-pressed={!etiquetas.length}
+            className={`col-span-2 sm:col-span-1 min-h-[44px] flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-2xl text-[11px] sm:text-xs font-heading font-bold border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 ${
+              !etiquetas.length
                 ? 'bg-[#003366] dark:bg-[#0077C8] text-white border-transparent shadow-lg'
-                : 'bg-white dark:bg-white/5 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-white/10'
+                : 'bg-white dark:bg-white/5 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-white/10 hover:shadow-md'
             }`}
           >
             {t.allTags}
-            <span className="opacity-70">{baseSinEtiqueta.length}</span>
           </button>
           {ETIQUETAS.map((e) => {
-            const activo = etiqueta === e.id;
-            const n = conteoPorEtiqueta[e.id] || 0;
+            const activo = etiquetas.includes(e.id);
+            const n = conteoEtiqueta(e.id);
             return (
               <button
                 key={e.id}
-                onClick={() => setEtiqueta(activo ? null : e.id)}
+                onClick={() => setEtiquetas((prev) => alternar(prev, e.id))}
                 aria-pressed={activo}
-                disabled={!n && !activo}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-heading font-bold border-2 transition-all duration-200 active:scale-95 disabled:opacity-35 disabled:pointer-events-none"
+                className={`min-h-[44px] flex items-center gap-2 px-3 py-1.5 rounded-2xl text-left text-[11px] sm:text-xs font-heading font-bold border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 ${
+                  activo ? '' : 'hover:shadow-md'
+                } ${!n && !activo ? 'opacity-45' : ''}`}
                 style={
                   activo
                     ? {
                         backgroundColor: e.color,
                         borderColor: e.color,
                         color: e.text,
-                        boxShadow: `0 6px 18px -4px ${e.color}AA, 0 0 0 3px ${e.color}33`,
-                        transform: 'scale(1.06)'
+                        boxShadow: `0 6px 18px -4px ${e.color}AA, 0 0 0 3px ${e.color}33`
                       }
                     : { borderColor: `${e.color}66`, backgroundColor: `${e.color}14` }
                 }
               >
-                <span
-                  className="w-2.5 h-2.5 rounded-full shrink-0"
-                  style={{ backgroundColor: activo ? e.text : e.color }}
-                />
-                <span className={activo ? '' : 'text-slate-800 dark:text-slate-100'}>{e[lang === 'en' ? 'en' : 'es']}</span>
-                <span className={activo ? 'opacity-80' : 'opacity-60 text-slate-700 dark:text-slate-200'}>{n}</span>
+                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: activo ? e.text : e.color }} />
+                <span className={`flex-1 leading-tight ${activo ? '' : 'text-slate-800 dark:text-slate-100'}`}>
+                  {e[lang === 'en' ? 'en' : 'es']}
+                </span>
+                <span className={`shrink-0 ${activo ? 'opacity-80' : 'opacity-60 text-slate-700 dark:text-slate-200'}`}>{n}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Filtro que llegó desde Socios o Presencia */}
-        {contexto && (
+        {/* Socio que llegó desde el carrusel de Organismos y Socios */}
+        {socio && (
           <div className="flex justify-center mb-4">
             <span className="inline-flex items-center gap-2 pl-3 pr-1 py-1 rounded-full bg-[#003366] text-white text-[11px] sm:text-xs font-heading font-semibold shadow">
-              {socio ? <Handshake className="w-3.5 h-3.5" /> : <MapPin className="w-3.5 h-3.5" />}
-              {contexto.label}: {contexto.valor}
+              <Handshake className="w-3.5 h-3.5" />
+              {t.partnerFilter}: {tAll.allies.items[socio]?.name || socio}
               <button
-                onClick={contexto.quitar}
+                onClick={() => setSocio(null)}
                 aria-label={t.removeFilter}
                 className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/20"
               >
@@ -417,8 +526,8 @@ export default function ProyectosAT({ filtroInicial = null }) {
         {/* Conteo + limpiar */}
         <div className="flex items-center justify-between gap-3 mb-3 text-[11px] sm:text-xs text-slate-600 dark:text-slate-300">
           <span>
-            {t.showing} <strong className="text-slate-900 dark:text-white">{visibles.length}</strong> {t.of}{' '}
-            {resumen.total} {t.projectsWord} · <span className="opacity-80">{t.tapHint}</span>
+            {t.showing} <strong className="text-slate-900 dark:text-white">{visibles.length}</strong> {t.of} {resumen.total}{' '}
+            {t.projectsWord} · <span className="opacity-80">{t.tapHint}</span>
           </span>
           {hayFiltros && (
             <button onClick={limpiar} className="font-heading font-bold text-[#0077C8] dark:text-[#4FB2F2] hover:underline shrink-0">
@@ -427,23 +536,37 @@ export default function ProyectosAT({ filtroInicial = null }) {
           )}
         </div>
 
-        {/* Tarjetas */}
+        {/* Tarjetas. La abierta deja su hueco y su ficha va a lo ancho
+            justo después del renglón donde está. */}
         {visibles.length ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 items-start grid-flow-row-dense">
-            {visibles.map((p) => (
-              <TarjetaProyecto
-                key={p.id}
-                p={p}
-                abierto={abierto === p.id}
-                onToggle={() => setAbierto((prev) => (prev === p.id ? null : p.id))}
-                t={t}
-                lang={lang}
-                locale={locale}
-                ahora={ahora}
-                refCallback={(el) => {
-                  tarjetasRef.current[p.id] = el;
-                }}
-              />
+          <div ref={setGrid} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {visibles.map((p, i) => (
+              <Fragment key={p.id}>
+                {p.id === abierto ? (
+                  <HuecoProyecto onClose={cerrar} t={t} />
+                ) : (
+                  <TarjetaProyecto
+                    p={p}
+                    onOpen={() => setAbierto(p.id)}
+                    lang={lang}
+                  />
+                )}
+                {i === finRenglon && proyectoAbierto && (
+                  <DetalleProyecto
+                    key={`detalle-${proyectoAbierto.id}`}
+                    p={proyectoAbierto}
+                    columna={idxAbierto % columnas}
+                    columnas={columnas}
+                    onClose={cerrar}
+                    t={t}
+                    tAll={tAll}
+                    lang={lang}
+                    locale={locale}
+                    ahora={ahora}
+                    panelRef={panelRef}
+                  />
+                )}
+              </Fragment>
             ))}
           </div>
         ) : (
