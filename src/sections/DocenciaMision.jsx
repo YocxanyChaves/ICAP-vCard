@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Telescope, TrendingUp, FlaskConical, Cpu, Flag, Globe2, BookOpen } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import KickerBadge from '../components/KickerBadge';
+import LogoICAP from '../components/LogoICAP';
 import FormacionVisionHero from './FormacionVisionHero';
 
 // Mismos ids que t.docenciaMision.items en translations.js — nombre y
@@ -226,8 +227,14 @@ export default function DocenciaMision({ showCards = true, showIntro = true }) {
         showIntro && showCards ? 'min-h-[85vh] sm:min-h-[88vh]' : ''
       }`}
     >
+      {/* Marca de agua: el isotipo del ICAP (no el escudo), grande, derecho
+          y centrado (un poco abajo de la mitad), detrás de las cards. */}
+      {showCards && (
+        <LogoICAP className="pointer-events-none absolute left-1/2 top-[63%] -translate-x-1/2 -translate-y-1/2 w-[22rem] sm:w-[36rem] text-[#0077C8] dark:text-white opacity-[0.08] dark:opacity-[0.06]" />
+      )}
+
       <div
-        className={`max-w-4xl mx-auto w-full flex flex-col ${showCards ? 'flex-1' : ''} ${
+        className={`relative max-w-4xl mx-auto w-full flex flex-col ${showCards ? 'flex-1' : ''} ${
           !showIntro && showCards ? 'gap-[var(--docencia-gap)]' : ''
         }`}
       >
