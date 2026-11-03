@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import BottomSheet from '../components/BottomSheet';
 import { getEtiqueta, nombreEtiqueta } from '../data/etiquetas';
-import { proyectosDePais, esRegional } from '../data/proyectosData';
+import { proyectosDePais, esRegional, tituloDe, clienteDe } from '../data/proyectosData';
 import { useLanguage } from '../i18n/LanguageContext';
 import KickerBadge from '../components/KickerBadge';
 
@@ -265,7 +265,7 @@ function CountryDetailBody({ country, tone = 'dark', onNavigate }) {
         // Clientes de los proyectos nacionales primero (son los propios
         // del país), luego los de los regionales.
         const clientes = [
-          ...new Set([...proyectos.filter((p) => !esRegional(p)), ...proyectos.filter(esRegional)].map((p) => p.cliente))
+          ...new Set([...proyectos.filter((p) => !esRegional(p)), ...proyectos.filter(esRegional)].map((p) => clienteDe(p, lang)))
         ];
         const MAX_CLIENTES = 6;
 
@@ -346,7 +346,7 @@ function CountryDetailBody({ country, tone = 'dark', onNavigate }) {
                           <span key={id} className="w-2 h-2 rounded-full" style={{ backgroundColor: getEtiqueta(id).color }} />
                         ))}
                       </span>
-                      <span className="flex-1 line-clamp-2">{p.titulo}</span>
+                      <span className="flex-1 line-clamp-2">{tituloDe(p, lang)}</span>
                       <ChevronRight className="w-4 h-4 text-[#0077C8] opacity-60 group-hover:opacity-100 shrink-0" />
                     </button>
                   ))}

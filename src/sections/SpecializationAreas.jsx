@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import KickerBadge from '../components/KickerBadge';
 import { ETIQUETAS, getEtiqueta } from '../data/etiquetas';
-import { PROYECTOS_AT } from '../data/proyectosData';
+import { PROYECTOS_AT, tituloDe } from '../data/proyectosData';
 import EscudoICAP from '../components/EscudoICAP';
 
 // Carrusel horizontal a todo el ancho con una tarjeta por cada una de las
@@ -606,10 +606,10 @@ export default function SpecializationAreas({ onNavigate }) {
                           <li
                             key={p.id}
                             className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/10 border border-white/10 text-[11px] sm:text-xs text-white/90 leading-snug"
-                            title={p.titulo}
+                            title={tituloDe(p, lang)}
                           >
                             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: area.color }} />
-                            <span className="truncate">{p.titulo}</span>
+                            <span className="truncate">{tituloDe(p, lang)}</span>
                           </li>
                         ))}
                       </ul>

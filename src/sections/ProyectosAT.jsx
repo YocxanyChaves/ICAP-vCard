@@ -2,7 +2,7 @@ import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 
 import { Search, X, Building2, CalendarDays, MapPin, FolderOpen, Layers, ChevronDown, Handshake, Earth, RotateCcw } from 'lucide-react';
 import KickerBadge from '../components/KickerBadge';
 import { ETIQUETAS, getEtiqueta, nombreEtiqueta } from '../data/etiquetas';
-import { PROYECTOS_AT, REGION_PAISES, proyectosDeSocio } from '../data/proyectosData';
+import { PROYECTOS_AT, REGION_PAISES, proyectosDeSocio, tituloDe, clienteDe } from '../data/proyectosData';
 import { useLanguage } from '../i18n/LanguageContext';
 import EscudoICAP from '../components/EscudoICAP';
 import { BANDERAS } from '../data/banderas';
@@ -190,7 +190,7 @@ function TarjetaProyecto({ p, onOpen, lang }) {
         <ChevronDown className="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-300 group-hover:translate-y-0.5" />
       </span>
       <h3 className="relative font-heading font-bold text-sm leading-snug text-[#003366] dark:text-white line-clamp-3">
-        {p.titulo}
+        {tituloDe(p, lang)}
       </h3>
     </button>
   );
@@ -233,7 +233,7 @@ function DetalleProyecto({ p, columna, columnas, onClose, t, tAll, lang, locale,
         <div className="relative p-4 sm:p-6 space-y-4">
           <div className="flex items-start justify-between gap-3">
             <h3 className="font-heading font-extrabold text-base sm:text-lg leading-snug text-[#003366] dark:text-white">
-              {p.titulo}
+              {tituloDe(p, lang)}
             </h3>
             <button
               type="button"
@@ -264,7 +264,7 @@ function DetalleProyecto({ p, columna, columnas, onClose, t, tAll, lang, locale,
 
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {[
-              [Building2, t.client, p.cliente],
+              [Building2, t.client, clienteDe(p, lang)],
               [Layers, t.clientType, t.clientTypes[p.tipoCliente]],
               [CalendarDays, t.period, formatearPeriodo(p, locale)],
               [MapPin, t.region, lang === 'en' ? REGION_EN[p.region] || p.region : p.region]
@@ -371,10 +371,10 @@ export default function ProyectosAT({ filtroInicial = null }) {
 
   const idsSocio = useMemo(() => (socio ? new Set(proyectosDeSocio(socio).map((p) => p.id)) : null), [socio]);
 
-  // Búsqueda: sólo nombre del proyecto y cliente.
+  // Búsqueda: sólo nombre del proyecto y cliente (en los dos idiomas).
   const q = normalizar(busqueda.trim());
   const base = ordenados.filter(
-    (p) => (!q || normalizar(`${p.titulo} ${p.cliente}`).includes(q)) && (!idsSocio || idsSocio.has(p.id))
+    (p) => (!q || normalizar(`${p.titulo} ${p.tituloEn || ''} ${p.cliente} ${p.clienteEn || ''}`).includes(q)) && (!idsSocio || idsSocio.has(p.id))
   );
   const cumpleEtiquetas = (p, lista) => lista.every((id) => p.etiquetas.includes(id));
   const cumplePaises = (p, lista) => lista.every((code) => paisesDe(p).includes(code));

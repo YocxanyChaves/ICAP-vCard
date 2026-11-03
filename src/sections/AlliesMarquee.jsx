@@ -3,7 +3,7 @@ import { Info, X, ArrowRight, ChevronRight } from 'lucide-react';
 import BottomSheet from '../components/BottomSheet';
 import KickerBadge from '../components/KickerBadge';
 import { getEtiqueta, nombreEtiqueta } from '../data/etiquetas';
-import { proyectosDeSocio } from '../data/proyectosData';
+import { proyectosDeSocio, tituloDe } from '../data/proyectosData';
 import { useLanguage } from '../i18n/LanguageContext';
 import sicaLogo from '../assets/allies/sica.png';
 import opsOmsLogo from '../assets/allies/ops-oms.png';
@@ -120,7 +120,7 @@ function AllyDetailBody({ ally, onNavigate }) {
                     <span key={id} className="w-2 h-2 rounded-full" style={{ backgroundColor: getEtiqueta(id).color }} />
                   ))}
                 </span>
-                <span className="text-xs text-slate-800 dark:text-slate-100 leading-snug flex-1 line-clamp-3">{p.titulo}</span>
+                <span className="text-xs text-slate-800 dark:text-slate-100 leading-snug flex-1 line-clamp-3">{tituloDe(p, lang)}</span>
                 <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#0077C8] shrink-0" />
               </button>
             </li>
