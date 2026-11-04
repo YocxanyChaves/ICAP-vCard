@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Mail, UserPlus, Quote, RotateCw, RotateCcw, Crown, MapPin, Landmark } from 'lucide-react';
-import { LinkedinIcon, WhatsAppIcon } from '../components/Icons';
-import { downloadVCard, whatsappDigits } from '../components/VCardDownload';
+import { ExternalLink, Quote, RotateCw, RotateCcw, Crown, MapPin, Landmark } from 'lucide-react';
+import { LinkedinIcon } from '../components/Icons';
 import { useLanguage } from '../i18n/LanguageContext';
 import KickerBadge from '../components/KickerBadge';
 import EscudoICAP from '../components/EscudoICAP';
@@ -10,7 +9,7 @@ import EscudoICAP from '../components/EscudoICAP';
  * Autoridades del ICAP: una sola ficha de vitrina para la Dirección
  * General. Reúne piezas del resto del sitio: el volteo 3D de
  * Misión/Visión, el bloque navy con escudo, el anillo de luz del logo de
- * Valores (girando alrededor del retrato) y los botones de Contacto, más
+ * Valores (girando alrededor del retrato) y el botón de LinkedIn, más
  * un marco de luz que recorre el borde de la ficha (.authority-frame).
  *
  * DATOS: mientras `photo` esté vacío se muestran las iniciales; los
@@ -23,9 +22,6 @@ const DIRECTOR = {
   initials: 'EB',
   photo: null,
   linkedin: 'https://www.linkedin.com/in/edgar-balsells-8a448b27',
-  // Teléfono y correo: en espera de confirmar si se publican.
-  whatsapp: '',
-  email: '',
   quote: { es: '', en: '' }
 };
 
@@ -68,80 +64,35 @@ function Portrait({ person }) {
 }
 
 /**
- * Botón de contacto: link real si el dato existe; si no, la misma
- * píldora apagada con el aviso "Dato pendiente", para que el diseño se
- * vea completo mientras se recopilan los datos.
+ * La Dirección General sólo publica su LinkedIn (sin WhatsApp, correo ni
+ * "Guardar contacto"), así que va un solo botón grande, del ancho que
+ * ocupaba la fila de cuatro: azul de LinkedIn, ícono en su cuadrito
+ * blanco y flecha a la derecha que avanza en hover.
  */
-function ContactChip({ href, onClick, icon: Icon, label, pendingLabel }) {
-  const enabled = Boolean(href || onClick);
-  const base =
-    'inline-flex items-center justify-center gap-1.5 h-10 px-3.5 rounded-xl text-[11px] sm:text-xs font-heading font-bold tracking-wide border transition-all bg-white/10 border-white/15 text-white';
-  const hover = 'hover:bg-white/20 hover:border-white/30 hover:-translate-y-0.5 active:scale-95';
-
-  if (!enabled) {
-    return (
-      <span title={pendingLabel} aria-disabled="true" className={`${base} opacity-40 cursor-not-allowed`}>
-        <Icon className="w-3.5 h-3.5" />
-        <span className="hidden sm:inline">{label}</span>
-      </span>
-    );
-  }
-  if (onClick) {
-    return (
-      <button type="button" onClick={onClick} title={label} className={`${base} ${hover} cursor-pointer`}>
-        <Icon className="w-3.5 h-3.5" />
-        <span className="hidden sm:inline">{label}</span>
-      </button>
-    );
-  }
-  return (
-    <a href={href} target="_blank" rel="noopener noreferrer" title={label} className={`${base} ${hover}`}>
-      <Icon className="w-3.5 h-3.5" />
-      <span className="hidden sm:inline">{label}</span>
-    </a>
-  );
-}
-
-function ContactRow({ person, role }) {
+function ContactRow({ person }) {
   const { t } = useLanguage();
   const a = t.authorities;
-  const [firstName, ...rest] = person.name.split(' ');
-  const saveContact = () =>
-    downloadVCard({
-      firstName,
-      lastName: rest.join(' '),
-      fullName: person.name,
-      title: role,
-      org: 'Instituto Centroamericano de Administración Pública (ICAP)',
-      cellPhone: person.whatsapp,
-      phone: person.whatsapp,
-      email: person.email,
-      url: 'https://icap.ac.cr',
-      address: 'San José, Costa Rica',
-      notes: role
-    });
-
+  if (!person.linkedin) return null;
   return (
-    <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
-      <ContactChip href={person.linkedin} icon={LinkedinIcon} label={a.linkedin} pendingLabel={`${a.linkedin} · ${a.pending}`} />
-      <ContactChip
-        href={
-          person.whatsapp
-            ? `https://wa.me/${whatsappDigits(person.whatsapp)}?text=${encodeURIComponent(a.whatsappMessage(person.name))}`
-            : ''
-        }
-        icon={WhatsAppIcon}
-        label={a.whatsapp}
-        pendingLabel={`${a.whatsapp} · ${a.pending}`}
-      />
-      <ContactChip
-        href={person.email ? `mailto:${person.email}` : ''}
-        icon={Mail}
-        label={a.email}
-        pendingLabel={`${a.email} · ${a.pending}`}
-      />
-      <ContactChip onClick={saveContact} icon={UserPlus} label={a.saveContact} />
-    </div>
+    <a
+      href={person.linkedin}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group w-full sm:w-[28rem] max-w-full flex items-center gap-3 h-14 pl-2.5 pr-5 rounded-2xl bg-gradient-to-r from-[#0A66C2] to-[#0077C8] border border-white/20 text-white shadow-lg shadow-black/30 ring-1 ring-[#4FB2F2]/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#0A66C2]/40 hover:brightness-110 active:scale-[0.98] active:translate-y-0"
+    >
+      <span className="w-10 h-10 rounded-xl bg-white text-[#0A66C2] flex items-center justify-center shrink-0 shadow-sm">
+        <LinkedinIcon className="w-5 h-5" />
+      </span>
+      <span className="flex-1 min-w-0 text-left">
+        <span className="block font-heading font-extrabold text-sm sm:text-[15px] tracking-wide leading-tight truncate">
+          {a.linkedinCta}
+        </span>
+        <span className="block text-[10px] sm:text-[11px] font-mono-code text-white/75 leading-tight truncate">
+          linkedin.com/in/edgar-balsells
+        </span>
+      </span>
+      <ExternalLink className="w-4 h-4 text-white/85 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+    </a>
   );
 }
 

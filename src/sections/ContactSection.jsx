@@ -39,6 +39,8 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
   const [scheduleModal, setScheduleModal] = useState(false);
   const topic = dept === 'docencia' ? t.header.deptDocencia : t.header.deptAT;
   const DeptIcon = dept === 'docencia' ? GraduationCap : Handshake;
+  // En AT, correo, agendar y la tarjeta .vcf van a Asistencia Técnica.
+  const email = dept === 'at' && contact.emailAT ? contact.emailAT : contact.email;
 
   // Tarjeta .vcf de la institución (no de una persona): mismos teléfono,
   // correo, sitio y dirección del contacto, con el ICAP como nombre.
@@ -50,7 +52,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
     org: 'Instituto Centroamericano de Administración Pública (ICAP)',
     phone: contact.phone,
     cellPhone: contact.cellPhone,
-    email: contact.email,
+    email,
     url: contact.url,
     address: contact.address,
     notes: t.vcard.notes,
@@ -90,7 +92,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
   }, []);
 
   return (
-    <section id={id} className="px-4 sm:px-6 pt-[var(--docencia-gap)] pb-14 sm:pb-24 bg-[#D6E9F7] dark:bg-[#001F3D] relative overflow-hidden">
+    <section id={id} className="px-4 sm:px-6 pt-[var(--docencia-gap)] pb-14 sm:pb-24 md:pb-10 bg-[#D6E9F7] dark:bg-[#001F3D] relative overflow-hidden">
       {/* Escudo grande y apenas insinuado de fondo, como el que ya
           "marca de agua" a Misión — el mismo gesto para cerrar el
           brochure con esa firma institucional. */}
@@ -99,9 +101,9 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
         className="pointer-events-none absolute w-72 sm:w-96 -right-16 -top-10 opacity-[0.05] rotate-[8deg]"
       />
 
-      <div ref={sectionRef} className="max-w-xl mx-auto relative">
+      <div ref={sectionRef} className="max-w-xl md:max-w-4xl mx-auto relative">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 md:mb-6">
           <div className="mb-1.5 sm:mb-2 flex justify-center">
             <KickerBadge variant={dept === 'docencia' ? 'dot' : 'glow'}>{t.contact.kicker}</KickerBadge>
           </div>
@@ -115,10 +117,12 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
 
         {/* Institutional Card */}
         <div className={visible ? 'animate-value-card-in' : 'opacity-0'}>
-          <div className="mv-card-light bg-white dark:bg-[#003366] rounded-[28px] overflow-hidden">
+          {/* En tablet/compu (md+) la ficha se acuesta: perfil a la izquierda
+              y datos + acciones a la derecha, así queda menos alta. */}
+          <div className="mv-card-light bg-white dark:bg-[#003366] rounded-[28px] overflow-hidden md:flex">
             {/* Franja del perfil del ICAP como institución: isotipo, nombre oficial y
                 el tema de la consulta según el departamento activo. */}
-            <div className="relative px-5 pt-6 pb-6 sm:px-8 sm:pt-8 sm:pb-7 overflow-hidden" style={{ background: PROFILE_BACKGROUND }}>
+            <div className="relative px-5 pt-6 pb-6 sm:px-8 sm:pt-8 sm:pb-7 overflow-hidden md:w-[38%] md:shrink-0 md:flex md:flex-col md:justify-center" style={{ background: PROFILE_BACKGROUND }}>
               <span
                 aria-hidden="true"
                 className="absolute top-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"
@@ -148,7 +152,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
                 </div>
               </div>
 
-              <div className="relative mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 border border-white/15 text-[10px] sm:text-[11px] font-heading font-semibold text-white/85">
+              <div className="relative mt-5 self-start inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 border border-white/15 text-[10px] sm:text-[11px] font-heading font-semibold text-white/85">
                 <DeptIcon className="w-3.5 h-3.5 text-[#bfe6ff]" />
                 <span>
                   {t.contact.topicLabel} <span className="font-extrabold text-white">{topic}</span>
@@ -157,7 +161,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
             </div>
 
             {/* Cuerpo: datos de la sede + acciones rápidas + guardar contacto */}
-            <div className="p-5 sm:p-8 flex flex-col gap-5 sm:gap-6">
+            <div className="p-5 sm:p-8 md:p-7 md:flex-1 md:min-w-0 flex flex-col gap-5 sm:gap-6 md:gap-4">
               {/* Datos institucionales */}
               <div className="rounded-2xl border border-slate-100 dark:border-white/10 divide-y divide-slate-100 dark:divide-white/10 overflow-hidden">
                 <div className="flex items-start gap-3 p-3.5">
@@ -209,7 +213,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
               </div>
 
               {/* Quick Action Buttons */}
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2">
                 {/* WhatsApp */}
                 <a
                   href={`https://wa.me/${whatsappDigits(contact.cellPhone)}?text=${encodeURIComponent(t.contact.whatsappMessage(topic))}`}
@@ -228,7 +232,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
 
                 {/* Email */}
                 <a
-                  href={`mailto:${contact.email}?subject=${encodeURIComponent(t.contact.emailSubject(topic))}`}
+                  href={`mailto:${email}?subject=${encodeURIComponent(t.contact.emailSubject(topic))}`}
                   className="flex items-center justify-between h-13 px-4 rounded-2xl bg-[#EAF3FB] dark:bg-white/5 hover:bg-[#D5E9F8] dark:hover:bg-white/10 text-[#003366] dark:text-white font-heading font-bold text-xs tracking-wider uppercase border border-[#0077C8]/20 dark:border-white/10 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99] active:translate-y-0"
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -287,7 +291,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
         </div>
 
         {/* Footer info */}
-        <div className="text-center mt-8 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+        <div className="text-center mt-8 md:mt-6 text-xs text-slate-700 dark:text-slate-300 space-y-1">
           <div className="font-heading font-semibold text-slate-700 dark:text-slate-200">
             {t.contact.footerLine}
           </div>
@@ -325,7 +329,7 @@ export default function ContactSection({ contact = defaultContact, id = 'contact
               {t.contact.viaWhatsapp}
             </a>
             <a
-              href={`mailto:${contact.email}?subject=${encodeURIComponent(t.contact.scheduleEmailSubject(topic))}`}
+              href={`mailto:${email}?subject=${encodeURIComponent(t.contact.scheduleEmailSubject(topic))}`}
               className="py-3.5 px-4 rounded-2xl bg-[#0077C8] hover:bg-[#005A96] text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors block text-center shadow-md"
             >
               {t.contact.viaEmail}

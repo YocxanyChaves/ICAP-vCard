@@ -42,6 +42,21 @@ import icapLogoMark from './assets/icap-logo-mark.png';
 // docencia/index.html para que GitHub Pages sirva esa ruta.
 const BASE = import.meta.env.BASE_URL; // '/ICAP-vCard/'
 const DOCENCIA_PATH = `${BASE}docencia/`;
+// Secciones que se ajustan a la pantalla sin scroll (ver "Ajuste a
+// pantalla" dentro del componente).
+const FIT_PAGES = new Set([
+  'mision',
+  'valores',
+  'autoridades',
+  'areas',
+  'presencia',
+  'contacto',
+  'docenciaImpacto',
+  'docenciaInvestigacion'
+]);
+const FIT_MIN_WIDTH = 768;
+const FIT_MIN_ZOOM = 0.7;
+
 const startsInDocencia = () => /\/docencia\/?$/.test(window.location.pathname);
 
 export default function Brochure({
@@ -123,6 +138,60 @@ export default function Brochure({
     ro.observe(main);
     return () => ro.disconnect();
   }, []);
+
+  // --- Ajuste a pantalla ------------------------------------------------
+  // En pantallas de tablet grande o compu (≥ 768px de ancho), las secciones
+  // que "casi" caben se achican con `zoom` para verse completas sin scroll,
+  // como si se alejara el zoom del navegador. Si haría falta achicar más
+  // de FIT_MIN_ZOOM se deja el tamaño normal y el scroll de siempre.
+  // Inicio, Proyectos y las secciones con animaciones atadas al scroll
+  // (Formación, Publicaciones, Áreas+Comunidad) quedan fuera a propósito.
+  const pageRef = useRef(null);
+  const fitPage = FIT_PAGES.has(activePage);
+
+  useLayoutEffect(() => {
+    const main = mainRef.current;
+    const page = pageRef.current;
+    if (!main || !page) return undefined;
+    if (!fitPage) {
+      page.style.zoom = '';
+      return undefined;
+    }
+
+    let frame = 0;
+    const fit = () => {
+      page.style.zoom = '';
+      const available = main.clientHeight;
+      if (main.clientWidth < FIT_MIN_WIDTH) return;
+      let z = 1;
+      // Al achicar, el contenido gana ancho y puede reacomodarse (quedar
+      // más bajo), así que se afina en un par de pasadas.
+      for (let i = 0; i < 3; i += 1) {
+        const h = page.getBoundingClientRect().height;
+        if (h <= available + 1) break;
+        z = Math.max(FIT_MIN_ZOOM, (z * available) / h);
+        page.style.zoom = String(z);
+        if (z === FIT_MIN_ZOOM) break;
+      }
+      if (page.getBoundingClientRect().height > available + 1) page.style.zoom = '';
+    };
+
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(fit);
+    };
+
+    fit();
+    // Fuentes e imágenes pueden cambiar el alto después del primer render.
+    const late = setTimeout(schedule, 400);
+    if (document.fonts?.ready) document.fonts.ready.then(schedule).catch(() => {});
+    window.addEventListener('resize', schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(late);
+      window.removeEventListener('resize', schedule);
+    };
+  }, [activePage, activeDept, fitPage, lang]);
 
   // --- Esfera animada del menú inferior --------------------------------
   // Un solo "blob" que se mide contra el botón activo y se traslada hasta
@@ -441,7 +510,7 @@ export default function Brochure({
 
       {/* Active Page */}
       <main ref={mainRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
-        <div key={`${activeDept}-${activePage}`} className="animate-page-in">
+        <div ref={pageRef} key={`${activeDept}-${activePage}`} className="animate-page-in">
           {renderPage()}
         </div>
       </main>
